@@ -1,7 +1,7 @@
 name: magical_version_bump
-description: A Very Good Project created to automatically modify/change the version 
-  specified in your pubspec.yaml
-version: 0.0.1-dev.3
+description: A Very Good Project created to automatically modify/change the
+  version specified in your pubspec.yaml
+version: 0.1.0
 homepage: https://github.com/kekavc24/magical_version_bump
 repository: https://github.com/kekavc24/magical_version_bump
 issue_tracker: https://github.com/kekavc24/magical_version_bump/issues
@@ -12,9 +12,9 @@ environment:
 dependencies:
   args: ^2.3.1
   cli_completion: ^0.3.0
+  collection: ^1.17.1
   mason_logger: ^0.2.4
   pub_updater: ^0.3.0
-  pubspec_parse: ^1.2.2
   yaml: ^3.1.1
   yaml_edit: ^2.1.0
 
