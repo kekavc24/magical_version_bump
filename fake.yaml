@@ -1,0 +1,4 @@
+name: magical_version_bump
+description: A Very Good Project created to automatically bump the version
+  number.
+version: 0.0.1+0
