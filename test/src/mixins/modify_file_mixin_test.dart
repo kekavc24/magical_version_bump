@@ -19,7 +19,6 @@ void main() {
     late _MockModifier modifier;
     late YamlFileData yamlData;
     late YamlFileData invalidYamlData;
-    late bool answer;
 
     const version = '7.7.7';
     const fakeFile = 'version: $version';
