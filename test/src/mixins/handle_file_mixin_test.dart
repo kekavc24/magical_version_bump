@@ -11,7 +11,7 @@ class _MockProgress extends Mock implements Progress {}
 class _MockFileHandler with HandleFile {}
 
 void main() {
-  group('handle file mixin', () {
+  group('handle file mixin test', () {
     late Logger logger;
     late _MockFileHandler fileHandler;
 

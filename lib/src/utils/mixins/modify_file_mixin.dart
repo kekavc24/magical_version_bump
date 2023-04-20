@@ -23,7 +23,9 @@ mixin ModifyYamlFile {
   }) async {
     //
     var versionToSave = '';
-    final actionProgress = logger.progress('Modifying version');
+    final actionProgress = logger.progress(
+      "${absoluteChange ? 'Changing' : 'Modifying'} version",
+    );
     var showFinalProgress = true;
 
     if (!absoluteChange) {

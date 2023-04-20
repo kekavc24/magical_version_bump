@@ -14,7 +14,7 @@ class _MockProgress extends Mock implements Progress {}
 class _MockPrepper with PrepCommand {}
 
 void main() {
-  group('prep command mixin', () {
+  group('prep command mixin test', () {
     late Logger logger;
     late _MockPrepper prepper;
 
