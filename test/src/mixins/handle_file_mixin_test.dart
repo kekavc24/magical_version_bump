@@ -37,7 +37,7 @@ void main() {
     });
 
     test('read file from custom directory', () async {
-      const path = 'fake.yaml';
+      const path = 'test/files/fake.yaml';
 
       when(
         () => logger.prompt(
