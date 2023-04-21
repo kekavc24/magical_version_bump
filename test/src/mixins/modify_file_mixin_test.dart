@@ -269,5 +269,22 @@ void main() {
       expect(moddedData.runtimeType, ModifiedFileData);
       expect(bumpedVersion, expectedVersion);
     });
+
+    test('changes the version entirely', () async {
+      const expectedVersion = '10.10.10+10';
+
+      final moddedData = await modifier.modifyFile(
+        absoluteChange: true,
+        absoluteVersion: expectedVersion,
+        yamlData: yamlData,
+        logger: logger,
+      );
+
+      verify(() => logger.progress('Changing version')).called(1);
+      final changedVersion = getVersion(moddedData.modifiedFile);
+
+      expect(moddedData.runtimeType, ModifiedFileData);
+      expect(changedVersion, expectedVersion);
+    });
   });
 }
