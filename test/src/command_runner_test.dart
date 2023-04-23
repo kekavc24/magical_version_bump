@@ -146,6 +146,5 @@ void main() {
         verify(() => logger.info(packageVersion)).called(1);
       });
     });
-
   });
 }

@@ -6,11 +6,11 @@ import 'package:mason_logger/mason_logger.dart';
 mixin PrepCommand {
   /// List of action flags. These flags indicate what the command
   ///  is doing. They always come first before any target flag.
-  final _actions = <String>['bump', 'dump', 'b', 'd'];
+  final actions = <String>['bump', 'dump', 'b', 'd'];
 
   /// List of target flags. These flags indicate what the main
   /// command is targeting in the pubspec.yaml version. Uses semver semantics.
-  final _targets = <String>[
+  final targets = <String>[
     'major',
     'minor',
     'patch',
@@ -55,7 +55,7 @@ mixin PrepCommand {
       readProgress.fail('Invalid arguments');
       throw MagicalException(
         violation:
-            """${undefinedFlags.join(', ')} ${undefinedFlags.isEmpty ? 'is not a defined flag' : 'are not  defined flags'}""",
+            """${undefinedFlags.join(', ')} ${undefinedFlags.length <= 1 ? 'is not a defined flag' : 'are not  defined flags'}""",
       );
     }
 
@@ -97,7 +97,7 @@ mixin PrepCommand {
   /// Check for any undefined flags
   List<String> _checkForUndefinedFlags(List<String> args) => args
       .where(
-        (element) => !_actions.contains(element) && !_targets.contains(element),
+        (element) => !actions.contains(element) && !targets.contains(element),
       )
       .toList();
 
@@ -105,19 +105,19 @@ mixin PrepCommand {
   /// flag
   String _checkFlags(List<String> args) {
     // Check if action flag is first
-    final firstArgIsAction = _actions.contains(args.first);
+    final firstArgIsAction = actions.contains(args.first);
 
     if (!firstArgIsAction) {
-      return _violation += " ${_actions.join(', ')} flags should come first";
+      return _violation += " ${actions.join(', ')} flags should come first";
     }
 
     final hasTargetFlag = args.any(
-      (element) => element != 'with-path' && _targets.contains(element),
+      (element) => element != 'with-path' && targets.contains(element),
     );
 
     if (!hasTargetFlag) {
       return _violation +=
-          """Command should have at least one of ${_targets.take(4).join(', ')} flags""";
+          """ Command should have at least one of ${targets.take(4).join(', ')} flags""";
     }
 
     return '';

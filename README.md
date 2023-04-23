@@ -6,8 +6,6 @@
 
 A command-line tool for changing/modifying the version specified in Flutter/Dart pubspec.yaml.
 
----
-
 ## Table of Contents
 - [Getting Started](#getting-started)
 - [Overview](#overview)
@@ -43,7 +41,7 @@ dart pub global activate magical_version_bump
 
 ### Flags
 
-All `action` flags precede the `target` flags. Check [examples](/example/README.md) for insight on the same.
+All `action` flags precede the `target` flags. Check example tab for insight on the same.
 
 | Flags           | Shorthand abbreviation | Type        | Function |
 |-----------------|------------------------|-------------|----------|
@@ -81,9 +79,7 @@ $ mag change -h
 
 ```
 
-[Check more examples](/example/README.md).
-
----
+Check example tab for more.
 
 <!--[coverage_badge]: coverage_badge.svg-->
 [license_badge]: https://img.shields.io/badge/license-MIT-blue.svg

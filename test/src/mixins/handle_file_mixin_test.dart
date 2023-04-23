@@ -11,7 +11,7 @@ class _MockProgress extends Mock implements Progress {}
 class _MockFileHandler with HandleFile {}
 
 void main() {
-  group('handle file mixin', () {
+  group('handle file mixin test', () {
     late Logger logger;
     late _MockFileHandler fileHandler;
 
@@ -37,7 +37,7 @@ void main() {
     });
 
     test('read file from custom directory', () async {
-      const path = 'fake.yaml';
+      const path = 'test/files/fake.yaml';
 
       when(
         () => logger.prompt(
