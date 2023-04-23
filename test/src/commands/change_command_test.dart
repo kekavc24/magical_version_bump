@@ -36,10 +36,6 @@ void main() {
     await resetFile();
   });
 
-  tearDown(() async {
-    await resetFile();
-  });
-
   group('change command test', () {
     test('changes version in yaml', () async {
       final result = await commandRunner.run(argsWithVersion);
@@ -48,6 +44,7 @@ void main() {
 
       expect(result, equals(ExitCode.success.code));
       expect(changedVersion, version);
+      await resetFile();
     });
 
     test('prompts for version if not provided', () async {
@@ -77,6 +74,7 @@ void main() {
 
       expect(result, equals(ExitCode.success.code));
       expect(changedVersion, version);
+      await resetFile();
     });
   });
 }

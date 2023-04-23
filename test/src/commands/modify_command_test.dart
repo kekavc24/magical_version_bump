@@ -51,10 +51,6 @@ void main() {
     await resetFile();
   });
 
-  tearDown(() async {
-    await resetFile();
-  });
-
   group('modify command test', () {
     test('bumps up all versions', () async {
       const version = '11.11.11+11';
@@ -64,6 +60,7 @@ void main() {
 
       expect(result, equals(ExitCode.success.code));
       expect(bumpedVersion, version);
+      await resetFile();
     });
 
     test('bumps down all versions', () async {
@@ -74,6 +71,7 @@ void main() {
 
       expect(result, equals(ExitCode.success.code));
       expect(bumpedVersion, version);
+      await resetFile();
     });
 
     test('command must have arguments error', () async {
@@ -82,6 +80,7 @@ void main() {
 
       expect(result, equals(ExitCode.usage.code));
       verify(() => logger.err('No arguments found')).called(1);
+      await resetFile();
     });
   });
 }
