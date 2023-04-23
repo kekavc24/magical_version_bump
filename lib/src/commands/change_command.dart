@@ -59,7 +59,7 @@ class ChangeVersion extends Command<int>
 
       return ExitCode.software.code;
     }
-    _logger.info('Version has been changed!');
+    _logger.success('Version has been changed!');
     return ExitCode.success.code;
   }
 }
