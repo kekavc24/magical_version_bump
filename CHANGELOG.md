@@ -12,3 +12,7 @@
 
 * Removed reference from inspiration project.
 * Added dart docs
+
+# 0.1.0
+
+* Added tests
