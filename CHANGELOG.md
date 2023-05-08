@@ -16,3 +16,8 @@
 # 0.1.0
 
 * Added tests
+
+# 0.1.1
+
+* Routine pub upgrade
+* Bump up dart sdk minimum version to 2.19
