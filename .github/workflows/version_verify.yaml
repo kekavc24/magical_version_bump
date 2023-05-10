@@ -1,0 +1,80 @@
+name: Update pubspec.yaml and verify version
+
+concurrency:
+    group: ${{ github.workflow }}-${{ github.ref }}
+    cancel-in-progress: true
+
+on:
+    pull_request:
+      branches: [ "master" ]
+      types: [closed]
+  
+jobs:
+    update-version:
+      runs-on: ubuntu-latest
+  
+      steps:
+        - uses: actions/checkout@v3
+          with:
+            ref: ${{ github.ref }}
+        
+        - name: 🌽 Corn-figure Git ;)
+          run : |
+            git config --global user.name 'Kavisi'
+            git config --global user.email '68240897+kekavc24@users.noreply.github.com'
+
+        - name: 🎯 Setup Dart
+          uses: dart-lang/setup-dart@v1
+          with:
+            sdk: "stable"
+
+        - name: ⚡ Activate Magical Bump CLI
+          run: dart pub global activate --source=path .
+        
+        - name: ➕ Bump major version
+          if: ${{ (github.event.pull_request.merged == true) && (contains(github.event.pull_request.labels.*.name, 'major release')) }}
+          run: |
+            mag modify -b --major
+            dart run build_runner build --delete-conflicting-outputs
+            git commit -am "chore(deps): bump major version"
+            git push
+        
+        - name: ➕ Bump minor version
+          if: ${{ (github.event.pull_request.merged == true) && (contains(github.event.pull_request.labels.*.name, 'minor release')) }}
+          run: |
+            mag modify -b --minor
+            dart run build_runner build --delete-conflicting-outputs
+            git commit -am "chore(deps): bump minor version"
+            git push
+        
+        - name: ➕ Bump patch version
+          if: ${{ (github.event.pull_request.merged == true) && (contains(github.event.pull_request.labels.*.name, 'patch release')) }}
+          run: |
+            mag modify -b --patch
+            dart run build_runner build --delete-conflicting-outputs
+            git commit -am "chore(deps): bump patch version"
+            git push
+
+    notify:
+        needs: update-version
+        runs-on: ubuntu-latest
+        steps:
+            -   name: 📚 Git Checkout
+                uses: actions/checkout@v3
+
+            -   name: 🎯 Setup Dart
+                uses: dart-lang/setup-dart@v1
+                with:
+                    sdk: "stable"
+
+            -   name: 📦 Install & Configure Dependencies
+                run: |  
+                        git config --global user.name 'Kavisi'
+                        git config --global user.email '68240897+kekavc24@users.noreply.github.com'
+                        git pull
+                        dart pub get
+            
+            -   name: 🔎 Verify version
+                if: ${{ (github.event.pull_request.merged == true) && (contains(github.event.pull_request.labels.*.name, 'publish')) }}
+                run: dart run test --run-skipped -t version-verify
+            
