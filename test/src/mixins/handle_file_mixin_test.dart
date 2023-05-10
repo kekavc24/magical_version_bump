@@ -32,7 +32,7 @@ void main() {
 
       verify(() => logger.progress('Reading file')).called(1);
 
-      expect(data.runtimeType, YamlFileData);
+      expect(data, isA<YamlFileData>());
       expect(data.path, path);
     });
 
@@ -55,7 +55,7 @@ void main() {
 
       verify(() => logger.progress('Reading file')).called(1);
 
-      expect(data.runtimeType, YamlFileData);
+      expect(data, isA<YamlFileData>());
       expect(data.path, path);
     });
 

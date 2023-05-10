@@ -59,7 +59,7 @@ void main() {
 
       final bumpedVersion = getVersion(moddedData.modifiedFile);
 
-      expect(moddedData.runtimeType, ModifiedFileData);
+      expect(moddedData, isA<ModifiedFileData>());
       expect(bumpedVersion, expectedVersion);
     });
 
@@ -82,7 +82,7 @@ void main() {
 
       final bumpedVersion = getVersion(moddedData.modifiedFile);
 
-      expect(moddedData.runtimeType, ModifiedFileData);
+      expect(moddedData, isA<ModifiedFileData>());
       expect(bumpedVersion, expectedVersion);
     });
 
@@ -105,7 +105,7 @@ void main() {
 
       final bumpedVersion = getVersion(moddedData.modifiedFile);
 
-      expect(moddedData.runtimeType, ModifiedFileData);
+      expect(moddedData, isA<ModifiedFileData>());
       expect(bumpedVersion, expectedVersion);
     });
 
@@ -129,7 +129,7 @@ void main() {
 
       final bumpedVersion = getVersion(moddedData.modifiedFile);
 
-      expect(moddedData.runtimeType, ModifiedFileData);
+      expect(moddedData, isA<ModifiedFileData>());
       expect(bumpedVersion, expectedVersion);
     });
 
@@ -153,7 +153,7 @@ void main() {
 
       final bumpedVersion = getVersion(moddedData.modifiedFile);
 
-      expect(moddedData.runtimeType, ModifiedFileData);
+      expect(moddedData, isA<ModifiedFileData>());
       expect(bumpedVersion, expectedVersion);
     });
 
@@ -176,7 +176,7 @@ void main() {
 
       final bumpedVersion = getVersion(moddedData.modifiedFile);
 
-      expect(moddedData.runtimeType, ModifiedFileData);
+      expect(moddedData, isA<ModifiedFileData>());
       expect(bumpedVersion, expectedVersion);
     });
 
@@ -221,7 +221,7 @@ void main() {
 
       final bumpedVersion = getVersion(moddedData.modifiedFile);
 
-      expect(moddedData.runtimeType, ModifiedFileData);
+      expect(moddedData, isA<ModifiedFileData>());
       expect(bumpedVersion, expectedVersion);
     });
 
@@ -266,7 +266,7 @@ void main() {
 
       final bumpedVersion = getVersion(moddedData.modifiedFile);
 
-      expect(moddedData.runtimeType, ModifiedFileData);
+      expect(moddedData, isA<ModifiedFileData>());
       expect(bumpedVersion, expectedVersion);
     });
 
@@ -283,7 +283,7 @@ void main() {
       verify(() => logger.progress('Changing version')).called(1);
       final changedVersion = getVersion(moddedData.modifiedFile);
 
-      expect(moddedData.runtimeType, ModifiedFileData);
+      expect(moddedData, isA<ModifiedFileData>());
       expect(changedVersion, expectedVersion);
     });
   });

@@ -18,7 +18,7 @@ void main() {
   const argsWithVersion = ['change', version, '--with-path'];
   const noVersionInArgs = ['change', '--with-path'];
 
-  setUp(() async {
+  setUp(() {
     logger = _MockLogger();
     commandRunner = MagicalVersionBumpCommandRunner(
       logger: logger,
@@ -33,10 +33,10 @@ void main() {
         ),
       ),
     ).thenReturn(path);
-    await resetFile();
   });
 
   group('change command test', () {
+
     test('changes version in yaml', () async {
       final result = await commandRunner.run(argsWithVersion);
 
@@ -44,7 +44,6 @@ void main() {
 
       expect(result, equals(ExitCode.success.code));
       expect(changedVersion, version);
-      await resetFile();
     });
 
     test('prompts for version if not provided', () async {
@@ -74,7 +73,8 @@ void main() {
 
       expect(result, equals(ExitCode.success.code));
       expect(changedVersion, version);
-      await resetFile();
     });
   });
+
+  tearDown(() async => resetFile());
 }

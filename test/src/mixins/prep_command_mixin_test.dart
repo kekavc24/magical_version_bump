@@ -39,7 +39,7 @@ void main() {
       final targetsMatch = const ListEquality<String>()
           .equals(targets, preppedData.versionTargets);
 
-      expect(preppedData.runtimeType, PrepCommandData);
+      expect(preppedData, isA<PrepCommandData>());
       expect(preppedData.action, action);
       expect(preppedData.requestPath, false);
       expect(targetsMatch, true);
@@ -59,7 +59,7 @@ void main() {
       final targetsMatch = const ListEquality<String>()
           .equals(targets, preppedData.versionTargets);
 
-      expect(preppedData.runtimeType, PrepCommandData);
+      expect(preppedData, isA<PrepCommandData>());
       expect(preppedData.action, action);
       expect(preppedData.requestPath, true);
       expect(targetsMatch, true);
