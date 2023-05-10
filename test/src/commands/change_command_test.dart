@@ -36,7 +36,6 @@ void main() {
   });
 
   group('change command test', () {
-
     test('changes version in yaml', () async {
       final result = await commandRunner.run(argsWithVersion);
 
