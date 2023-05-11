@@ -17,12 +17,8 @@ jobs:
         - uses: actions/checkout@v3
           with:
             ref: ${{ github.ref }}
+            fetch-depth: 0
             token: ${{ secrets.VERSION_VERIFY }}
-        
-        - name: 🌽 Corn-figure Git ;)
-          run : |
-            git config --global user.name 'Kavisi'
-            git config --global user.email '68240897+kekavc24@users.noreply.github.com'
 
         - name: 🎯 Setup Dart
           uses: dart-lang/setup-dart@v1
@@ -72,8 +68,6 @@ jobs:
 
             -   name: 📦 Install & Configure Dependencies
                 run: |  
-                        git config --global user.name 'Kavisi'
-                        git config --global user.email '68240897+kekavc24@users.noreply.github.com'
                         git pull
                         dart pub get
             
