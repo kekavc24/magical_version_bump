@@ -79,7 +79,7 @@ $ mag change -h
 
 ```
 
-Check example tab for more.
+Check example tab/folder for more.
 
 <!--[coverage_badge]: coverage_badge.svg-->
 [license_badge]: https://img.shields.io/badge/license-MIT-blue.svg
