@@ -1,7 +1,7 @@
 name: magical_version_bump
 description: A commandline tool for automatically modifying/changing the
   version specified in your pubspec.yaml
-version: 0.1.1
+version: 0.1.2
 homepage: https://github.com/kekavc24/magical_version_bump
 repository: https://github.com/kekavc24/magical_version_bump
 issue_tracker: https://github.com/kekavc24/magical_version_bump/issues
