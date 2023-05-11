@@ -59,5 +59,4 @@ jobs:
           dart test test/src/commands/change_command_test.dart
           dart test test/src/commands/modify_command_test.dart
           dart test test/src/commands/update_command_test.dart
-          dart test test/src/commands/modify_command_test.dart
           dart test test/src/mixins/

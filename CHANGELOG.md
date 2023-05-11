@@ -21,3 +21,7 @@
 
 * Routine pub upgrade
 * Bump up dart sdk minimum version to 2.19
+
+# 0.1.2
+
+* Minor improvements.
