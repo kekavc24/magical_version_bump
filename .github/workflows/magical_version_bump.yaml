@@ -54,9 +54,4 @@ jobs:
         run: dart analyze --fatal-infos --fatal-warnings .
 
       - name: 🧪 Run Tests
-        run: |
-          dart test test/src/command_runner_test.dart
-          dart test test/src/commands/change_command_test.dart
-          dart test test/src/commands/modify_command_test.dart
-          dart test test/src/commands/update_command_test.dart
-          dart test test/src/mixins/
+        run: dart test -j, --concurrency=1
