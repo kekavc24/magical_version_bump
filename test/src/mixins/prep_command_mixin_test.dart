@@ -1,5 +1,5 @@
 import 'package:collection/collection.dart';
-import 'package:magical_version_bump/src/utils/mixins/command_mixins.dart';
+import 'package:magical_version_bump/src/utils/command_handler/mixins/command_mixins.dart';
 import 'package:magical_version_bump/src/utils/models/magical_data_model.dart';
 import 'package:mason_logger/mason_logger.dart';
 import 'package:mocktail/mocktail.dart';
