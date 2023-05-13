@@ -1,11 +1,10 @@
 import 'package:args/command_runner.dart';
-import 'package:magical_version_bump/src/utils/command_handler/mixins/command_mixins.dart';
 import 'package:magical_version_bump/src/utils/exceptions/command_exceptions.dart';
+import 'package:magical_version_bump/src/utils/mixins/command_mixins.dart';
 import 'package:mason_logger/mason_logger.dart';
 
 /// This command overwrites/writes the version in the pubspec.yaml
-class ChangeVersion extends Command<int>
-    with PrepCommand, HandleFile, ModifyYamlFile {
+class ChangeVersion extends Command<int> {
   ChangeVersion({
     required Logger logger,
   }) : _logger = logger {
@@ -35,21 +34,6 @@ class ChangeVersion extends Command<int>
           argResults!.rest.isEmpty ? null : argResults!.rest.first;
 
       // Read file
-      final yamlData = await readFile(
-        requestPath: requestPath,
-        logger: _logger,
-      );
-
-      // Modify file
-      final modifiedData = await modifyFile(
-        absoluteChange: true,
-        absoluteVersion: absoluteVersion,
-        yamlData: yamlData,
-        logger: _logger,
-      );
-
-      // Save changes
-      await saveFile(data: modifiedData, logger: _logger);
     } on MagicalException catch (e) {
       _logger.err(e.toString());
 

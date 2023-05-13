@@ -45,12 +45,13 @@ mixin HandleFile {
 
   /// Save file changes
   Future<void> saveFile({
-    required ModifiedFileData data,
+    required String data,
+    required String path,
     required Logger logger,
   }) async {
     final saveProgress = logger.progress('Saving changes');
 
-    await File(data.path).writeAsString(data.modifiedFile);
+    await File(path).writeAsString(data);
 
     saveProgress.complete('Saved changes');
   }

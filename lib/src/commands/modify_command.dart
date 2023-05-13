@@ -1,15 +1,16 @@
 import 'package:args/command_runner.dart';
-import 'package:magical_version_bump/src/utils/command_handler/mixins/command_mixins.dart';
 import 'package:magical_version_bump/src/utils/exceptions/command_exceptions.dart';
+import 'package:magical_version_bump/src/utils/handlers/command_handlers.dart';
 import 'package:mason_logger/mason_logger.dart';
 
 /// This command modifies the version by bumping up or dumping down the
 /// version number
-class ModifyVersion extends Command<int>
-    with PrepCommand, HandleFile, ModifyYamlFile {
-  ModifyVersion({
+class ModifyVersionCommand extends Command<int> {
+  ModifyVersionCommand({
     required Logger logger,
-  }) : _logger = logger {
+    HandleModifyCommand? handler,
+  })  : _logger = logger,
+        _handler = handler ?? HandleModifyCommand(logger: logger) {
     argParser
       ..addFlag(
         'bump',
@@ -59,33 +60,13 @@ class ModifyVersion extends Command<int>
   String get name => 'modify';
 
   final Logger _logger;
+  final HandleModifyCommand _handler;
 
   @override
   Future<int> run() async {
     try {
       // Prep command first
-      final prepData = await readArgs(
-        args: argResults!.arguments,
-        logger: _logger,
-      );
-
-      // Read file
-      final yamlData = await readFile(
-        requestPath: prepData.requestPath,
-        logger: _logger,
-      );
-
-      // Modify file
-      final modifiedData = await modifyFile(
-        absoluteChange: false,
-        action: prepData.action,
-        targets: prepData.versionTargets,
-        yamlData: yamlData,
-        logger: _logger,
-      );
-
-      // Save changes
-      await saveFile(data: modifiedData, logger: _logger);
+      await _handler.handleCommand(argResults!.arguments);
     } on MagicalException catch (e) {
       _logger.err(e.toString());
 
