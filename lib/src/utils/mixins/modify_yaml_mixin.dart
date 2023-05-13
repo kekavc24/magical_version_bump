@@ -86,9 +86,10 @@ mixin ModifyYaml {
           '${modifiableMap[0]}.${modifiableMap[1]}.${modifiableMap[2]}';
     }
 
-    final buildNumber = modifiableMap.values.last.contains('+')
-        ? '+${modifiableMap[2]!.split('+').last}'
-        : '';
+    final buildNumber =
+        modifiableMap.values.last.contains('+') && relativeTarget != 'patch'
+            ? '+${modifiableMap[2]!.split('+').last}'
+            : '';
 
     return relativeVersion += buildNumber;
   }
