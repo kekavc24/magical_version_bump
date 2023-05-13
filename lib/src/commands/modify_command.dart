@@ -49,6 +49,12 @@ class ModifyVersionCommand extends Command<int> {
         help:
             '''Tells CLI to request file path instead of checking current directory''',
         negatable: false,
+      )
+      ..addFlag(
+        'absolute',
+        help:
+            '''Tells CLI to bump each version independent of the other versions present''',
+        negatable: false,
       );
   }
 

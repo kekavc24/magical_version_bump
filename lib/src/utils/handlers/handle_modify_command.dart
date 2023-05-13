@@ -29,7 +29,7 @@ class HandleModifyCommand
       throw MagicalException(violation: invalidity.value);
     }
 
-    final preppedArgs = prepArgs(args);
+    final preppedArgs = prepArgs(normalizedArgs);
 
     prepProgress.complete('Checked arguments');
 
