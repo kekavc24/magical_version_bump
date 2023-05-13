@@ -24,7 +24,8 @@ class MagicalVersionBumpCommandRunner extends CompletionCommandRunner<int> {
   MagicalVersionBumpCommandRunner({
     Logger? logger,
     PubUpdater? pubUpdater,
-    HandleModifyCommand? handler,
+    HandleModifyCommand? modifyHandler,
+    HandleChangeCommand? changeHandler,
   })  : _logger = logger ?? Logger(),
         _pubUpdater = pubUpdater ?? PubUpdater(),
         super(executableName, description) {
@@ -43,8 +44,8 @@ class MagicalVersionBumpCommandRunner extends CompletionCommandRunner<int> {
 
     // Add sub commands
     addCommand(UpdateCommand(logger: _logger, pubUpdater: _pubUpdater));
-    addCommand(ModifyVersionCommand(logger: _logger, handler: handler));
-    addCommand(ChangeVersion(logger: _logger));
+    addCommand(ModifyVersionCommand(logger: _logger, handler: modifyHandler));
+    addCommand(ChangeNodesCommand(logger: _logger, handler: changeHandler));
   }
 
   @override

@@ -82,7 +82,6 @@ class ModifyVersionCommand extends Command<int> {
 
       return ExitCode.software.code;
     }
-    _logger.success('Version has been modified!');
     return ExitCode.success.code;
   }
 }

@@ -17,10 +17,16 @@ mixin ValidatePreppedArgs {
     'absolute'
   ];
 
-  /// List of any other accepted flags
+  /// List of any other accepted flags for `Change` and `Generate` commands
   final otherAcceptedFlags = <String>[
     // For Change command
-    'yaml-version'
+    'yaml-version',
+    'documentation',
+    'issue_tracker',
+    'repository',
+    'homepage',
+    'description',
+    'name'
 
     // For generate command
   ];
@@ -74,7 +80,10 @@ mixin ValidatePreppedArgs {
   /// Check for any undefined flags
   List<String> _checkForUndefinedFlags(List<String> args) => args
       .where(
-        (element) => !actions.contains(element) && !targets.contains(element),
+        (element) =>
+            !actions.contains(element) &&
+            !targets.contains(element) &&
+            !otherAcceptedFlags.contains(element),
       )
       .toList();
 
