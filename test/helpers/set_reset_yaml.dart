@@ -15,21 +15,30 @@ String getTestPath() {
 }
 
 /// Get version from fake.yaml before test starts
-Future<String> readFileVersion() async {
+Future<String> readFileNode(String node) async {
   final path = getTestPath();
 
   final file = await File(path).readAsString();
 
-  return getYamlValue(file, 'version');
+  return getYamlValue(file, node);
 }
 
 /// Reset file to initial version
-Future<void> resetFile() async {
+Future<void> resetFile({
+  bool remove = false,
+  String node = 'version',
+  String nodeValue = '10.10.10+10',
+}) async {
   final path = getTestPath();
-  const version = '10.10.10+10';
-
   final file = await File(path).readAsString();
-  final yamlEdit = YamlEditor(file)..update(['version'], version);
+
+  final yamlEdit = YamlEditor(file);
+
+  if (remove) {
+    yamlEdit.remove([node]);
+  } else {
+    yamlEdit.update([node], nodeValue);
+  }
 
   await File(path).writeAsString(yamlEdit.toString());
 }

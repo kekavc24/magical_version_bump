@@ -14,24 +14,17 @@ void main() {
   late MagicalVersionBumpCommandRunner commandRunner;
 
   const path = 'test/files/fake.yaml';
-  const bumpArgs = [
-    'modify',
-    '-b',
+
+  const modifyFlags = [
     '--major',
     '--minor',
     '--patch',
     '--build-number',
     '--with-path'
   ];
-  const dumpArgs = [
-    'modify',
-    '-d',
-    '--major',
-    '--minor',
-    '--patch',
-    '--build-number',
-    '--with-path'
-  ];
+
+  const bumpArgs = ['modify', '-b', ...modifyFlags];
+  const dumpArgs = ['modify', '-d', ...modifyFlags];
 
   setUp(() async {
     logger = _MockLogger();
@@ -50,12 +43,30 @@ void main() {
     ).thenReturn(path);
   });
 
-  group('modify command test', () {
+  group('throws error', () {
+    test('command must have arguments error', () async {
+      final args = ['modify'];
+      final result = await commandRunner.run(args);
+
+      expect(result, equals(ExitCode.usage.code));
+      verify(() => logger.err('No arguments found')).called(1);
+    });
+
+    test('invalid arguments passed to command', () async {
+      final args = ['modify', 'undefined-arg'];
+      final result = await commandRunner.run(args);
+
+      expect(result, equals(ExitCode.usage.code));
+      verify(() => logger.err('undefined-arg is not a defined flag')).called(1);
+    });
+  });
+
+  group('independent versioning (absolute)', () {
     test('bumps up all versions', () async {
       const version = '11.11.11+11';
-      final result = await commandRunner.run(bumpArgs);
+      final result = await commandRunner.run([...bumpArgs, 'absolute']);
 
-      final bumpedVersion = await readFileVersion();
+      final bumpedVersion = await readFileNode('version');
 
       expect(result, equals(ExitCode.success.code));
       expect(bumpedVersion, version);
@@ -63,20 +74,90 @@ void main() {
 
     test('bumps down all versions', () async {
       const version = '9.9.9+9';
-      final result = await commandRunner.run(dumpArgs);
+      final result = await commandRunner.run([...dumpArgs, 'absolute']);
 
-      final bumpedVersion = await readFileVersion();
+      final bumpedVersion = await readFileNode('version');
+
+      expect(result, equals(ExitCode.success.code));
+      expect(bumpedVersion, version);
+    });
+  });
+
+  group('collective versioning (relative)', () {
+    test('bumps up major version and build-number', () async {
+      const version = '11.0.0+11';
+      final result = await commandRunner.run(bumpArgs);
+
+      final bumpedVersion = await readFileNode('version');
 
       expect(result, equals(ExitCode.success.code));
       expect(bumpedVersion, version);
     });
 
-    test('command must have arguments error', () async {
-      final args = ['modify'];
-      final result = await commandRunner.run(args);
+    test('bumps up minor version and build-number', () async {
+      const version = '10.11.0+11';
+      final result = await commandRunner.run(
+        [...bumpArgs.where((element) => element != '--major')],
+      );
 
-      expect(result, equals(ExitCode.usage.code));
-      verify(() => logger.err('No arguments found')).called(1);
+      final bumpedVersion = await readFileNode('version');
+
+      expect(result, equals(ExitCode.success.code));
+      expect(bumpedVersion, version);
+    });
+
+    test('bumps up patch version and build-number', () async {
+      const version = '10.10.11+11';
+      final result = await commandRunner.run(
+        [
+          ...bumpArgs.where(
+            (element) => element != '--major' && element != '--minor',
+          )
+        ],
+      );
+
+      final bumpedVersion = await readFileNode('version');
+
+      expect(result, equals(ExitCode.success.code));
+      expect(bumpedVersion, version);
+    });
+
+    test('bumps down major version and build-number', () async {
+      const version = '9.0.0+9';
+      final result = await commandRunner.run(dumpArgs);
+
+      final bumpedVersion = await readFileNode('version');
+
+      expect(result, equals(ExitCode.success.code));
+      expect(bumpedVersion, version);
+    });
+
+    test('bumps down minor version and build-number', () async {
+      const version = '10.9.0+9';
+      final result = await commandRunner.run(
+        [...dumpArgs.where((element) => element != '--major')],
+      );
+
+      final bumpedVersion = await readFileNode('version');
+
+      expect(result, equals(ExitCode.success.code));
+      expect(bumpedVersion, version);
+    });
+
+    test('bumps down patch version and build-number', () async {
+      const version = '10.10.9+9';
+      final result = await commandRunner.run(
+        [
+          ...dumpArgs.where(
+            (element) => element != '--major' && element != '--minor',
+          )
+        ],
+      );
+
+      final bumpedVersion = await readFileNode('version');
+
+      expect(result, equals(ExitCode.success.code));
+      expect(bumpedVersion, version);
     });
   });
 

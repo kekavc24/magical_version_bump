@@ -14,9 +14,14 @@ void main() {
   late MagicalVersionBumpCommandRunner commandRunner;
 
   const path = 'test/files/fake.yaml';
-  const version = '8.8.8+8';
-  const argsWithVersion = ['change', version, '--with-path'];
-  const noVersionInArgs = ['change', '--with-path'];
+
+  const nameArg = '--name=Test File';
+  const descArg = '--description=This is a test';
+  const versionArg = '--yaml-version=8.8.8+8';
+  const homepageArg = '--homepage=https://url.to.homepage';
+  const repoArg = '--repository=https://url.to.repository-on-github';
+  const issueArg = '--issue_tracker=https://url.to.issue-tracker';
+  const docArg = '--documentation=https://url.to.documentation';
 
   setUp(() {
     logger = _MockLogger();
@@ -35,45 +40,124 @@ void main() {
     ).thenReturn(path);
   });
 
-  group('change command test', () {
-    test('changes version in yaml', () async {
-      final result = await commandRunner.run(argsWithVersion);
+  group('throws error', () {
+    test('command must have arguments error', () async {
+      final args = ['change'];
+      final result = await commandRunner.run(args);
 
-      final changedVersion = await readFileVersion();
-
-      expect(result, equals(ExitCode.success.code));
-      expect(changedVersion, version);
+      expect(result, equals(ExitCode.usage.code));
+      verify(() => logger.err('No arguments found')).called(1);
     });
 
-    test('prompts for version if not provided', () async {
-      // Rejects base version
-      when(
-        () => logger.confirm(
-          any(),
-          defaultValue: any(
-            named: 'defaultValue',
-          ),
-        ),
-      ).thenReturn(false);
+    test('invalid arguments passed to command', () async {
+      final args = ['change', 'undefined-arg'];
+      final result = await commandRunner.run(args);
 
-      // Add default version used for testing as version desired
-      when(
-        () => logger.prompt(
-          'Enter version number : ',
-          defaultValue: any(
-            named: 'defaultValue',
-          ),
-        ),
-      ).thenReturn(version);
-
-      final result = await commandRunner.run(noVersionInArgs);
-
-      final changedVersion = await readFileVersion();
-
-      expect(result, equals(ExitCode.success.code));
-      expect(changedVersion, version);
+      expect(result, equals(ExitCode.usage.code));
+      verify(() => logger.err('undefined-arg is not a defined flag')).called(1);
     });
   });
 
-  tearDown(() async => resetFile());
+  group('change command test', () {
+    test('changes name in yaml', () async {
+      final result = await commandRunner.run(
+        ['change', nameArg, '--with-path'],
+      );
+
+      final expectedChange = nameArg.split('=').last;
+
+      final current = await readFileNode('name');
+      await resetFile(node: 'name', nodeValue: 'magical_version_bump');
+
+      expect(result, equals(ExitCode.success.code));
+      expect(current, expectedChange);
+    });
+
+    test('changes description in yaml', () async {
+      final result = await commandRunner.run(
+        ['change', descArg, '--with-path'],
+      );
+
+      final expectedChange = descArg.split('=').last;
+
+      final current = await readFileNode('description');
+      await resetFile(
+        node: 'description',
+        nodeValue: 'A Very Good description',
+      );
+
+      expect(result, equals(ExitCode.success.code));
+      expect(current, expectedChange);
+    });
+
+    test('changes version in yaml', () async {
+      final result = await commandRunner.run(
+        ['change', versionArg, '--with-path'],
+      );
+
+      final expectedChange = versionArg.split('=').last;
+
+      final current = await readFileNode('version');
+      await resetFile();
+
+      expect(result, equals(ExitCode.success.code));
+      expect(current, expectedChange);
+    });
+
+    test('changes homepage url in yaml', () async {
+      final result = await commandRunner.run(
+        ['change', homepageArg, '--with-path'],
+      );
+
+      final expectedChange = homepageArg.split('=').last;
+
+      final current = await readFileNode('homepage');
+      await resetFile(node: 'homepage', remove: true);
+
+      expect(result, equals(ExitCode.success.code));
+      expect(current, expectedChange);
+    });
+
+    test('changes repository url in yaml', () async {
+      final result = await commandRunner.run(
+        ['change', repoArg, '--with-path'],
+      );
+
+      final expectedChange = repoArg.split('=').last;
+
+      final current = await readFileNode('repository');
+      await resetFile(node: 'repository', remove: true);
+
+      expect(result, equals(ExitCode.success.code));
+      expect(current, expectedChange);
+    });
+
+    test('changes issue-tracker url in yaml', () async {
+      final result = await commandRunner.run(
+        ['change', issueArg, '--with-path'],
+      );
+
+      final expectedChange = issueArg.split('=').last;
+
+      final current = await readFileNode('issue_tracker');
+      await resetFile(node: 'issue_tracker', remove: true);
+
+      expect(result, equals(ExitCode.success.code));
+      expect(current, expectedChange);
+    });
+
+    test('changes documentation url in yaml', () async {
+      final result = await commandRunner.run(
+        ['change', docArg, '--with-path'],
+      );
+
+      final expectedChange = docArg.split('=').last;
+
+      final current = await readFileNode('documentation');
+      await resetFile(node: 'documentation', remove: true);
+
+      expect(result, equals(ExitCode.success.code));
+      expect(current, expectedChange);
+    });
+  });
 }
