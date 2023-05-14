@@ -29,7 +29,7 @@
 # 0.2.0
 
 **Minor Changes**
-* Default behaviour for versioning is relative where :
+* Default versioning is relative where :
     * incrementing major - defaults minor & patch to zero
     * incrementing minor - defaults only patch to zero
 * CLI tool will always get the highest relative version based on all flags provided.

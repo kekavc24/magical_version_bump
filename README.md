@@ -12,7 +12,7 @@ A command-line tool for changing/modifying the version specified in Flutter/Dart
     - [Executable Name](#executable-name)
     - [Available Commands](#commands)
     - [Available Flags and Options](#flags-and-options)
-- [Default Behaviour](#default-behaviour)
+- [Default](#default)
 - [Basic Usage](#basic-usage)
 
 ## Getting Started
@@ -72,7 +72,7 @@ The `change` command takes in options which you can pass in values to. It also i
 | `--issue_tracker` | -                      | Change the url pointing to an issue tracker in pubspec.yaml |
 | `--documentation` | -                      | Change the url pointing to your project's documentation in pubspec.yaml |
 
-## Default behaviour
+## Default
 * The tool will always check the current folder for the pubspec.yaml file. Add a `--with-path` flag to nudge the CLI to request the path from you.
 
 ```sh
