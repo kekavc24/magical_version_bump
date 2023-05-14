@@ -1,4 +1,4 @@
-import 'package:magical_version_bump/src/utils/command_handler/mixins/command_mixins.dart';
+import 'package:magical_version_bump/src/utils/mixins/command_mixins.dart';
 import 'package:magical_version_bump/src/utils/models/magical_data_model.dart';
 import 'package:mason_logger/mason_logger.dart';
 import 'package:mocktail/mocktail.dart';
@@ -8,37 +8,34 @@ class _MockLogger extends Mock implements Logger {}
 
 class _MockProgress extends Mock implements Progress {}
 
-class _MockFileHandler with HandleFile {}
+class _FakeFileHandler with HandleFile {}
 
 void main() {
+  late Logger logger;
+  late _FakeFileHandler handler;
+
+  const testpath = 'test/files/fake.yaml';
+  const defaultPath = 'pubspec.yaml';
+  const wrongPath = 'pubspec';
+
+  setUp(() {
+    logger = _MockLogger();
+    handler = _FakeFileHandler();
+
+    when(() => logger.progress(any())).thenReturn(_MockProgress());
+  });
+
   group('handle file mixin test', () {
-    late Logger logger;
-    late _MockFileHandler fileHandler;
-
-    setUp(() {
-      logger = _MockLogger();
-      fileHandler = _MockFileHandler();
-
-      when(() => logger.progress(any())).thenReturn(_MockProgress());
-    });
-
-    test('read file from current directory', () async {
-      const path = 'pubspec.yaml';
-
-      final data = await fileHandler.readFile(
-        requestPath: false,
-        logger: logger,
-      );
+    test('reads pubspec.yaml file from path', () async {
+      final data = await handler.readFile(logger: logger);
 
       verify(() => logger.progress('Reading file')).called(1);
 
       expect(data, isA<YamlFileData>());
-      expect(data.path, path);
+      expect(data.path, defaultPath);
     });
 
-    test('read file from custom directory', () async {
-      const path = 'test/files/fake.yaml';
-
+    test('reads pubspec.yaml file from user provided path', () async {
       when(
         () => logger.prompt(
           'Please enter the path to file:',
@@ -46,22 +43,17 @@ void main() {
             named: 'defaultValue',
           ),
         ),
-      ).thenReturn(path);
+      ).thenReturn(testpath);
 
-      final data = await fileHandler.readFile(
-        requestPath: true,
-        logger: logger,
-      );
+      final data = await handler.readFile(requestPath: true, logger: logger);
 
       verify(() => logger.progress('Reading file')).called(1);
 
       expect(data, isA<YamlFileData>());
-      expect(data.path, path);
+      expect(data.path, testpath);
     });
 
-    test('wrong path provided', () async {
-      const path = 'fake';
-
+    test('throws error if path provided is not absolute', () async {
       when(
         () => logger.prompt(
           'Please enter the path to file:',
@@ -69,9 +61,9 @@ void main() {
             named: 'defaultValue',
           ),
         ),
-      ).thenReturn(path);
+      ).thenReturn(wrongPath);
 
-      final data = fileHandler.readFile(
+      final data = handler.readFile(
         requestPath: true,
         logger: logger,
       );

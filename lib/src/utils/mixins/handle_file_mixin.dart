@@ -16,7 +16,7 @@ mixin HandleFile {
   /// Note: Must provide also yaml file in path incase the file name has been
   /// changed.
   Future<YamlFileData> readFile({
-    required bool requestPath,
+    bool requestPath = false,
     required Logger logger,
   }) async {
     var path = ''; // path to file
@@ -45,12 +45,13 @@ mixin HandleFile {
 
   /// Save file changes
   Future<void> saveFile({
-    required ModifiedFileData data,
+    required String data,
+    required String path,
     required Logger logger,
   }) async {
     final saveProgress = logger.progress('Saving changes');
 
-    await File(data.path).writeAsString(data.modifiedFile);
+    await File(path).writeAsString(data);
 
     saveProgress.complete('Saved changes');
   }

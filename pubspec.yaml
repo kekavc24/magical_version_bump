@@ -5,9 +5,17 @@ version: 0.1.2
 homepage: https://github.com/kekavc24/magical_version_bump
 repository: https://github.com/kekavc24/magical_version_bump
 issue_tracker: https://github.com/kekavc24/magical_version_bump/issues
+topics:
+  - yaml
+  - cli
 
 environment:
   sdk: ">=2.19.0 <3.0.0"
+
+platforms:
+  linux:
+  windows:
+  macos:
 
 dependencies:
   args: ^2.3.1

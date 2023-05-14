@@ -24,10 +24,14 @@ class YamlFileData extends MagicalData {
 /// This class stores data after all arguments have been read
 class PrepCommandData extends MagicalData {
   PrepCommandData({
+    required this.absoluteVersioning,
     required this.action,
     required this.versionTargets,
     required this.requestPath,
   });
+
+  /// Whether version will be bumped up/down independent to other versions
+  final bool absoluteVersioning;
 
   /// Current action user want to pursue
   final String action;

@@ -102,8 +102,7 @@ void main() {
       verifyNever(() => logger.info(updatePrompt));
     });
 
-    test('can be instantiated without an explicit analytics/logger instance',
-        () {
+    test('can be instantiated without an explicit logger instance', () {
       final commandRunner = MagicalVersionBumpCommandRunner();
       expect(commandRunner, isNotNull);
       expect(commandRunner, isA<CompletionCommandRunner<int>>());
