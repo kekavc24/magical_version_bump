@@ -40,7 +40,7 @@ mixin ModifyYaml {
 
         // Patch targets to modify. Build number is last and patch is first
         final subVersionToMod =
-            target == 'patch' ? patchTargets.first[0] : patchTargets.last;
+            target == 'patch' ? patchTargets.first : patchTargets.last;
 
         var modifiedVersion = action == 'bump' || action == 'b'
             ? int.parse(subVersionToMod) + 1
