@@ -34,7 +34,7 @@ mixin ValidatePreppedArgs {
   /// Check if args normalized correctly
   Future<InvalidReason?> validateArgs(
     List<String> args, {
-    required bool isModify,
+    bool isModify = false,
   }) async {
     // Args must not be empty
     if (args.isEmpty) {

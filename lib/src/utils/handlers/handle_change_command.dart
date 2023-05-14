@@ -24,7 +24,6 @@ class HandleChangeCommand
 
     final invalidity = await validateArgs(
       preppedArgs.keys.toList(),
-      isModify: false,
     );
 
     if (invalidity != null) {
@@ -48,7 +47,6 @@ class HandleChangeCommand
 
       version = await validateVersion(
         logger: logger!,
-        isModify: false,
         version: preppedArgs['yaml-version'],
       );
     }

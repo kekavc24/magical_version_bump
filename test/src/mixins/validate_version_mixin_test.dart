@@ -67,7 +67,6 @@ void main() {
     test('validates version passed as valid', () async {
       final validatedVersion = await validator.validateVersion(
         logger: logger,
-        isModify: false,
         version: version,
       );
 
@@ -104,7 +103,6 @@ void main() {
     test('prompts when version passed is null', () async {
       final validatedVersion = await validator.validateVersion(
         logger: logger,
-        isModify: false,
       );
 
       verify(() => logger.progress('Checking version number')).called(1);
@@ -127,7 +125,6 @@ void main() {
     test('prompts when version passed is invalid', () async {
       final validatedVersion = await validator.validateVersion(
         logger: logger,
-        isModify: false,
         version: '1.',
       );
 

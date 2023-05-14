@@ -13,7 +13,7 @@ void main() {
       const baseError = 'Missing arguments';
       const verboseError = 'No arguments found';
 
-      final invalidReason = await validator.validateArgs([], isModify: false);
+      final invalidReason = await validator.validateArgs([]);
 
       expect(invalidReason, isNotNull);
       expect(invalidReason!.key, baseError);
@@ -27,7 +27,6 @@ void main() {
 
       final invalidReason = await validator.validateArgs(
         undefinedArg,
-        isModify: false,
       );
 
       expect(invalidReason, isNotNull);
@@ -42,7 +41,6 @@ void main() {
 
       final invalidReason = await validator.validateArgs(
         duplicatedArgs,
-        isModify: false,
       );
 
       expect(invalidReason, isNotNull);
@@ -89,7 +87,6 @@ void main() {
 
       final invalidReason = await validator.validateArgs(
         validArgs,
-        isModify: false,
       );
 
       expect(invalidReason, isNull);

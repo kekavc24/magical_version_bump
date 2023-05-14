@@ -18,7 +18,7 @@ mixin ModifyYaml {
     String action,
     List<String> versionTargets,
     String version, {
-    required bool absoluteVersioning,
+    bool absoluteVersioning = false,
   }) async {
     final versions = getVersions(version, versionTargets);
 

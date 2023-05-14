@@ -235,7 +235,6 @@ void main() {
         'bump',
         majorTarget,
         version,
-        absoluteVersioning: false,
       );
 
       // Bump down version by 1
@@ -243,7 +242,6 @@ void main() {
         'dump',
         majorTarget,
         version,
-        absoluteVersioning: false,
       );
 
       expect(dynamicBump, bumpedVersion);
@@ -258,7 +256,6 @@ void main() {
         'bump',
         minorTarget,
         version,
-        absoluteVersioning: false,
       );
 
       // Bump down version by 1
@@ -266,7 +263,6 @@ void main() {
         'dump',
         minorTarget,
         version,
-        absoluteVersioning: false,
       );
 
       expect(dynamicBump, bumpedVersion);
@@ -281,7 +277,6 @@ void main() {
         'bump',
         patchTarget,
         version,
-        absoluteVersioning: false,
       );
 
       // Bump down version by 1
@@ -289,7 +284,6 @@ void main() {
         'dump',
         patchTarget,
         version,
-        absoluteVersioning: false,
       );
 
       expect(dynamicBump, bumpedVersion);
@@ -304,7 +298,6 @@ void main() {
         'bump',
         [...patchTarget, ...buildTarget],
         version,
-        absoluteVersioning: false,
       );
 
       // Bump down version by 1
@@ -312,7 +305,6 @@ void main() {
         'dump',
         [...patchTarget, ...buildTarget],
         version,
-        absoluteVersioning: false,
       );
 
       expect(dynamicBump, bumpedVersion);

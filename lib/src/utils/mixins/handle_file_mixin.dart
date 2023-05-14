@@ -16,7 +16,7 @@ mixin HandleFile {
   /// Note: Must provide also yaml file in path incase the file name has been
   /// changed.
   Future<YamlFileData> readFile({
-    required bool requestPath,
+   bool requestPath = false,
     required Logger logger,
   }) async {
     var path = ''; // path to file
