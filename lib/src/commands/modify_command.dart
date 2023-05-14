@@ -8,9 +8,8 @@ import 'package:mason_logger/mason_logger.dart';
 class ModifyVersionCommand extends Command<int> {
   ModifyVersionCommand({
     required Logger logger,
-    HandleModifyCommand? handler,
   })  : _logger = logger,
-        _handler = handler ?? HandleModifyCommand(logger: logger) {
+        _handler = HandleModifyCommand(logger: logger) {
     argParser
       ..addFlag(
         'bump',

@@ -7,9 +7,8 @@ import 'package:mason_logger/mason_logger.dart';
 class ChangeNodesCommand extends Command<int> {
   ChangeNodesCommand({
     required Logger logger,
-    HandleChangeCommand? handler,
   })  : _logger = logger,
-        _handler = handler ?? HandleChangeCommand(logger: logger) {
+        _handler = HandleChangeCommand(logger: logger) {
     argParser
       ..addFlag(
         'with-path',

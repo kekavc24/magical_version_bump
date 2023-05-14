@@ -2,7 +2,6 @@ import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
 import 'package:cli_completion/cli_completion.dart';
 import 'package:magical_version_bump/src/commands/commands.dart';
-import 'package:magical_version_bump/src/utils/handlers/command_handlers.dart';
 import 'package:magical_version_bump/src/version.dart';
 import 'package:mason_logger/mason_logger.dart';
 import 'package:pub_updater/pub_updater.dart';
@@ -24,8 +23,6 @@ class MagicalVersionBumpCommandRunner extends CompletionCommandRunner<int> {
   MagicalVersionBumpCommandRunner({
     Logger? logger,
     PubUpdater? pubUpdater,
-    HandleModifyCommand? modifyHandler,
-    HandleChangeCommand? changeHandler,
   })  : _logger = logger ?? Logger(),
         _pubUpdater = pubUpdater ?? PubUpdater(),
         super(executableName, description) {
@@ -44,8 +41,8 @@ class MagicalVersionBumpCommandRunner extends CompletionCommandRunner<int> {
 
     // Add sub commands
     addCommand(UpdateCommand(logger: _logger, pubUpdater: _pubUpdater));
-    addCommand(ModifyVersionCommand(logger: _logger, handler: modifyHandler));
-    addCommand(ChangeNodesCommand(logger: _logger, handler: changeHandler));
+    addCommand(ModifyVersionCommand(logger: _logger));
+    addCommand(ChangeNodesCommand(logger: _logger));
   }
 
   @override
