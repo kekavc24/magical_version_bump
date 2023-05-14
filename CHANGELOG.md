@@ -25,3 +25,21 @@
 # 0.1.2
 
 * Minor improvements.
+
+# 0.2.0
+
+**Minor Changes**
+* Default behaviour for versioning is relative where :
+    * incrementing major - defaults minor & patch to zero
+    * incrementing minor - defaults only patch to zero
+* CLI tool will always get the highest relative version based on all flags provided.
+
+**Features**
+* Added `--absolute` flag for absolute versioning. Each version will be treated as an absolute number.
+* Added new flags/options to `change` command. Check README for more info.
+
+**Fixes & Improvements**
+* Updated README and example docs.
+* Fixed lurking bugs.
+* Improved code readability and testability
+* Added improved tests.
