@@ -29,12 +29,7 @@ mixin ValidateVersion {
       }
 
       if (yamlMap.containsKey('version')) {
-        // Get only the first version entry
-        final versionEntry = yamlMap.entries.firstWhere(
-          (element) => element.key == 'version',
-        );
-
-        validVersion = versionEntry.value as String? ?? '';
+        validVersion = yamlMap['version']?.toString() ?? '';
       }
     } else {
       validVersion = version ?? '';
@@ -143,7 +138,7 @@ mixin ValidateVersion {
     final versionSplit = version.split('.');
 
     // Max length is 3 for SEMVER
-    if (versionSplit.length > 3) return false;
+    if (versionSplit.length > 3 || versionSplit.length < 3) return false;
 
     // Must have at length of 3 if build number is present
     if (versionSplit.length < 3 &&
