@@ -112,13 +112,16 @@ mixin ModifyYaml {
     // Add missing values
     if (versions.length <= 2 && versionTargets.contains('minor')) {
       versions.insert(1, '0');
-    } else if (versions.length < 3 && (versionTargets.contains('patch'))) {
+    }
+
+    if (versions.length < 3 && (versionTargets.contains('patch'))) {
       //
       versionTargets.contains('build-number')
           ? versions.add('0+1')
           : versions.add('0');
-    } else if (versions.length == 3 &&
-        versionTargets.contains('build-number')) {
+    }
+
+    if (versions.length == 3 && versionTargets.contains('build-number')) {
       // Check if last digit has build number
       final hasBuildNum = versions.last.contains('+');
 
