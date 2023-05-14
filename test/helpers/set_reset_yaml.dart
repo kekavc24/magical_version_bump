@@ -20,7 +20,7 @@ Future<String> readFileVersion() async {
 
   final file = await File(path).readAsString();
 
-  return getVersion(file);
+  return getYamlValue(file, 'version');
 }
 
 /// Reset file to initial version

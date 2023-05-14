@@ -31,9 +31,6 @@ mixin ValidatePreppedArgs {
     // For generate command
   ];
 
-  /// Base string used to append errors
-  var _baseError = 'Error!';
-
   /// Check if args normalized correctly
   Future<InvalidReason?> validateArgs(
     List<String> args, {
@@ -94,7 +91,7 @@ mixin ValidatePreppedArgs {
     final firstArgIsAction = actions.contains(args.first);
 
     if (!firstArgIsAction) {
-      return _baseError += " ${actions.join(', ')} flags should come first";
+      return "${actions.join(', ')} flags should come first";
     }
 
     final hasTargetFlag = args.any(
@@ -102,8 +99,7 @@ mixin ValidatePreppedArgs {
     );
 
     if (!hasTargetFlag) {
-      return _baseError +=
-          """ Command should have at least one of ${targets.take(4).join(', ')} flags""";
+      return """Command should have at least one of ${targets.take(4).join(', ')} flags""";
     }
 
     return '';
@@ -144,7 +140,7 @@ mixin ValidatePreppedArgs {
         repeated.write('${entry.key} -> ${entry.value}\n');
       }
 
-      return _baseError += ' Found repeated flags:\n$repeated';
+      return 'Found repeated flags:\n$repeated';
     }
 
     return '';
