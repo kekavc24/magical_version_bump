@@ -29,20 +29,20 @@ dart pub global activate magical_version_bump
 
 ![Update meme](https://storage.googleapis.com/magical_kenya_bucket/7lqtb5.jpg)
 
-### Executable Name
+## Executable Name
 
 | Executable Name | Function                    |
 |-----------------|-----------------------------|
 | `mag`           | Global executable for command-line tool|
 
-### Commands 
+## Commands 
 
 | Command  | Function |
 |----------|----------|
 | `modify` | This command explicitly modifies a specific [SemVer](https://semver.org/) version number in the version specified in your pubspec.yaml.|
 | `change` | This command overwrites specified node in pubspec.yaml file.|
 
-### Flags and Options
+## Flags and Options
 
 The `modify` command dictates that `action` flags precede the `target` flags. Available flags include: 
 
@@ -55,12 +55,16 @@ The `modify` command dictates that `action` flags precede the `target` flags. Av
 | `--patch`        | -                      | `target`    | Tells CLI to target the patch version number |
 | `--build-number` | -                      | `target`    | Tells CLI to target the build-number |
 | `--with-path`    | -                      | `target`    | Tells CLI to request the path from you and not check the current directory |
+| `--set-path`     |                        | `N/A`       | Sets path to pubspec.yaml file |
+
+NOTE: `set-path` takes precedence over `with-path`. Tool will remove the `with-path` automatically but will complain as shown.
 
 The `change` command takes in options which you can pass in values to. It also includes one flag.
 
-| Flags           | Shorthand abbreviation | Type        | Function |
-|-----------------|------------------------|-------------|----------|
-| `--with-path`   | -                      | `target`    | Tells CLI to request the path from you and not check the current directory |
+| Flags           | Shorthand abbreviation | Function |
+|-----------------|------------------------|----------|
+| `--with-path`   | -                      | Tells CLI to request the path from you and not check the current directory |
+| `--set-path`    |                        | Sets path to pubspec.yaml file |
 
 | Options           | Shorthand abbreviation | Function                        |
 |-------------------|------------------------|---------------------------------|

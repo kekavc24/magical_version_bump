@@ -161,5 +161,42 @@ void main() {
     });
   });
 
+  group('modify with custom path', () {
+    test('sets path and dumps all versions', () async {
+      const version = '9.9.9+9';
+      final result = await commandRunner.run(
+        [...dumpArgs, 'absolute', 'set-path=$path'],
+      );
+
+      final bumpedVersion = await readFileNode('version');
+
+      verify(
+        () => logger.warn('Duplicate flags were found when path was set'),
+      ).called(1);
+
+      expect(result, equals(ExitCode.success.code));
+      expect(bumpedVersion, version);
+    });
+
+    test(
+      'sets path and bumps all versions even with duplicated set-path flags',
+      () async {
+        const version = '11.11.11+11';
+        final result = await commandRunner.run(
+          [...bumpArgs, 'absolute', 'set-path=$path', 'set-path=$path'],
+        );
+
+        final bumpedVersion = await readFileNode('version');
+
+        verify(
+          () => logger.warn('Duplicate flags were found when path was set'),
+        ).called(1);
+
+        expect(result, equals(ExitCode.success.code));
+        expect(bumpedVersion, version);
+      },
+    );
+  });
+
   tearDown(() async => resetFile());
 }

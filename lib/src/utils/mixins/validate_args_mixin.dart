@@ -1,3 +1,5 @@
+import 'package:mason_logger/mason_logger.dart';
+
 typedef InvalidReason = MapEntry<String, String>;
 
 /// This mixin validates args normalized to make sure they follow guidelines
@@ -19,6 +21,9 @@ mixin ValidatePreppedArgs {
 
   /// List of any other accepted flags for `Change` and `Generate` commands
   final otherAcceptedFlags = <String>[
+    // General for all
+    'set-path',
+
     // For Change command
     'yaml-version',
     'documentation',
@@ -32,46 +37,78 @@ mixin ValidatePreppedArgs {
   ];
 
   /// Check if args normalized correctly
-  Future<InvalidReason?> validateArgs(
+  Future<({InvalidReason? invalidReason, List<String> args})> validateArgs(
     List<String> args, {
+    required bool userSetPath,
+    required Logger logger,
     bool isModify = false,
   }) async {
     // Args must not be empty
     if (args.isEmpty) {
-      return const InvalidReason(
-        'Missing arguments',
-        'No arguments found',
+      return (
+        invalidReason: const InvalidReason(
+          'Missing arguments',
+          'No arguments found',
+        ),
+        args: <String>[],
       );
     }
 
+    final modifiableArgs = [...args];
+
     // Check for undefined flags
-    final undefinedFlags = _checkForUndefinedFlags(args);
+    final undefinedFlags = _checkForUndefinedFlags(modifiableArgs);
 
     if (undefinedFlags.isNotEmpty) {
-      return InvalidReason(
-        'Invalid arguments',
-        """${undefinedFlags.join(', ')} ${undefinedFlags.length <= 1 ? 'is not a defined flag' : 'are not  defined flags'}""",
+      return (
+        invalidReason: InvalidReason(
+          'Invalid arguments',
+          """${undefinedFlags.join(', ')} ${undefinedFlags.length <= 1 ? 'is not a defined flag' : 'are not  defined flags'}""",
+        ),
+        args: <String>[],
       );
+    }
+
+    // Remove any "with-path" flag if user set path. Warn too
+    if (userSetPath) {
+      // Warn user
+      final hasPathFlag = modifiableArgs.any(
+        (element) => element == 'with-path' || element.contains('set-path'),
+      );
+
+      if (hasPathFlag) {
+        logger.warn('Duplicate flags were found when path was set');
+
+        modifiableArgs
+          ..remove('with-path')
+          ..retainWhere((element) => !element.contains('set-path'));
+      }
     }
 
     // Check for correct order of flags as specified above on `actions` &
     // `targets` variables
     if (isModify) {
-      final standardsError = _checkFlags(args);
+      final standardsError = _checkFlags(modifiableArgs);
 
       if (standardsError.isNotEmpty) {
-        return InvalidReason('Wrong flag sequence', standardsError);
+        return (
+          invalidReason: InvalidReason('Wrong flag sequence', standardsError),
+          args: <String>[],
+        );
       }
     }
 
     // Get duplicated flags
-    final repeatedFlags = _checkForDuplicates(args);
+    final repeatedFlags = _checkForDuplicates(modifiableArgs);
 
     if (repeatedFlags.isNotEmpty) {
-      return InvalidReason('Duplicate flags', repeatedFlags);
+      return (
+        args: <String>[],
+        invalidReason: InvalidReason('Duplicate flags', repeatedFlags),
+      );
     }
 
-    return null;
+    return (invalidReason: null, args: modifiableArgs);
   }
 
   /// Check for any undefined flags

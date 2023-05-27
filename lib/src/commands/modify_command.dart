@@ -49,6 +49,10 @@ class ModifyVersionCommand extends Command<int> {
             '''Tells CLI to request file path instead of checking current directory''',
         negatable: false,
       )
+      ..addOption(
+        'set-path',
+        help: '''Tell CLI where to check for a pubspec.yaml file''',
+      )
       ..addFlag(
         'absolute',
         help:

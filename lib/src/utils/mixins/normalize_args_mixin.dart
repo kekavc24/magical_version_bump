@@ -1,20 +1,44 @@
-import 'package:magical_version_bump/src/utils/models/magical_data_model.dart';
-
 typedef ArgsAndValues = Map<String, String>;
 
 /// This mixin normalizes arguments passed passed in by user
 mixin NormalizeArgs {
-  /// Normalize arguments. Remove '-' or '--' present
-  List<String> normalizeArgs(List<String> args) => args.map((e) {
-        var mod = e.replaceFirst(RegExp('--'), '');
+  /// Normalize arguments. Remove '-' or '--' present.
+  ///
+  /// Also obtains the set path
+  ({List<String> args, bool hasPath, String? setPath}) normalizeArgs(
+    List<String> args,
+  ) {
+    final sanitizedArgs = args.map((e) {
+      var mod = e.replaceFirst(RegExp('--'), '');
 
-        if (mod[0] == '-') mod = mod.replaceFirst(RegExp('-'), '');
+      if (mod[0] == '-') mod = mod.replaceFirst(RegExp('-'), '');
 
-        return mod;
-      }).toList();
+      return mod;
+    }).toList();
 
-  /// Prep normalized args and return data model
-  PrepCommandData prepArgs(List<String> args) {
+    final hasPath = sanitizedArgs.any((arg) => arg.contains('set-path'));
+
+    return (
+      args: hasPath
+          ? sanitizedArgs.where((arg) => !arg.contains('set-path')).toList()
+          : sanitizedArgs,
+      hasPath: hasPath,
+      setPath: hasPath
+          ? sanitizedArgs
+              .firstWhere((arg) => arg.contains('set-path'))
+              .split('=')
+              .last
+          : null
+    );
+  }
+
+  /// Prep normalized args
+  ({
+    bool absoluteVersioning,
+    String action,
+    List<String> versionTargets,
+    bool requestPath,
+  }) prepArgs(List<String> args) {
     final actionFlag = args.first; // Action command
 
     // Targets
@@ -25,7 +49,7 @@ mixin NormalizeArgs {
 
     final absoluteBump = targetFlags.remove('absolute');
 
-    return PrepCommandData(
+    return (
       absoluteVersioning: absoluteBump,
       action: actionFlag,
       versionTargets: targetFlags,

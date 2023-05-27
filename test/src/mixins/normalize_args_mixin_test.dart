@@ -1,6 +1,5 @@
 import 'package:collection/collection.dart';
 import 'package:magical_version_bump/src/utils/mixins/command_mixins.dart';
-import 'package:magical_version_bump/src/utils/models/magical_data_model.dart';
 import 'package:test/test.dart';
 
 class _FakeNormalizer with NormalizeArgs {}
@@ -15,18 +14,40 @@ void main() {
   });
 
   group('normalizes flags correctly', () {
-    test("removes the '--' & '-' appended to flags", () {
+    test("removes the '--' & '-' appended to flags with no set path", () {
       final flags = <String>['--double-fake-flag', '-single-fake-flag'];
       final sanitizedFlags = <String>['double-fake-flag', 'single-fake-flag'];
 
       final normalizedFlags = normalizer.normalizeArgs(flags);
 
       final wasNormalized = listEquality.equals(
-        normalizedFlags,
+        normalizedFlags.args,
         sanitizedFlags,
       );
 
       expect(wasNormalized, true);
+      expect(normalizedFlags.hasPath, false);
+      expect(normalizedFlags.setPath, isNull);
+    });
+
+    test("removes the '--' & '-' appended to flags with set path", () {
+      final flags = <String>[
+        '--double-fake-flag',
+        '-single-fake-flag',
+        '--set-path=myPath'
+      ];
+      final sanitizedFlags = <String>['double-fake-flag', 'single-fake-flag'];
+
+      final normalizedFlags = normalizer.normalizeArgs(flags);
+
+      final wasNormalized = listEquality.equals(
+        normalizedFlags.args,
+        sanitizedFlags,
+      );
+
+      expect(wasNormalized, true);
+      expect(normalizedFlags.hasPath, true);
+      expect(normalizedFlags.setPath, 'myPath');
     });
   });
 
@@ -36,7 +57,6 @@ void main() {
 
       final prepData = normalizer.prepArgs(args);
 
-      expect(prepData, isA<PrepCommandData>());
       expect(prepData.action, 'bump');
       expect(listEquality.equals(['major'], prepData.versionTargets), true);
       expect(prepData.absoluteVersioning, false);
@@ -48,7 +68,6 @@ void main() {
 
       final prepData = normalizer.prepArgs(args);
 
-      expect(prepData, isA<PrepCommandData>());
       expect(prepData.action, 'bump');
       expect(listEquality.equals(['major'], prepData.versionTargets), true);
       expect(prepData.absoluteVersioning, false);
@@ -60,7 +79,6 @@ void main() {
 
       final prepData = normalizer.prepArgs(args);
 
-      expect(prepData, isA<PrepCommandData>());
       expect(prepData.action, 'bump');
       expect(listEquality.equals(['major'], prepData.versionTargets), true);
       expect(prepData.absoluteVersioning, true);

@@ -43,3 +43,12 @@
 * Fixed lurking bugs.
 * Improved code readability and testability
 * Added improved tests.
+
+# 0.3.0
+**Features**
+* Added `--set-path` flag to both commands. Check README for more info.
+
+**Fixes & Improvements**
+* Update to Dart 3
+* Fixed lurking bugs
+* Improved tests

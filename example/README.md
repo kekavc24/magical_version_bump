@@ -110,3 +110,12 @@ path specified will be `directory-with-yaml/myFile.yaml`
 $ mag modify -b --major --with-path  -  requests path and version 1.0.0 becomes 2.0.0
 
 ```
+
+* Alternatively you can provide a path directly with `set-path`
+
+``` sh
+# Bump up with specified path
+
+$ mag modify -b --major --set-path=path-to-file  -  reads from path and version 1.0.0 becomes 2.0.0
+
+```
