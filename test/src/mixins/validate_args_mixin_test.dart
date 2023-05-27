@@ -110,20 +110,20 @@ void main() {
       () async {
         const validArgs = ['name', 'major', 'bump', 'yaml-version'];
 
-        final invalidReason = await validator.validateArgs(
+        final validated = await validator.validateArgs(
           validArgs,
           userSetPath: false,
           logger: logger,
         );
 
-        expect(invalidReason, isNull);
+        expect(validated.invalidReason, isNull);
       },
     );
 
     test("warns and removes 'with-path' flag when path is set", () async {
       const validArgs = ['name', 'major', 'bump', 'yaml-version', 'with-path'];
 
-      final invalidReason = await validator.validateArgs(
+      final validated = await validator.validateArgs(
         validArgs,
         userSetPath: true,
         logger: logger,
@@ -133,7 +133,7 @@ void main() {
         () => logger.warn('Duplicate flags were found when path was set'),
       ).called(1);
 
-      expect(invalidReason, isNull);
+      expect(validated.invalidReason, isNull);
     });
 
     test(
@@ -141,7 +141,7 @@ void main() {
       () async {
         const validArgs = ['name', 'major', 'bump', 'yaml-version', 'set-path'];
 
-        final invalidReason = await validator.validateArgs(
+        final validated = await validator.validateArgs(
           validArgs,
           userSetPath: true,
           logger: logger,
@@ -153,7 +153,7 @@ void main() {
           ),
         ).called(1);
 
-        expect(invalidReason, isNull);
+        expect(validated.invalidReason, isNull);
       },
     );
   });
