@@ -51,8 +51,10 @@ mixin ValidatePreppedArgs {
       );
     }
 
+    final modifiableArgs = [...args];
+
     // Check for undefined flags
-    final undefinedFlags = _checkForUndefinedFlags(args);
+    final undefinedFlags = _checkForUndefinedFlags(modifiableArgs);
 
     if (undefinedFlags.isNotEmpty) {
       return InvalidReason(
@@ -62,23 +64,25 @@ mixin ValidatePreppedArgs {
     }
 
     // Remove any "with-path" flag if user set path. Warn too
-    if (userSetPath && args.contains('with-path')) {
+    if (userSetPath) {
       // Warn user
-      logger.warn("'with-path' flag was found when path was set");
-
-      if (args.any((element) => element.contains('set-path'))) {
-        logger.warn("Another 'set-path' flag was found");
-      }
-
-      args.removeWhere(
+      final hasPathFlag = modifiableArgs.any(
         (element) => element == 'with-path' || element.contains('set-path'),
       );
+
+      if (hasPathFlag) {
+        logger.warn('Duplicate flags were found when path was set');
+
+        modifiableArgs.removeWhere(
+          (element) => element == 'with-path' || element.contains('set-path'),
+        );
+      }
     }
 
     // Check for correct order of flags as specified above on `actions` &
     // `targets` variables
     if (isModify) {
-      final standardsError = _checkFlags(args);
+      final standardsError = _checkFlags(modifiableArgs);
 
       if (standardsError.isNotEmpty) {
         return InvalidReason('Wrong flag sequence', standardsError);
@@ -86,7 +90,7 @@ mixin ValidatePreppedArgs {
     }
 
     // Get duplicated flags
-    final repeatedFlags = _checkForDuplicates(args);
+    final repeatedFlags = _checkForDuplicates(modifiableArgs);
 
     if (repeatedFlags.isNotEmpty) {
       return InvalidReason('Duplicate flags', repeatedFlags);
