@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:magical_version_bump/src/utils/models/magical_data_model.dart';
 import 'package:mason_logger/mason_logger.dart';
 import 'package:yaml/yaml.dart';
 
@@ -15,7 +14,7 @@ mixin HandleFile {
   ///
   /// Note: Must provide also yaml file in path incase the file name has been
   /// changed.
-  Future<YamlFileData> readFile({
+  Future<({String file, String path, YamlMap yamlMap})> readFile({
     bool requestPath = false,
     required Logger logger,
   }) async {
@@ -40,7 +39,7 @@ mixin HandleFile {
 
     readProgress.complete('Read file');
 
-    return YamlFileData(path: path, file: file, yamlMap: yamlMap);
+    return (path: path, file: file, yamlMap: yamlMap);
   }
 
   /// Save file changes

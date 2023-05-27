@@ -1,5 +1,4 @@
 import 'package:magical_version_bump/src/utils/mixins/command_mixins.dart';
-import 'package:magical_version_bump/src/utils/models/magical_data_model.dart';
 import 'package:mason_logger/mason_logger.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:test/test.dart';
@@ -31,7 +30,6 @@ void main() {
 
       verify(() => logger.progress('Reading file')).called(1);
 
-      expect(data, isA<YamlFileData>());
       expect(data.path, defaultPath);
     });
 
@@ -49,7 +47,6 @@ void main() {
 
       verify(() => logger.progress('Reading file')).called(1);
 
-      expect(data, isA<YamlFileData>());
       expect(data.path, testpath);
     });
 

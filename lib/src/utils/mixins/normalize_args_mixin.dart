@@ -1,5 +1,3 @@
-import 'package:magical_version_bump/src/utils/models/magical_data_model.dart';
-
 typedef ArgsAndValues = Map<String, String>;
 
 /// This mixin normalizes arguments passed passed in by user
@@ -13,8 +11,15 @@ mixin NormalizeArgs {
         return mod;
       }).toList();
 
-  /// Prep normalized args and return data model
-  PrepCommandData prepArgs(List<String> args) {
+  /// Prep normalized args
+  ({
+    bool absoluteVersioning,
+    String action,
+    List<String> versionTargets,
+    bool requestPath
+  }) prepArgs(
+    List<String> args,
+  ) {
     final actionFlag = args.first; // Action command
 
     // Targets
@@ -25,7 +30,7 @@ mixin NormalizeArgs {
 
     final absoluteBump = targetFlags.remove('absolute');
 
-    return PrepCommandData(
+    return (
       absoluteVersioning: absoluteBump,
       action: actionFlag,
       versionTargets: targetFlags,

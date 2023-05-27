@@ -1,6 +1,5 @@
 import 'package:collection/collection.dart';
 import 'package:magical_version_bump/src/utils/mixins/command_mixins.dart';
-import 'package:magical_version_bump/src/utils/models/magical_data_model.dart';
 import 'package:test/test.dart';
 
 class _FakeNormalizer with NormalizeArgs {}
@@ -36,7 +35,6 @@ void main() {
 
       final prepData = normalizer.prepArgs(args);
 
-      expect(prepData, isA<PrepCommandData>());
       expect(prepData.action, 'bump');
       expect(listEquality.equals(['major'], prepData.versionTargets), true);
       expect(prepData.absoluteVersioning, false);
@@ -48,7 +46,6 @@ void main() {
 
       final prepData = normalizer.prepArgs(args);
 
-      expect(prepData, isA<PrepCommandData>());
       expect(prepData.action, 'bump');
       expect(listEquality.equals(['major'], prepData.versionTargets), true);
       expect(prepData.absoluteVersioning, false);
@@ -60,7 +57,6 @@ void main() {
 
       final prepData = normalizer.prepArgs(args);
 
-      expect(prepData, isA<PrepCommandData>());
       expect(prepData.action, 'bump');
       expect(listEquality.equals(['major'], prepData.versionTargets), true);
       expect(prepData.absoluteVersioning, true);
