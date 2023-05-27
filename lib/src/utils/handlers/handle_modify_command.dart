@@ -22,14 +22,19 @@ class HandleModifyCommand
     // Normalize args & check validity
     final normalizedArgs = normalizeArgs(args);
 
-    final invalidity = await validateArgs(normalizedArgs, isModify: true);
+    final invalidity = await validateArgs(
+      normalizedArgs.args,
+      isModify: true,
+      userSetPath: normalizedArgs.hasPath,
+      logger: logger!,
+    );
 
     if (invalidity != null) {
       prepProgress.fail(invalidity.key);
       throw MagicalException(violation: invalidity.value);
     }
 
-    final preppedArgs = prepArgs(normalizedArgs);
+    final preppedArgs = prepArgs(normalizedArgs.args);
 
     prepProgress.complete('Checked arguments');
 
@@ -37,6 +42,7 @@ class HandleModifyCommand
     final fileData = await readFile(
       requestPath: preppedArgs.requestPath,
       logger: logger!,
+      setPath: normalizedArgs.setPath,
     );
 
     // Validate version and get correct version

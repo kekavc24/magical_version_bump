@@ -20,10 +20,12 @@ class HandleChangeCommand
     // Normalize args & check validity
     final normalizedArgs = normalizeArgs(args);
 
-    final preppedArgs = getArgAndValues(normalizedArgs);
+    final preppedArgs = getArgAndValues(normalizedArgs.args);
 
     final invalidity = await validateArgs(
       preppedArgs.keys.toList(),
+      userSetPath: normalizedArgs.hasPath,
+      logger: logger!,
     );
 
     if (invalidity != null) {
@@ -37,6 +39,7 @@ class HandleChangeCommand
     final fileData = await readFile(
       requestPath: preppedArgs.containsKey('with-path'),
       logger: logger!,
+      setPath: normalizedArgs.setPath,
     );
 
     var version = '';

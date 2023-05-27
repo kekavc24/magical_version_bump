@@ -15,8 +15,9 @@ mixin HandleFile {
   /// Note: Must provide also yaml file in path incase the file name has been
   /// changed.
   Future<({String file, String path, YamlMap yamlMap})> readFile({
-    bool requestPath = false,
     required Logger logger,
+    bool requestPath = false,
+    String? setPath,
   }) async {
     var path = ''; // path to file
 
@@ -27,7 +28,7 @@ mixin HandleFile {
         defaultValue: 'pubspec.yaml',
       );
     } else {
-      path = 'pubspec.yaml';
+      path = setPath ?? 'pubspec.yaml';
     }
 
     final readProgress = logger.progress('Reading file');
