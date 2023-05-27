@@ -1,3 +1,5 @@
+import 'package:mason_logger/mason_logger.dart';
+
 typedef InvalidReason = MapEntry<String, String>;
 
 /// This mixin validates args normalized to make sure they follow guidelines
@@ -19,6 +21,9 @@ mixin ValidatePreppedArgs {
 
   /// List of any other accepted flags for `Change` and `Generate` commands
   final otherAcceptedFlags = <String>[
+    // General for all
+    'set-path',
+
     // For Change command
     'yaml-version',
     'documentation',
@@ -34,6 +39,8 @@ mixin ValidatePreppedArgs {
   /// Check if args normalized correctly
   Future<InvalidReason?> validateArgs(
     List<String> args, {
+    required bool userSetPath,
+    required Logger logger,
     bool isModify = false,
   }) async {
     // Args must not be empty
@@ -51,6 +58,20 @@ mixin ValidatePreppedArgs {
       return InvalidReason(
         'Invalid arguments',
         """${undefinedFlags.join(', ')} ${undefinedFlags.length <= 1 ? 'is not a defined flag' : 'are not  defined flags'}""",
+      );
+    }
+
+    // Remove any "with-path" flag if user set path. Warn too
+    if (userSetPath && args.contains('with-path')) {
+      // Warn user
+      logger.warn("'with-path' flag was found when path was set");
+
+      if (args.any((element) => element.contains('set-path'))) {
+        logger.warn("Another 'set-path' flag was found");
+      }
+
+      args.removeWhere(
+        (element) => element == 'with-path' || element.contains('set-path'),
       );
     }
 
