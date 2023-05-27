@@ -37,7 +37,7 @@ mixin ValidatePreppedArgs {
   ];
 
   /// Check if args normalized correctly
-  Future<InvalidReason?> validateArgs(
+  Future<({InvalidReason? invalidReason, List<String> args})> validateArgs(
     List<String> args, {
     required bool userSetPath,
     required Logger logger,
@@ -45,9 +45,12 @@ mixin ValidatePreppedArgs {
   }) async {
     // Args must not be empty
     if (args.isEmpty) {
-      return const InvalidReason(
-        'Missing arguments',
-        'No arguments found',
+      return (
+        invalidReason: const InvalidReason(
+          'Missing arguments',
+          'No arguments found',
+        ),
+        args: <String>[],
       );
     }
 
@@ -57,9 +60,12 @@ mixin ValidatePreppedArgs {
     final undefinedFlags = _checkForUndefinedFlags(modifiableArgs);
 
     if (undefinedFlags.isNotEmpty) {
-      return InvalidReason(
-        'Invalid arguments',
-        """${undefinedFlags.join(', ')} ${undefinedFlags.length <= 1 ? 'is not a defined flag' : 'are not  defined flags'}""",
+      return (
+        invalidReason: InvalidReason(
+          'Invalid arguments',
+          """${undefinedFlags.join(', ')} ${undefinedFlags.length <= 1 ? 'is not a defined flag' : 'are not  defined flags'}""",
+        ),
+        args: <String>[],
       );
     }
 
@@ -73,9 +79,9 @@ mixin ValidatePreppedArgs {
       if (hasPathFlag) {
         logger.warn('Duplicate flags were found when path was set');
 
-        modifiableArgs.removeWhere(
-          (element) => element == 'with-path' || element.contains('set-path'),
-        );
+        modifiableArgs
+          ..remove('with-path')
+          ..retainWhere((element) => !element.contains('set-path'));
       }
     }
 
@@ -85,7 +91,10 @@ mixin ValidatePreppedArgs {
       final standardsError = _checkFlags(modifiableArgs);
 
       if (standardsError.isNotEmpty) {
-        return InvalidReason('Wrong flag sequence', standardsError);
+        return (
+          invalidReason: InvalidReason('Wrong flag sequence', standardsError),
+          args: <String>[],
+        );
       }
     }
 
@@ -93,10 +102,13 @@ mixin ValidatePreppedArgs {
     final repeatedFlags = _checkForDuplicates(modifiableArgs);
 
     if (repeatedFlags.isNotEmpty) {
-      return InvalidReason('Duplicate flags', repeatedFlags);
+      return (
+        args: <String>[],
+        invalidReason: InvalidReason('Duplicate flags', repeatedFlags),
+      );
     }
 
-    return null;
+    return (invalidReason: null, args: modifiableArgs);
   }
 
   /// Check for any undefined flags

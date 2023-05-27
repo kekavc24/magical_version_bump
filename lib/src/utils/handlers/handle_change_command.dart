@@ -22,22 +22,22 @@ class HandleChangeCommand
 
     final preppedArgs = getArgAndValues(normalizedArgs.args);
 
-    final invalidity = await validateArgs(
+    final validatedArgs = await validateArgs(
       preppedArgs.keys.toList(),
       userSetPath: normalizedArgs.hasPath,
       logger: logger!,
     );
 
-    if (invalidity != null) {
-      prepProgress.fail(invalidity.key);
-      throw MagicalException(violation: invalidity.value);
+    if (validatedArgs.invalidReason != null) {
+      prepProgress.fail(validatedArgs.invalidReason!.key);
+      throw MagicalException(violation: validatedArgs.invalidReason!.value);
     }
 
     prepProgress.complete('Checked arguments');
 
     // Read pubspec.yaml file
     final fileData = await readFile(
-      requestPath: preppedArgs.containsKey('with-path'),
+      requestPath: validatedArgs.args.contains('with-path'),
       logger: logger!,
       setPath: normalizedArgs.setPath,
     );
@@ -45,7 +45,7 @@ class HandleChangeCommand
     var version = '';
 
     // If user wants version change, check if valid
-    if (preppedArgs.containsKey('yaml-version')) {
+    if (validatedArgs.args.contains('yaml-version')) {
       logger!.warn('Version flag detected. Must verify version is valid');
 
       version = await validateVersion(
@@ -59,8 +59,16 @@ class HandleChangeCommand
 
     final changeProgress = logger!.progress('Changing yaml nodes');
 
-    // Loop all entries
-    final entries = preppedArgs.entries.where(
+    // Loop all entries and match with validated args
+    final validMap = validatedArgs.args.fold(
+      <String, String>{},
+      (previousValue, element) {
+        previousValue.addAll({element: preppedArgs[element] ?? ''});
+        return previousValue;
+      },
+    );
+
+    final entries = validMap.entries.where(
       (element) => element.key != 'with-path',
     );
 

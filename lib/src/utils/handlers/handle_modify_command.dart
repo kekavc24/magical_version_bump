@@ -22,19 +22,19 @@ class HandleModifyCommand
     // Normalize args & check validity
     final normalizedArgs = normalizeArgs(args);
 
-    final invalidity = await validateArgs(
+    final validated = await validateArgs(
       normalizedArgs.args,
       isModify: true,
       userSetPath: normalizedArgs.hasPath,
       logger: logger!,
     );
 
-    if (invalidity != null) {
-      prepProgress.fail(invalidity.key);
-      throw MagicalException(violation: invalidity.value);
+    if (validated.invalidReason != null) {
+      prepProgress.fail(validated.invalidReason!.key);
+      throw MagicalException(violation: validated.invalidReason!.value);
     }
 
-    final preppedArgs = prepArgs(normalizedArgs.args);
+    final preppedArgs = prepArgs(validated.args);
 
     prepProgress.complete('Checked arguments');
 
