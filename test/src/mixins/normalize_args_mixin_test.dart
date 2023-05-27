@@ -14,18 +14,40 @@ void main() {
   });
 
   group('normalizes flags correctly', () {
-    test("removes the '--' & '-' appended to flags", () {
+    test("removes the '--' & '-' appended to flags with no set path", () {
       final flags = <String>['--double-fake-flag', '-single-fake-flag'];
       final sanitizedFlags = <String>['double-fake-flag', 'single-fake-flag'];
 
       final normalizedFlags = normalizer.normalizeArgs(flags);
 
       final wasNormalized = listEquality.equals(
-        normalizedFlags,
+        normalizedFlags.args,
         sanitizedFlags,
       );
 
       expect(wasNormalized, true);
+      expect(normalizedFlags.hasPath, false);
+      expect(normalizedFlags.setPath, isNull);
+    });
+
+    test("removes the '--' & '-' appended to flags with set path", () {
+      final flags = <String>[
+        '--double-fake-flag',
+        '-single-fake-flag',
+        '--set-path=myPath'
+      ];
+      final sanitizedFlags = <String>['double-fake-flag', 'single-fake-flag'];
+
+      final normalizedFlags = normalizer.normalizeArgs(flags);
+
+      final wasNormalized = listEquality.equals(
+        normalizedFlags.args,
+        sanitizedFlags,
+      );
+
+      expect(wasNormalized, true);
+      expect(normalizedFlags.hasPath, true);
+      expect(normalizedFlags.setPath, 'myPath');
     });
   });
 

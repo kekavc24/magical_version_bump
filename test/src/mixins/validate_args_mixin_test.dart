@@ -1,19 +1,31 @@
 import 'package:magical_version_bump/src/utils/mixins/command_mixins.dart';
+import 'package:mason_logger/mason_logger.dart';
+import 'package:mocktail/mocktail.dart';
 import 'package:test/test.dart';
 
 class _FakeArgsValidator with ValidatePreppedArgs {}
 
+class _MockLogger extends Mock implements Logger {}
+
 void main() {
   late _FakeArgsValidator validator;
+  late Logger logger;
 
-  setUp(() => validator = _FakeArgsValidator());
+  setUp(() {
+    validator = _FakeArgsValidator();
+    logger = _MockLogger();
+  });
 
-  group('basic errors', () {
+  group('basic errors with no set path', () {
     test('returns error when no args are passed', () async {
       const baseError = 'Missing arguments';
       const verboseError = 'No arguments found';
 
-      final invalidReason = await validator.validateArgs([]);
+      final invalidReason = await validator.validateArgs(
+        [],
+        userSetPath: false,
+        logger: logger,
+      );
 
       expect(invalidReason, isNotNull);
       expect(invalidReason!.key, baseError);
@@ -27,6 +39,8 @@ void main() {
 
       final invalidReason = await validator.validateArgs(
         undefinedArg,
+        userSetPath: false,
+        logger: logger,
       );
 
       expect(invalidReason, isNotNull);
@@ -41,6 +55,8 @@ void main() {
 
       final invalidReason = await validator.validateArgs(
         duplicatedArgs,
+        userSetPath: false,
+        logger: logger,
       );
 
       expect(invalidReason, isNotNull);
@@ -59,6 +75,8 @@ void main() {
       final invalidReason = await validator.validateArgs(
         args,
         isModify: true,
+        userSetPath: false,
+        logger: logger,
       );
 
       expect(invalidReason, isNotNull);
@@ -73,7 +91,12 @@ void main() {
           // ignore: lines_longer_than_80_chars
           "Command should have at least one of ${validator.targets.take(4).join(', ')} flags";
 
-      final invalidReason = await validator.validateArgs(args, isModify: true);
+      final invalidReason = await validator.validateArgs(
+        args,
+        isModify: true,
+        userSetPath: false,
+        logger: logger,
+      );
 
       expect(invalidReason, isNotNull);
       expect(invalidReason!.key, baseError);
@@ -82,14 +105,56 @@ void main() {
   });
 
   group('no errors', () {
-    test('returns no errors when valid args are passed', () async {
-      const validArgs = ['name', 'major', 'bump', 'yaml-version'];
+    test(
+      'returns no errors when valid args are passed with no set path',
+      () async {
+        const validArgs = ['name', 'major', 'bump', 'yaml-version'];
+
+        final invalidReason = await validator.validateArgs(
+          validArgs,
+          userSetPath: false,
+          logger: logger,
+        );
+
+        expect(invalidReason, isNull);
+      },
+    );
+
+    test("warns and removes 'with-path' flag when path is set", () async {
+      const validArgs = ['name', 'major', 'bump', 'yaml-version', 'with-path'];
 
       final invalidReason = await validator.validateArgs(
         validArgs,
+        userSetPath: true,
+        logger: logger,
       );
+
+      verify(
+        () => logger.warn('Duplicate flags were found when path was set'),
+      ).called(1);
 
       expect(invalidReason, isNull);
     });
+
+    test(
+      "warns and removes duplicate 'set-path' flag when path is set",
+      () async {
+        const validArgs = ['name', 'major', 'bump', 'yaml-version', 'set-path'];
+
+        final invalidReason = await validator.validateArgs(
+          validArgs,
+          userSetPath: true,
+          logger: logger,
+        );
+
+        verify(
+          () => logger.warn(
+            'Duplicate flags were found when path was set',
+          ),
+        ).called(1);
+
+        expect(invalidReason, isNull);
+      },
+    );
   });
 }

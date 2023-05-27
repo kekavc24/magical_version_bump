@@ -33,22 +33,36 @@ void main() {
       expect(data.path, defaultPath);
     });
 
-    test('reads pubspec.yaml file from user provided path', () async {
-      when(
-        () => logger.prompt(
-          'Please enter the path to file:',
-          defaultValue: any(
-            named: 'defaultValue',
-          ),
-        ),
-      ).thenReturn(testpath);
-
-      final data = await handler.readFile(requestPath: true, logger: logger);
+    test('reads pubspec.yaml file from path set by user', () async {
+      final data = await handler.readFile(
+        logger: logger,
+        setPath: testpath,
+      );
 
       verify(() => logger.progress('Reading file')).called(1);
 
       expect(data.path, testpath);
     });
+
+    test(
+      'reads pubspec.yaml file from path provided by user in prompt',
+      () async {
+        when(
+          () => logger.prompt(
+            'Please enter the path to file:',
+            defaultValue: any(
+              named: 'defaultValue',
+            ),
+          ),
+        ).thenReturn(testpath);
+
+        final data = await handler.readFile(requestPath: true, logger: logger);
+
+        verify(() => logger.progress('Reading file')).called(1);
+
+        expect(data.path, testpath);
+      },
+    );
 
     test('throws error if path provided is not absolute', () async {
       when(
