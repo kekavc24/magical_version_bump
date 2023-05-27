@@ -16,11 +16,18 @@ mixin NormalizeArgs {
       return mod;
     }).toList();
 
+    final hasPath = sanitizedArgs.any((arg) => arg.contains('set-path'));
+
     return (
-      args: sanitizedArgs.where((arg) => !arg.contains('set-path')).toList(),
-      hasPath: sanitizedArgs.contains('set-path'),
-      setPath: sanitizedArgs.contains('set-path')
-          ? sanitizedArgs.firstWhere((arg) => arg.contains('set-path'))
+      args: hasPath
+          ? sanitizedArgs.where((arg) => !arg.contains('set-path')).toList()
+          : sanitizedArgs,
+      hasPath: hasPath,
+      setPath: hasPath
+          ? sanitizedArgs
+              .firstWhere((arg) => arg.contains('set-path'))
+              .split('=')
+              .last
           : null
     );
   }
