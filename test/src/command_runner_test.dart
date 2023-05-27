@@ -11,8 +11,6 @@ import 'package:test/test.dart';
 
 class _MockLogger extends Mock implements Logger {}
 
-class _MockProcessResult extends Mock implements ProcessResult {}
-
 class _MockProgress extends Mock implements Progress {}
 
 class _MockPubUpdater extends Mock implements PubUpdater {}
@@ -27,8 +25,14 @@ void main() {
   group('MagicalVersionBumpCommandRunner', () {
     late PubUpdater pubUpdater;
     late Logger logger;
-    late ProcessResult processResult;
     late MagicalVersionBumpCommandRunner commandRunner;
+
+    final successfulProcessResult = ProcessResult(
+      42,
+      ExitCode.success.code,
+      '',
+      '',
+    );
 
     setUp(() {
       pubUpdater = _MockPubUpdater();
@@ -38,9 +42,6 @@ void main() {
       ).thenAnswer((_) async => packageVersion);
 
       logger = _MockLogger();
-
-      processResult = _MockProcessResult();
-      when(() => processResult.exitCode).thenReturn(ExitCode.success.code);
 
       commandRunner = MagicalVersionBumpCommandRunner(
         logger: logger,
@@ -81,7 +82,7 @@ void main() {
           packageName: packageName,
           versionConstraint: any(named: 'versionConstraint'),
         ),
-      ).thenAnswer((_) async => processResult);
+      ).thenAnswer((_) => Future.value(successfulProcessResult));
       when(
         () => pubUpdater.isUpToDate(
           packageName: any(named: 'packageName'),
