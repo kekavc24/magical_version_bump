@@ -16,7 +16,11 @@ class ChangeNodesCommand extends Command<int> {
             '''Tells CLI to request file path instead of checking current directory''',
         negatable: false,
       )
-      ..addMultiOption(
+      ..addOption(
+        'set-path',
+        help: '''Tell CLI where to check for a pubspec.yaml file''',
+      )
+      ..addOption(
         'name',
         help: '''Change the name in pubspec.yaml''',
       )
