@@ -11,7 +11,7 @@ extension VersionExtension on Version {
   }) {
     // Get build number just incase
     final buildFromVersion = int.tryParse(
-      build.isEmpty ? '1' : build.last.toString(),
+      build.isEmpty ? '' : build.last.toString(),
     );
 
     var modifiedVersion = '';
@@ -67,8 +67,11 @@ extension VersionExtension on Version {
     }
 
     if (modifiedVersion.isEmpty) {
-      modifiedVersion = "$major.$minor.$patch-${preRelease.join('.')}";
+      modifiedVersion = '$major.$minor.$patch';
 
+      if (isPreRelease && strategy == ModifyStrategy.absolute) {
+        modifiedVersion += "-${preRelease.join('.')}";
+      }
     }
 
     if (versionTargets.contains('build-number')) {
@@ -78,7 +81,9 @@ extension VersionExtension on Version {
           bumpType == BumpType.up ? buildToModify + 1 : buildToModify - 1;
 
       modifiedVersion += '+${buildNumber < 0 ? 0 : buildNumber}';
-    } else if (buildFromVersion != null) {
+    }
+
+    if (!versionTargets.contains('build-number') && buildFromVersion != null) {
       modifiedVersion += '+$buildFromVersion';
     }
 
