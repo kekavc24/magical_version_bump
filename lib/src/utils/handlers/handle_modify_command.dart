@@ -1,3 +1,4 @@
+import 'package:magical_version_bump/src/utils/enums/enums.dart';
 import 'package:magical_version_bump/src/utils/exceptions/command_exceptions.dart';
 import 'package:magical_version_bump/src/utils/extensions/iterable_extension.dart';
 import 'package:magical_version_bump/src/utils/mixins/command_mixins.dart';
@@ -60,12 +61,12 @@ class HandleModifyCommand
     );
 
     final modifiedVersion = await dynamicBump(
-      preppedArgs.action,
-      preppedArgs.absoluteVersioning
+      currentVersion,
+      action: preppedArgs.action,
+      versionTargets: preppedArgs.strategy == ModifyStrategy.absolute
           ? preppedArgs.versionTargets
           : preppedArgs.versionTargets.getRelative(),
-      currentVersion,
-      absoluteVersioning: preppedArgs.absoluteVersioning,
+      strategy: preppedArgs.strategy,
     );
 
     final modifiedFile = await editYamlFile(

@@ -183,7 +183,7 @@ void main() {
         'patch',
       );
 
-      expect(relativeVersion.toString(), '10.10.11');
+      expect(relativeVersion.toString(), '10.10.10');
     });
 
     test('returns valid map of versions', () {
