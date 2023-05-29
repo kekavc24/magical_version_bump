@@ -45,6 +45,7 @@
 * Added improved tests.
 
 # 0.3.0
+
 **Features**
 * Added `--set-path` flag to both commands. Check README for more info.
 

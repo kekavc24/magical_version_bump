@@ -57,7 +57,7 @@ The `modify` command dictates that `action` flags precede the `target` flags. Av
 | `--with-path`    | -                      | `target`    | Tells CLI to request the path from you and not check the current directory |
 | `--set-path`     |                        | `N/A`       | Sets path to pubspec.yaml file |
 
-NOTE: `set-path` takes precedence over `with-path`. Tool will remove the `with-path` automatically but will complain as shown.
+NOTE: `set-path` takes precedence over `with-path`. Tool will remove the `with-path` or any duplicates for this found.
 
 The `change` command takes in options which you can pass in values to. It also includes one flag.
 
