@@ -22,6 +22,8 @@ void main() {
   const repoArg = '--repository=https://url.to.repository-on-github';
   const issueArg = '--issue_tracker=https://url.to.issue-tracker';
   const docArg = '--documentation=https://url.to.documentation';
+  const preleaseArg = '--set-prelease=test';
+  const buildArg = '--set-build=100';
 
   setUp(() {
     logger = _MockLogger();
@@ -155,6 +157,62 @@ void main() {
 
       final current = await readFileNode('documentation');
       await resetFile(node: 'documentation', remove: true);
+
+      expect(result, equals(ExitCode.success.code));
+      expect(current, expectedChange);
+    });
+
+    test('changes the prelease in version and removes build info', () async {
+      final result = await commandRunner.run(
+        ['change', preleaseArg, '--set-path=$path'],
+      );
+
+      const expectedChange = '10.10.10-test';
+
+      final current = await readFileNode('version');
+      await resetFile();
+
+      expect(result, equals(ExitCode.success.code));
+      expect(current, expectedChange);
+    });
+
+    test('changes the prelease in version and keeps build info', () async {
+      final result = await commandRunner.run(
+        ['change', preleaseArg, '--set-path=$path', '--keep-build'],
+      );
+
+      const expectedChange = '10.10.10-test+10';
+
+      final current = await readFileNode('version');
+      await resetFile();
+
+      expect(result, equals(ExitCode.success.code));
+      expect(current, expectedChange);
+    });
+
+    test('changes the build and removes prelease info', () async {
+      final result = await commandRunner.run(
+        ['change', buildArg, '--set-path=$path'],
+      );
+
+      const expectedChange = '10.10.10+100';
+
+      final current = await readFileNode('version');
+      await resetFile();
+
+      expect(result, equals(ExitCode.success.code));
+      expect(current, expectedChange);
+    });
+
+    test('changes the build and sets prelease info', () async {
+      final result = await commandRunner.run(
+        ['change', preleaseArg, buildArg, '--set-path=$path'],
+      );
+
+      const expectedChange = '10.10.10-test+100';
+
+      final current = await readFileNode('version');
+      await resetFile();
 
       expect(result, equals(ExitCode.success.code));
       expect(current, expectedChange);
