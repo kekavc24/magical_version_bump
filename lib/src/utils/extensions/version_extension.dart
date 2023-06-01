@@ -90,6 +90,22 @@ extension VersionExtension on Version {
     return modifiedVersion;
   }
 
+  /// Set prelease and build-number
+  String setPreAndBuild({
+    bool keepPre = false,
+    bool keepBuild = false,
+    String? updatedPre,
+    String? updatedBuild,
+  }) {
+    return Version(
+      major,
+      minor,
+      patch,
+      pre: updatedPre ?? (keepPre ? preRelease.join('.') : null),
+      build: updatedBuild ?? (keepBuild ? build.join('.') : null),
+    ).toString();
+  }
+
   /// Get value of next relative version
   Version nextRelativeVersion(String target) {
     switch (target) {

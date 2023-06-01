@@ -196,5 +196,54 @@ void main() {
 
       expect(isSame, true);
     });
+
+    test('sets new prelease and removes build-number', () {
+      const updatedVersion = '10.10.10-alpha';
+
+      final setPre = Version.parse(version).setPreAndBuild(updatedPre: 'alpha');
+
+      expect(setPre, updatedVersion);
+    });
+
+    test('sets new prelease and keeps build-number', () {
+      const updatedVersion = '10.10.10-alpha+21';
+
+      final setPre = Version.parse(version).setPreAndBuild(
+        updatedPre: 'alpha',
+        keepBuild: true,
+      );
+
+      expect(setPre, updatedVersion);
+    });
+
+    test('sets new build-number and removes prelease', () {
+      const updatedVersion = '10.10.10+20';
+
+      final setPre = Version.parse(version).setPreAndBuild(updatedBuild: '20');
+
+      expect(setPre, updatedVersion);
+    });
+
+    test('sets new build-number and keeps prelease', () {
+      const updatedVersion = '10.10.10-prelease+20';
+
+      final setPre = Version.parse(version).setPreAndBuild(
+        updatedBuild: '20',
+        keepPre: true,
+      );
+
+      expect(setPre, updatedVersion);
+    });
+
+    test('sets both prelease and build-number', () {
+      const updatedVersion = '10.10.10-alpha+20';
+
+      final setPre = Version.parse(version).setPreAndBuild(
+        updatedPre: 'alpha',
+        updatedBuild: '20',
+      );
+
+      expect(setPre, updatedVersion);
+    });
   });
 }
