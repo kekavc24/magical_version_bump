@@ -11,14 +11,14 @@ class HandleModifyCommand
         HandleFile,
         ValidateVersion,
         ModifyYaml {
-  HandleModifyCommand({this.logger});
+  HandleModifyCommand({required this.logger});
 
-  final Logger? logger;
+  final Logger logger;
 
   /// Modify the version in pubspec.yaml
   Future<void> handleCommand(List<String> args) async {
     // Command progress
-    final prepProgress = logger!.progress('Checking arguments');
+    final prepProgress = logger.progress('Checking arguments');
 
     // Normalize args & check validity
     final normalizedArgs = normalizeArgs(args);
@@ -27,7 +27,7 @@ class HandleModifyCommand
       normalizedArgs.args,
       isModify: true,
       userSetPath: normalizedArgs.hasPath,
-      logger: logger!,
+      logger: logger,
     );
 
     if (validated.invalidReason != null) {
@@ -42,19 +42,19 @@ class HandleModifyCommand
     // Read pubspec.yaml file
     final fileData = await readFile(
       requestPath: preppedArgs.requestPath,
-      logger: logger!,
+      logger: logger,
       setPath: normalizedArgs.setPath,
     );
 
     // Validate version and get correct version
     final currentVersion = await validateVersion(
-      logger: logger!,
+      logger: logger,
       isModify: true,
       yamlMap: fileData.yamlMap,
     );
 
     // Modify the version
-    final modProgress = logger!.progress(
+    final modProgress = logger.progress(
       preppedArgs.action == 'b' || preppedArgs.action == 'bump'
           ? 'Bumping up version'
           : 'Bumping down version',
@@ -81,11 +81,11 @@ class HandleModifyCommand
     await saveFile(
       data: modifiedFile,
       path: fileData.path,
-      logger: logger!,
+      logger: logger,
     );
 
     /// Show success
-    logger!.success(
+    logger.success(
       """Version ${preppedArgs.action == 'b' || preppedArgs.action == 'bump' ? 'bumped up' : 'bumped down'} from $currentVersion to $modifiedVersion""",
     );
   }

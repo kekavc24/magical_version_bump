@@ -9,13 +9,13 @@ class HandleChangeCommand
         ValidatePreppedArgs,
         ValidateVersion,
         ModifyYaml {
-  HandleChangeCommand({this.logger});
+  HandleChangeCommand({required this.logger});
 
-  final Logger? logger;
+  final Logger logger;
 
   /// Change specified node in yaml file
   Future<void> handleCommand(List<String> args) async {
-    final prepProgress = logger!.progress('Checking arguments');
+    final prepProgress = logger.progress('Checking arguments');
 
     // Normalize args & check validity
     final normalizedArgs = normalizeArgs(args);
@@ -25,7 +25,7 @@ class HandleChangeCommand
     final validatedArgs = await validateArgs(
       preppedArgs.keys.toList(),
       userSetPath: normalizedArgs.hasPath,
-      logger: logger!,
+      logger: logger,
     );
 
     if (validatedArgs.invalidReason != null) {
@@ -38,7 +38,7 @@ class HandleChangeCommand
     // Read pubspec.yaml file
     final fileData = await readFile(
       requestPath: validatedArgs.args.contains('with-path'),
-      logger: logger!,
+      logger: logger,
       setPath: normalizedArgs.setPath,
     );
 
@@ -46,10 +46,10 @@ class HandleChangeCommand
 
     // If user wants version change, check if valid
     if (validatedArgs.args.contains('yaml-version')) {
-      logger!.warn('Version flag detected. Must verify version is valid');
+      logger.warn('Version flag detected. Must verify version is valid');
 
       version = await validateVersion(
-        logger: logger!,
+        logger: logger,
         version: preppedArgs['yaml-version'],
       );
     }
@@ -57,7 +57,7 @@ class HandleChangeCommand
     // Set up re-usable file
     var editedFile = fileData.file;
 
-    final changeProgress = logger!.progress('Changing yaml nodes');
+    final changeProgress = logger.progress('Changing yaml nodes');
 
     // Loop all entries and match with validated args
     final validMap = validatedArgs.args.fold(
@@ -83,9 +83,9 @@ class HandleChangeCommand
     changeProgress.complete('Changed all nodes');
 
     /// Save file changes
-    await saveFile(data: editedFile, path: fileData.path, logger: logger!);
+    await saveFile(data: editedFile, path: fileData.path, logger: logger);
 
     /// Show success
-    logger!.success('Updated your yaml file!');
+    logger.success('Updated your yaml file!');
   }
 }
