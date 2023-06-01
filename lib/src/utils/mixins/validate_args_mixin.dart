@@ -25,6 +25,10 @@ mixin ValidatePreppedArgs {
     'set-path',
 
     // For Change command
+    'set-prelease',
+    'set-build',
+    'keep-pre',
+    'keep-build',
     'yaml-version',
     'documentation',
     'issue_tracker',

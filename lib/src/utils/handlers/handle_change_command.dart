@@ -54,9 +54,11 @@ class HandleChangeCommand
         validatedArgs.args.contains('set-build')) {
       logger.warn('Version flag detected. Must verify version is valid');
 
+      // Check version that user want to change to or the current version 
       version = await validateVersion(
         logger: logger,
-        version: preppedArgs['yaml-version'],
+        version: preppedArgs['yaml-version'] ??
+            fileData.yamlMap['version'] as String?,
       );
     }
 
