@@ -85,7 +85,7 @@ jobs:
             GIT_COMMITTER_NAME: ${{ steps.corn-fig-git.outputs.name }}
             GIT_COMMITTER_EMAIL: ${{ steps.corn-fig-git.outputs.email }}
 
-    notify:
+    verify-version:
         needs: update-version
         runs-on: ubuntu-latest
         steps:
