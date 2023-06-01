@@ -1,6 +1,10 @@
 import 'package:magical_version_bump/src/utils/exceptions/command_exceptions.dart';
+import 'package:magical_version_bump/src/utils/extensions/extensions.dart';
 import 'package:magical_version_bump/src/utils/mixins/command_mixins.dart';
 import 'package:mason_logger/mason_logger.dart';
+import 'package:pub_semver/pub_semver.dart';
+
+typedef ChangeableNodes = Iterable<MapEntry<String, String>>;
 
 class HandleChangeCommand
     with
@@ -45,7 +49,9 @@ class HandleChangeCommand
     var version = '';
 
     // If user wants version change, check if valid
-    if (validatedArgs.args.contains('yaml-version')) {
+    if (validatedArgs.args.contains('yaml-version') ||
+        validatedArgs.args.contains('set-prelease') ||
+        validatedArgs.args.contains('set-build')) {
       logger.warn('Version flag detected. Must verify version is valid');
 
       version = await validateVersion(
@@ -72,12 +78,27 @@ class HandleChangeCommand
       (element) => element.key != 'with-path',
     );
 
-    for (final entry in entries) {
+    // Check if user wanted to change prelease or build
+    final checkedNodes = checkNodes(entries);
+
+    for (final node in checkedNodes.nodes) {
       editedFile = await editYamlFile(
         editedFile,
-        entry.key == 'yaml-version' ? 'version' : entry.key,
-        entry.key == 'yaml-version' ? version : entry.value,
+        node.key == 'yaml-version' ? 'version' : node.key,
+        node.key == 'yaml-version' ? version : node.value,
       );
+    }
+
+    // Update any 'set-prelease' or 'set-build' options after 'yaml-version'
+    if (checkedNodes.build != null || checkedNodes.pre != null) {
+      final updatedVersion = Version.parse(version).setPreAndBuild(
+        keepPre: checkedNodes.keepPre,
+        keepBuild: checkedNodes.keepBuild,
+        updatedPre: checkedNodes.pre,
+        updatedBuild: checkedNodes.build,
+      );
+
+      editedFile = await editYamlFile(editedFile, 'version', updatedVersion);
     }
 
     changeProgress.complete('Changed all nodes');
@@ -87,5 +108,56 @@ class HandleChangeCommand
 
     /// Show success
     logger.success('Updated your yaml file!');
+  }
+
+  /// Check whether prelease or build are being modified
+  ({
+    ChangeableNodes nodes,
+    bool keepPre,
+    bool keepBuild,
+    String? pre,
+    String? build,
+  }) checkNodes(
+    ChangeableNodes nodes,
+  ) {
+    var keepPre = false;
+    var keepBuild = false;
+    String? pre;
+    String? build;
+
+    final modifiedNodes = nodes.fold(
+      <MapEntry<String, String>>[],
+      (previousValue, element) {
+        switch (element.key) {
+          case 'keep-pre':
+            keepPre = true;
+            break;
+
+          case 'keep-build':
+            keepBuild = true;
+            break;
+
+          case 'set-build':
+            build = element.value.isEmpty ? null : element.value;
+            break;
+
+          case 'set-prelease':
+            pre = element.value.isEmpty ? null : element.value;
+            break;
+
+          default:
+            previousValue.add(element);
+        }
+        return previousValue;
+      },
+    );
+
+    return (
+      nodes: modifiedNodes,
+      keepPre: keepPre,
+      keepBuild: keepBuild,
+      pre: pre,
+      build: build,
+    );
   }
 }
