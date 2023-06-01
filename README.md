@@ -64,13 +64,13 @@ The `change` command takes in options which you can pass in values to. It also i
 | Flags           | Shorthand abbreviation | Function |
 |-----------------|------------------------|----------|
 | `--with-path`   | -                      | Tells CLI to request the path from you and not check the current directory |
-| `--keep-pre`    | -                      | Explicitly indicates that the tool should keep any existing prelease version found |
+| `--keep-pre`    | -                      | Explicitly indicates that the tool should keep any existing prerelease version found |
 | `--keep-build`  | -                      | Explicitly indicates that the tool should keep any existing build metadata found |
 
 | Options           | Shorthand abbreviation | Function                        |
 |-------------------|------------------------|---------------------------------|
 | `--set-path`      | -                      | Sets path to pubspec.yaml file |
-| `--set-prelease`  | -                      | Change the prelease version in the version specified in your pubspec.yaml file |
+| `--set-prerelease`  | -                      | Change the prerelease version in the version specified in your pubspec.yaml file |
 | `--set-build`     | -                      | Change build metadata appended to the version in your pubspec.yaml file |
 | `--name`          | -                      | Change the name in pubspec.yaml |
 | `--description`   | -                      | Change the description of your project in pubspec.yaml |

@@ -50,11 +50,11 @@ class HandleChangeCommand
 
     // If user wants version change, check if valid
     if (validatedArgs.args.contains('yaml-version') ||
-        validatedArgs.args.contains('set-prelease') ||
+        validatedArgs.args.contains('set-prerelease') ||
         validatedArgs.args.contains('set-build')) {
       logger.warn('Version flag detected. Must verify version is valid');
 
-      // Check version that user want to change to or the current version 
+      // Check version that user want to change to or the current version
       version = await validateVersion(
         logger: logger,
         version: preppedArgs['yaml-version'] ??
@@ -80,7 +80,7 @@ class HandleChangeCommand
       (element) => element.key != 'with-path',
     );
 
-    // Check if user wanted to change prelease or build
+    // Check if user wanted to change prerelease or build
     final checkedNodes = checkNodes(entries);
 
     for (final node in checkedNodes.nodes) {
@@ -91,7 +91,7 @@ class HandleChangeCommand
       );
     }
 
-    // Update any 'set-prelease' or 'set-build' options after 'yaml-version'
+    // Update any 'set-prerelease' or 'set-build' options after 'yaml-version'
     if (checkedNodes.build != null || checkedNodes.pre != null) {
       final updatedVersion = Version.parse(version).setPreAndBuild(
         keepPre: checkedNodes.keepPre,
@@ -112,7 +112,7 @@ class HandleChangeCommand
     logger.success('Updated your yaml file!');
   }
 
-  /// Check whether prelease or build are being modified
+  /// Check whether prerelease or build are being modified
   ({
     ChangeableNodes nodes,
     bool keepPre,
@@ -143,7 +143,7 @@ class HandleChangeCommand
             build = element.value.isEmpty ? null : element.value;
             break;
 
-          case 'set-prelease':
+          case 'set-prerelease':
             pre = element.value.isEmpty ? null : element.value;
             break;
 

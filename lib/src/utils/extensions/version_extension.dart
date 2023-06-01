@@ -90,7 +90,7 @@ extension VersionExtension on Version {
     return modifiedVersion;
   }
 
-  /// Set prelease and build-number
+  /// Set prerelease and build-number
   String setPreAndBuild({
     bool keepPre = false,
     bool keepBuild = false,

@@ -22,7 +22,7 @@ void main() {
   const repoArg = '--repository=https://url.to.repository-on-github';
   const issueArg = '--issue_tracker=https://url.to.issue-tracker';
   const docArg = '--documentation=https://url.to.documentation';
-  const preleaseArg = '--set-prelease=test';
+  const preleaseArg = '--set-prerelease=test';
   const buildArg = '--set-build=100';
 
   setUp(() {
@@ -162,7 +162,7 @@ void main() {
       expect(current, expectedChange);
     });
 
-    test('changes the prelease in version and removes build info', () async {
+    test('changes the prerelease in version and removes build info', () async {
       final result = await commandRunner.run(
         ['change', preleaseArg, '--set-path=$path'],
       );
@@ -176,7 +176,7 @@ void main() {
       expect(current, expectedChange);
     });
 
-    test('changes the prelease in version and keeps build info', () async {
+    test('changes the prerelease in version and keeps build info', () async {
       final result = await commandRunner.run(
         ['change', preleaseArg, '--set-path=$path', '--keep-build'],
       );
@@ -190,7 +190,7 @@ void main() {
       expect(current, expectedChange);
     });
 
-    test('changes the build and removes prelease info', () async {
+    test('changes the build and removes prerelease info', () async {
       final result = await commandRunner.run(
         ['change', buildArg, '--set-path=$path'],
       );
@@ -204,7 +204,7 @@ void main() {
       expect(current, expectedChange);
     });
 
-    test('changes the build and sets prelease info', () async {
+    test('changes the build and sets prerelease info', () async {
       final result = await commandRunner.run(
         ['change', preleaseArg, buildArg, '--set-path=$path'],
       );

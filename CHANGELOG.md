@@ -1,9 +1,9 @@
 # 0.4.0
 **Features**
 * added new `flags` and `options` to `change` command
-    * `keep-pre` & `keep-build` flags to nudge the tool to preserve prelease & build metadata
-    * `set-build` & `set-prelease` options for changing the prelease & build metadata
-* build & prelease info will be removed when using the new options.
+    * `keep-pre` & `keep-build` flags to nudge the tool to preserve prerelease & build metadata
+    * `set-build` & `set-prerelease` options for changing the prerelease & build metadata
+* build & prerelease info will be removed when using the new options.
 
 **Improvements**
 * updated changelog readability to show latest versions first

@@ -25,7 +25,7 @@ mixin ValidatePreppedArgs {
     'set-path',
 
     // For Change command
-    'set-prelease',
+    'set-prerelease',
     'set-build',
     'keep-pre',
     'keep-build',

@@ -7,7 +7,7 @@ import 'package:test/test.dart';
 import '../../helpers/helpers.dart';
 
 void main() {
-  const version = '10.10.10-prelease+21';
+  const version = '10.10.10-prerelease+21';
 
   group('relative versioning strategy', () {
     test('bumps major version', () {
@@ -81,8 +81,8 @@ void main() {
 
   group('absolute versioning strategy', () {
     test('bumps up/down the major version', () {
-      const expectedBumpedVersion = '11.10.10-prelease+21';
-      const expectedDumpedVersion = '9.10.10-prelease+21';
+      const expectedBumpedVersion = '11.10.10-prerelease+21';
+      const expectedDumpedVersion = '9.10.10-prerelease+21';
 
       final bumpedVersion = Version.parse(version).modifyVersion(
         BumpType.up,
@@ -101,8 +101,8 @@ void main() {
     });
 
     test('bumps up/down minor version', () {
-      const expectedBumpedVersion = '10.11.10-prelease+21';
-      const expectedDumpedVersion = '10.9.10-prelease+21';
+      const expectedBumpedVersion = '10.11.10-prerelease+21';
+      const expectedDumpedVersion = '10.9.10-prerelease+21';
 
       final bumpedVersion = Version.parse(version).modifyVersion(
         BumpType.up,
@@ -121,8 +121,8 @@ void main() {
     });
 
     test('bumps up/down patch version', () {
-      const expectedBumpedVersion = '10.10.11-prelease+21';
-      const expectedDumpedVersion = '10.10.9-prelease+21';
+      const expectedBumpedVersion = '10.10.11-prerelease+21';
+      const expectedDumpedVersion = '10.10.9-prerelease+21';
 
       final bumpedVersion = Version.parse(version).modifyVersion(
         BumpType.up,
@@ -141,8 +141,8 @@ void main() {
     });
 
     test('bumps up/down build number', () {
-      const expectedBumpedVersion = '10.10.10-prelease+22';
-      const expectedDumpedVersion = '10.10.10-prelease+20';
+      const expectedBumpedVersion = '10.10.10-prerelease+22';
+      const expectedDumpedVersion = '10.10.10-prerelease+20';
 
       final bumpedVersion = Version.parse(version).modifyVersion(
         BumpType.up,
@@ -197,7 +197,7 @@ void main() {
       expect(isSame, true);
     });
 
-    test('sets new prelease and removes build-number', () {
+    test('sets new prerelease and removes build-number', () {
       const updatedVersion = '10.10.10-alpha';
 
       final setPre = Version.parse(version).setPreAndBuild(updatedPre: 'alpha');
@@ -205,7 +205,7 @@ void main() {
       expect(setPre, updatedVersion);
     });
 
-    test('sets new prelease and keeps build-number', () {
+    test('sets new prerelease and keeps build-number', () {
       const updatedVersion = '10.10.10-alpha+21';
 
       final setPre = Version.parse(version).setPreAndBuild(
@@ -216,7 +216,7 @@ void main() {
       expect(setPre, updatedVersion);
     });
 
-    test('sets new build-number and removes prelease', () {
+    test('sets new build-number and removes prerelease', () {
       const updatedVersion = '10.10.10+20';
 
       final setPre = Version.parse(version).setPreAndBuild(updatedBuild: '20');
@@ -224,8 +224,8 @@ void main() {
       expect(setPre, updatedVersion);
     });
 
-    test('sets new build-number and keeps prelease', () {
-      const updatedVersion = '10.10.10-prelease+20';
+    test('sets new build-number and keeps prerelease', () {
+      const updatedVersion = '10.10.10-prerelease+20';
 
       final setPre = Version.parse(version).setPreAndBuild(
         updatedBuild: '20',
@@ -235,7 +235,7 @@ void main() {
       expect(setPre, updatedVersion);
     });
 
-    test('sets both prelease and build-number', () {
+    test('sets both prerelease and build-number', () {
       const updatedVersion = '10.10.10-alpha+20';
 
       final setPre = Version.parse(version).setPreAndBuild(

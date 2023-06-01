@@ -81,12 +81,12 @@ mixin ValidateVersion {
         );
       }
 
-      // Ask user if this is a prelease version. Just in case
-      final isPrelease = logger.confirm('Mark this as a prelease version?');
+      // Ask user if this is a prerelease version. Just in case
+      final isPrelease = logger.confirm('Mark this as a prerelease version?');
 
       if (isPrelease) {
         prerelease = logger.prompt(
-          'Enter prelease info : ',
+          'Enter prerelease info : ',
           defaultValue: 'alpha',
         );
       }

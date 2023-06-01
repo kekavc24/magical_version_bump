@@ -19,7 +19,7 @@ class ChangeNodesCommand extends Command<int> {
       ..addFlag(
         'keep-pre',
         help:
-            '''Explicitly indicates that the tool should keep any existing prelease version found''',
+            '''Explicitly indicates that the tool should keep any existing prerelease version found''',
         negatable: false,
       )
       ..addFlag(
@@ -33,12 +33,14 @@ class ChangeNodesCommand extends Command<int> {
         help: '''Tell CLI where to check for a pubspec.yaml file''',
       )
       ..addOption(
-        'set-prelease',
-        help: '''Change the prelease version in the version specified in your pubspec.yaml file''',
+        'set-prerelease',
+        help:
+            '''Change the prerelease version in the version specified in your pubspec.yaml file''',
       )
       ..addOption(
         'set-build',
-        help: '''Change build metadata appended to the version in your pubspec.yaml file''',
+        help:
+            '''Change build metadata appended to the version in your pubspec.yaml file''',
       )
       ..addOption(
         'name',
