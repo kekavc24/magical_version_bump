@@ -64,10 +64,14 @@ The `change` command takes in options which you can pass in values to. It also i
 | Flags           | Shorthand abbreviation | Function |
 |-----------------|------------------------|----------|
 | `--with-path`   | -                      | Tells CLI to request the path from you and not check the current directory |
-| `--set-path`    |                        | Sets path to pubspec.yaml file |
+| `--keep-pre`    | -                      | Explicitly indicates that the tool should keep any existing prelease version found |
+| `--keep-build`  | -                      | Explicitly indicates that the tool should keep any existing build metadata found |
 
 | Options           | Shorthand abbreviation | Function                        |
 |-------------------|------------------------|---------------------------------|
+| `--set-path`      | -                      | Sets path to pubspec.yaml file |
+| `--set-prelease`  | -                      | Change the prelease version in the version specified in your pubspec.yaml file |
+| `--set-build`     | -                      | Change build metadata appended to the version in your pubspec.yaml file |
 | `--name`          | -                      | Change the name in pubspec.yaml |
 | `--description`   | -                      | Change the description of your project in pubspec.yaml |
 | `--yaml-version`  | -                      | Option to completely change the version in pubspec.yaml |
@@ -80,9 +84,10 @@ The `change` command takes in options which you can pass in values to. It also i
 * The tool will always check the current folder for the pubspec.yaml file. Add a `--with-path` flag to nudge the CLI to request the path from you.
 
 ```sh
-mag modify -b --major --with-path
+mag modify -b --major --with-path # Requests path
 
-# Requests path after validating the arguments passed.
+mag modify -b --major --set-path=path-to-fil # Checks directory specified
+
 
 ```
 
