@@ -122,37 +122,20 @@ void main() {
       expect(bumpedVersion, version);
     });
 
-    test('bumps down major version and build-number', () async {
-      const version = '9.0.0+9';
+    test('throws error when dumping down version', () async {
       final result = await commandRunner.run(dumpArgs);
 
-      final bumpedVersion = await readFileNode('version');
-
-      expect(result, equals(ExitCode.success.code));
-      expect(bumpedVersion, version);
+      expect(result, equals(ExitCode.usage.code));
+      verify(
+        () => logger.err(
+          'This versioning strategy does not allow bumping down versions',
+        ),
+      ).called(1);
     });
 
-    test('bumps down minor version and build-number', () async {
-      const version = '10.9.0+9';
-      final result = await commandRunner.run(
-        [...dumpArgs.where((element) => element != '--major')],
-      );
-
-      final bumpedVersion = await readFileNode('version');
-
-      expect(result, equals(ExitCode.success.code));
-      expect(bumpedVersion, version);
-    });
-
-    test('bumps down patch version and build-number', () async {
-      const version = '10.10.9+9';
-      final result = await commandRunner.run(
-        [
-          ...dumpArgs.where(
-            (element) => element != '--major' && element != '--minor',
-          )
-        ],
-      );
+    test('gets highest weighted target and bumps it (major)', () async {
+      const version = '11.0.0+11';
+      final result = await commandRunner.run(bumpArgs);
 
       final bumpedVersion = await readFileNode('version');
 
@@ -162,22 +145,6 @@ void main() {
   });
 
   group('modify with custom path', () {
-    test('sets path and dumps all versions', () async {
-      const version = '9.9.9+9';
-      final result = await commandRunner.run(
-        [...dumpArgs, 'absolute', 'set-path=$path'],
-      );
-
-      final bumpedVersion = await readFileNode('version');
-
-      verify(
-        () => logger.warn('Duplicate flags were found when path was set'),
-      ).called(1);
-
-      expect(result, equals(ExitCode.success.code));
-      expect(bumpedVersion, version);
-    });
-
     test(
       'sets path and bumps all versions even with duplicated set-path flags',
       () async {

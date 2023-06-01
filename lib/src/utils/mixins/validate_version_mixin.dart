@@ -1,5 +1,6 @@
 import 'package:magical_version_bump/src/utils/exceptions/command_exceptions.dart';
 import 'package:mason_logger/mason_logger.dart';
+import 'package:pub_semver/pub_semver.dart';
 import 'package:yaml/yaml.dart';
 
 /// This mixin validates and prompts for correct version to be set if invalid
@@ -41,7 +42,7 @@ mixin ValidateVersion {
       return _promptForVersion(logger);
     }
 
-    final isValid = await _versionIsValid(validVersion);
+    final isValid = _versionIsValid(validVersion);
 
     if (isValid) {
       checkProgress.complete('Validated version number');
@@ -57,108 +58,90 @@ mixin ValidateVersion {
   /// Prompt for a version to bump or dump
   Future<String> _promptForVersion(Logger logger) async {
     // Ask user if to use 0.0.0 as base
-    String version;
+    Version? version;
+    var versionNumber = '';
+    String? prerelease;
+    String? build;
 
-    final useDefault = logger.confirm(
-      'Add default version 0.0.0 as base?',
-      defaultValue: true,
-    );
+    var promptForVersion = true;
 
-    // If user chose yes
-    if (useDefault) {
-      version = '0.0.0';
-    } else {
-      version = logger.prompt(
-        'Enter version number : ',
-        defaultValue: '0.0.0',
+    while (promptForVersion) {
+      final useDefault = logger.confirm(
+        'Add default version 0.0.0 as base?',
+        defaultValue: true,
       );
 
-      var newVersionIsValid = await _versionIsValid(version);
-
-      // Loop and make sure version number is valid
-      while (!newVersionIsValid) {
-        logger.err('Invalid version number');
-
-        version = logger.prompt(
+      // If user chose yes
+      if (useDefault) {
+        versionNumber = '0.0.0';
+      } else {
+        versionNumber = logger.prompt(
           'Enter version number : ',
           defaultValue: '0.0.0',
         );
-
-        newVersionIsValid = await _versionIsValid(version);
       }
-    }
 
-    bool addBuildNumber;
+      // Ask user if this is a prerelease version. Just in case
+      final isPrelease = logger.confirm('Mark this as a prerelease version?');
 
-    // Check if version has build number. Prompt for plus if not
-    if (version.contains('+')) {
-      addBuildNumber = false;
-    } else {
-      addBuildNumber = logger.confirm(
-        'Do you want to add a build number?',
+      if (isPrelease) {
+        prerelease = logger.prompt(
+          'Enter prerelease info : ',
+          defaultValue: 'alpha',
+        );
+      }
+
+      // Ask if user wants a build number
+      final addBuildNumber = logger.confirm(
+        'Do you want to add build info (typically a build number)?',
         defaultValue: true,
       );
-    }
 
-    // If user wants to add build number
-    if (addBuildNumber) {
-      var buildNumber = logger.prompt(
-        'Enter build number :',
-        defaultValue: 1,
-      );
-
-      var tempVersion = '$version+$buildNumber';
-
-      // Check if valid
-      var tempIsValid = await _versionIsValid(tempVersion);
-
-      while (!tempIsValid) {
-        logger.err('Invalid build number');
-
-        buildNumber = logger.prompt(
-          'Enter build number :',
+      // If user wants to add build number
+      if (addBuildNumber) {
+        build = logger.prompt(
+          'Enter build number : ',
           defaultValue: 1,
         );
-
-        tempVersion = '$version+$buildNumber';
-
-        tempIsValid = await _versionIsValid(tempVersion);
       }
 
-      version = '$version+$buildNumber';
+      final versionNumbers = versionNumber.split('.');
+
+      // Check if any value is null
+      final hasNullVersions = versionNumbers.any(
+        (element) => int.tryParse(element) == null,
+      );
+
+      if (hasNullVersions || versionNumbers.length != 3) {
+        logger.err('Invalid version number!');
+        continue;
+      }
+
+      // Parse version numbers
+      final parsedVersions = versionNumbers.map(int.parse).toList();
+
+      version = Version(
+        parsedVersions.first,
+        parsedVersions[1],
+        parsedVersions.last,
+        pre: prerelease,
+        build: build,
+      );
+
+      promptForVersion = !_versionIsValid(version.toString());
     }
 
-    return version;
+    return version.toString();
   }
 
   /// Check version validity using SEMVER versioning
-  Future<bool> _versionIsValid(String? version) async {
-    if (version == null) return false;
-
-    final versionSplit = version.split('.');
-
-    // Max length is 3 for SEMVER
-    if (versionSplit.length > 3 || versionSplit.length < 3) return false;
-
-    // Must have at length of 3 if build number is present
-    if (versionSplit.length < 3 &&
-        versionSplit.any((element) => element.contains('+'))) {
+  bool _versionIsValid(
+    String? version,
+  ) {
+    try {
+      Version.parse(version ?? '');
+    } catch (e) {
       return false;
-    }
-
-    for (final versionNumber in versionSplit) {
-      // If version number has build number
-      if (versionNumber.contains('+')) {
-        final convertedList = versionNumber.split('+').map(int.tryParse);
-
-        if (convertedList.any((element) => element == null)) {
-          return false;
-        }
-      } else {
-        final parsedVersionNumber = int.tryParse(versionNumber);
-
-        if (parsedVersionNumber == null) return false;
-      }
     }
 
     return true;

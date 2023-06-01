@@ -1,3 +1,5 @@
+import 'package:magical_version_bump/src/utils/enums/enums.dart';
+
 typedef ArgsAndValues = Map<String, String>;
 
 /// This mixin normalizes arguments passed passed in by user
@@ -34,7 +36,7 @@ mixin NormalizeArgs {
 
   /// Prep normalized args
   ({
-    bool absoluteVersioning,
+    ModifyStrategy strategy,
     String action,
     List<String> versionTargets,
     bool requestPath,
@@ -47,10 +49,10 @@ mixin NormalizeArgs {
     // Check if path was in list
     final wasInTargetFlags = targetFlags.remove('with-path');
 
-    final absoluteBump = targetFlags.remove('absolute');
+    final isAbsolute = targetFlags.remove('absolute');
 
     return (
-      absoluteVersioning: absoluteBump,
+      strategy: isAbsolute ? ModifyStrategy.absolute : ModifyStrategy.relative,
       action: actionFlag,
       versionTargets: targetFlags,
       requestPath: wasInTargetFlags,

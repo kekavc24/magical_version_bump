@@ -19,14 +19,13 @@ extension Operations on Iterable<String> {
       previousValue.addEntries([MapEntry(element, score)]);
 
       return previousValue;
-    })
-        .entries
-        .reduce(
-          (value, element) => value.value > element.value ? value : element,
-        )
-        .key;
+    });
 
-    targets.add(weighted);
+    final maxWeight = weighted.entries.reduce(
+      (value, element) => value.value > element.value ? value : element,
+    );
+
+    targets.add(maxWeight.key);
 
     if (contains('build-number')) targets.add('build-number');
 

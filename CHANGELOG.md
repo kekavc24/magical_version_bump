@@ -1,30 +1,23 @@
-# 0.0.1-dev.1
+# 0.4.0
+**Features**
+* added new `flags` and `options` to `change` command
+    * `keep-pre` & `keep-build` flags to nudge the tool to preserve prerelease & build metadata
+    * `set-build` & `set-prerelease` options for changing the prerelease & build metadata
+* build & prerelease info will be removed when using the new options.
 
-* Initial package release
-* feat: added basic bump/dump for common dart/flutter versioning in pubspec.yaml
-* Currently package has no tests yet (working progress). Still works great though. (source: Dude Trust Me) ;)
+**Improvements**
+* updated changelog readability to show latest versions first
+* added tests to match new functionality
+* updated README with new flags & options
 
-# 0.0.1-dev.2
+# 0.3.0
 
-* Added valid license
+**Features**
+* add `--set-path` flag to both commands. Check README for more info.
 
-# 0.0.1-dev.3
-
-* Removed reference from inspiration project.
-* Added dart docs
-
-# 0.1.0
-
-* Added tests
-
-# 0.1.1
-
-* Routine pub upgrade
-* Bump up dart sdk minimum version to 2.19
-
-# 0.1.2
-
-* Minor improvements.
+**Improvements**
+* update to `Dart 3.0.0`
+* improve tests
 
 # 0.2.0
 
@@ -40,16 +33,34 @@
 
 **Fixes & Improvements**
 * Updated README and example docs.
-* Fixed lurking bugs.
 * Improved code readability and testability
 * Added improved tests.
 
-# 0.3.0
+# 0.1.2
 
-**Features**
-* Added `--set-path` flag to both commands. Check README for more info.
+* Minor improvements.
 
-**Fixes & Improvements**
-* Update to Dart 3
-* Fixed lurking bugs
-* Improved tests
+# 0.1.1
+
+* Routine pub upgrade
+* Bump up dart sdk minimum version to 2.19
+
+# 0.1.0
+
+* Added tests
+
+# 0.0.1-dev.3
+
+* Removed reference from inspiration project.
+* Added dart docs
+
+# 0.0.1-dev.2
+
+* Added valid license
+
+# 0.0.1-dev.1
+
+* Initial package release
+* feat: added basic bump/dump for common dart/flutter versioning in pubspec.yaml
+* Currently package has no tests yet (working progress). Still works great though. (source: Dude Trust Me) ;)
+

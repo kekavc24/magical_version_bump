@@ -1,4 +1,5 @@
 import 'package:collection/collection.dart';
+import 'package:magical_version_bump/src/utils/enums/enums.dart';
 import 'package:magical_version_bump/src/utils/mixins/command_mixins.dart';
 import 'package:test/test.dart';
 
@@ -59,7 +60,7 @@ void main() {
 
       expect(prepData.action, 'bump');
       expect(listEquality.equals(['major'], prepData.versionTargets), true);
-      expect(prepData.absoluteVersioning, false);
+      expect(prepData.strategy, ModifyStrategy.relative);
       expect(prepData.requestPath, false);
     });
 
@@ -70,7 +71,7 @@ void main() {
 
       expect(prepData.action, 'bump');
       expect(listEquality.equals(['major'], prepData.versionTargets), true);
-      expect(prepData.absoluteVersioning, false);
+      expect(prepData.strategy, ModifyStrategy.relative);
       expect(prepData.requestPath, true);
     });
 
@@ -81,7 +82,7 @@ void main() {
 
       expect(prepData.action, 'bump');
       expect(listEquality.equals(['major'], prepData.versionTargets), true);
-      expect(prepData.absoluteVersioning, true);
+      expect(prepData.strategy, ModifyStrategy.absolute);
       expect(prepData.requestPath, true);
     });
   });

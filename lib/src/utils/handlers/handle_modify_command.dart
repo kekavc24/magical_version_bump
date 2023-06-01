@@ -1,3 +1,4 @@
+import 'package:magical_version_bump/src/utils/enums/enums.dart';
 import 'package:magical_version_bump/src/utils/exceptions/command_exceptions.dart';
 import 'package:magical_version_bump/src/utils/extensions/iterable_extension.dart';
 import 'package:magical_version_bump/src/utils/mixins/command_mixins.dart';
@@ -10,14 +11,14 @@ class HandleModifyCommand
         HandleFile,
         ValidateVersion,
         ModifyYaml {
-  HandleModifyCommand({this.logger});
+  HandleModifyCommand({required this.logger});
 
-  final Logger? logger;
+  final Logger logger;
 
   /// Modify the version in pubspec.yaml
   Future<void> handleCommand(List<String> args) async {
     // Command progress
-    final prepProgress = logger!.progress('Checking arguments');
+    final prepProgress = logger.progress('Checking arguments');
 
     // Normalize args & check validity
     final normalizedArgs = normalizeArgs(args);
@@ -26,7 +27,7 @@ class HandleModifyCommand
       normalizedArgs.args,
       isModify: true,
       userSetPath: normalizedArgs.hasPath,
-      logger: logger!,
+      logger: logger,
     );
 
     if (validated.invalidReason != null) {
@@ -41,31 +42,31 @@ class HandleModifyCommand
     // Read pubspec.yaml file
     final fileData = await readFile(
       requestPath: preppedArgs.requestPath,
-      logger: logger!,
+      logger: logger,
       setPath: normalizedArgs.setPath,
     );
 
     // Validate version and get correct version
     final currentVersion = await validateVersion(
-      logger: logger!,
+      logger: logger,
       isModify: true,
       yamlMap: fileData.yamlMap,
     );
 
     // Modify the version
-    final modProgress = logger!.progress(
+    final modProgress = logger.progress(
       preppedArgs.action == 'b' || preppedArgs.action == 'bump'
           ? 'Bumping up version'
           : 'Bumping down version',
     );
 
     final modifiedVersion = await dynamicBump(
-      preppedArgs.action,
-      preppedArgs.absoluteVersioning
+      currentVersion,
+      action: preppedArgs.action,
+      versionTargets: preppedArgs.strategy == ModifyStrategy.absolute
           ? preppedArgs.versionTargets
           : preppedArgs.versionTargets.getRelative(),
-      currentVersion,
-      absoluteVersioning: preppedArgs.absoluteVersioning,
+      strategy: preppedArgs.strategy,
     );
 
     final modifiedFile = await editYamlFile(
@@ -80,11 +81,11 @@ class HandleModifyCommand
     await saveFile(
       data: modifiedFile,
       path: fileData.path,
-      logger: logger!,
+      logger: logger,
     );
 
     /// Show success
-    logger!.success(
+    logger.success(
       """Version ${preppedArgs.action == 'b' || preppedArgs.action == 'bump' ? 'bumped up' : 'bumped down'} from $currentVersion to $modifiedVersion""",
     );
   }

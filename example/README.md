@@ -59,14 +59,8 @@ $ mag modify -d --build-number  -  version 1.0.0+2 becomes 1.0.0+1
 
 ```
 
-* Change a specific node in your yaml file. You have to use the `change` command and provide a node and its new value to change it. Flutter/Dart yaml node supported currently are :
-        * name
-        * description
-        * version
-        * homepage
-        * repository
-        * issue_tracker
-        * documentation
+* Change a specific node in your yaml file. You have to use the `change` command and provide a node and its new value to change it. Flutter/Dart yaml node supported currently are : `name`,  `description`,  `version`,  `homepage`,  `repository`,  `issue_tracker`,  `documentation`. You can also change the prerelease info using `set-prerelease` and build metadata using `set-build`
+
 
 ``` sh
 # Change current version to an entirely different version. 

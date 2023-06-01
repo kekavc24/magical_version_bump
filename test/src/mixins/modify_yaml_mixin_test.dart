@@ -1,4 +1,4 @@
-import 'package:collection/collection.dart';
+import 'package:magical_version_bump/src/utils/enums/enums.dart';
 import 'package:magical_version_bump/src/utils/mixins/command_mixins.dart';
 import 'package:test/test.dart';
 
@@ -8,7 +8,6 @@ class _FakeYamlModifier with ModifyYaml {}
 
 void main() {
   late _FakeYamlModifier modifier;
-  late ListEquality<String> listEquality;
 
   const version = '11.11.11';
   const versionWithBuild = '$version+11';
@@ -30,78 +29,6 @@ void main() {
 
   setUp(() {
     modifier = _FakeYamlModifier();
-    listEquality = const ListEquality<String>();
-  });
-
-  group('get versions correctly', () {
-    test('returns correct index', () {
-      const majorIndex = 0;
-      const minorIndex = 1;
-      const patchOrBuildIndex = 2;
-
-      final indexOfMajor = modifier.checkIndex(majorTarget.first);
-      final indexOfMinor = modifier.checkIndex(minorTarget.first);
-      final indexOfPatch = modifier.checkIndex(patchTarget.first);
-      final indexOfBuild = modifier.checkIndex(buildTarget.first);
-
-      expect(indexOfMajor, majorIndex);
-      expect(indexOfMinor, minorIndex);
-      expect(indexOfPatch, patchOrBuildIndex);
-      expect(indexOfBuild, patchOrBuildIndex);
-    });
-
-    test('return version separated correctly', () {
-      final correctSplit = version.split('.');
-      final correctSplitWithBuild = versionWithBuild.split('.');
-
-      final split = modifier.getVersions(version, []);
-      final splitWithBuild = modifier.getVersions(versionWithBuild, []);
-
-      final matchesSplit = listEquality.equals(
-        split,
-        correctSplit,
-      );
-      final matchesSplitWithBuild = listEquality.equals(
-        splitWithBuild,
-        correctSplitWithBuild,
-      );
-
-      expect(matchesSplit, true);
-      expect(matchesSplitWithBuild, true);
-    });
-
-    test('appends missing version and returns versions', () {
-      const incorrectVersion = '1';
-      final correctVersions = '1.0.0'.split('.');
-
-      final versions = modifier.getVersions(
-        incorrectVersion,
-        [...patchTarget, ...minorTarget],
-      );
-
-      final wasAppended = listEquality.equals(
-        versions,
-        correctVersions,
-      );
-
-      expect(wasAppended, true);
-    });
-
-    test('appends missing build number and returns versions', () {
-      final appendedVersions = '$version+1'.split('.');
-
-      final versions = modifier.getVersions(
-        version,
-        buildTarget,
-      );
-
-      final wasAppended = listEquality.equals(
-        versions,
-        appendedVersions,
-      );
-
-      expect(wasAppended, true);
-    });
   });
 
   group('independent versioning (absolute)', () {
@@ -111,18 +38,18 @@ void main() {
 
       // Bump up version by 1
       final dynamicBump = await modifier.dynamicBump(
-        'bump',
-        majorTarget,
         version,
-        absoluteVersioning: true,
+        action: 'bump',
+        versionTargets: majorTarget,
+        strategy: ModifyStrategy.absolute,
       );
 
       // Bump down version by 1
       final dynamicDump = await modifier.dynamicBump(
-        'dump',
-        majorTarget,
         version,
-        absoluteVersioning: true,
+        action: 'dump',
+        versionTargets: majorTarget,
+        strategy: ModifyStrategy.absolute,
       );
 
       expect(dynamicBump, bumpedVersion);
@@ -135,18 +62,18 @@ void main() {
 
       // Bump up version by 1
       final dynamicBump = await modifier.dynamicBump(
-        'bump',
-        minorTarget,
         version,
-        absoluteVersioning: true,
+        action: 'bump',
+        versionTargets: minorTarget,
+        strategy: ModifyStrategy.absolute,
       );
 
       // Bump down version by 1
       final dynamicDump = await modifier.dynamicBump(
-        'dump',
-        minorTarget,
         version,
-        absoluteVersioning: true,
+        action: 'dump',
+        versionTargets: minorTarget,
+        strategy: ModifyStrategy.absolute,
       );
 
       expect(dynamicBump, bumpedVersion);
@@ -159,18 +86,18 @@ void main() {
 
       // Bump up version by 1
       final dynamicBump = await modifier.dynamicBump(
-        'bump',
-        patchTarget,
         version,
-        absoluteVersioning: true,
+        action: 'bump',
+        versionTargets: patchTarget,
+        strategy: ModifyStrategy.absolute,
       );
 
       // Bump down version by 1
       final dynamicDump = await modifier.dynamicBump(
-        'dump',
-        patchTarget,
         version,
-        absoluteVersioning: true,
+        action: 'dump',
+        versionTargets: patchTarget,
+        strategy: ModifyStrategy.absolute,
       );
 
       expect(dynamicBump, bumpedVersion);
@@ -183,20 +110,19 @@ void main() {
 
       // Bump up version by 1
       final dynamicBump = await modifier.dynamicBump(
-        'bump',
-        buildTarget,
         versionWithBuild,
-        absoluteVersioning: true,
+        action: 'bump',
+        versionTargets: buildTarget,
+        strategy: ModifyStrategy.absolute,
       );
 
       // Bump down version by 1
       final dynamicDump = await modifier.dynamicBump(
-        'dump',
-        buildTarget,
         versionWithBuild,
-        absoluteVersioning: true,
+        action: 'dump',
+        versionTargets: buildTarget,
+        strategy: ModifyStrategy.absolute,
       );
-
       expect(dynamicBump, bumpedVersion);
       expect(dynamicDump, dumpedVersion);
     });
@@ -207,18 +133,18 @@ void main() {
 
       // Bump up version by 1
       final dynamicBump = await modifier.dynamicBump(
-        'bump',
-        buildTarget,
         version,
-        absoluteVersioning: true,
+        action: 'bump',
+        versionTargets: buildTarget,
+        strategy: ModifyStrategy.absolute,
       );
 
       // Bump down version by 1
       final dynamicDump = await modifier.dynamicBump(
-        'dump',
-        buildTarget,
         version,
-        absoluteVersioning: true,
+        action: 'dump',
+        versionTargets: buildTarget,
+        strategy: ModifyStrategy.absolute,
       );
 
       expect(dynamicBump, bumpedVersion);
@@ -229,86 +155,68 @@ void main() {
   group('collective versioning (relative)', () {
     test('collectively bumps up/down major version', () async {
       const bumpedVersion = '12.0.0';
-      const dumpedVersion = '10.0.0';
 
       final dynamicBump = await modifier.dynamicBump(
-        'bump',
-        majorTarget,
         version,
-      );
-
-      // Bump down version by 1
-      final dynamicDump = await modifier.dynamicBump(
-        'dump',
-        majorTarget,
-        version,
+        action: 'bump',
+        versionTargets: majorTarget,
       );
 
       expect(dynamicBump, bumpedVersion);
-      expect(dynamicDump, dumpedVersion);
     });
 
     test('collectively bumps up/down minor version', () async {
       const bumpedVersion = '11.12.0';
-      const dumpedVersion = '11.10.0';
 
       final dynamicBump = await modifier.dynamicBump(
-        'bump',
-        minorTarget,
         version,
-      );
-
-      // Bump down version by 1
-      final dynamicDump = await modifier.dynamicBump(
-        'dump',
-        minorTarget,
-        version,
+        action: 'bump',
+        versionTargets: minorTarget,
       );
 
       expect(dynamicBump, bumpedVersion);
-      expect(dynamicDump, dumpedVersion);
     });
 
     test('collectively bumps up/down patch version', () async {
       const bumpedVersion = '11.11.12';
-      const dumpedVersion = '11.11.10';
 
       final dynamicBump = await modifier.dynamicBump(
-        'bump',
-        patchTarget,
         version,
-      );
-
-      // Bump down version by 1
-      final dynamicDump = await modifier.dynamicBump(
-        'dump',
-        patchTarget,
-        version,
+        action: 'bump',
+        versionTargets: patchTarget,
       );
 
       expect(dynamicBump, bumpedVersion);
-      expect(dynamicDump, dumpedVersion);
     });
 
-    test('appends build number and collectively bumps up/down patch', () async {
-      const bumpedVersion = '11.11.12+2';
-      const dumpedVersion = '11.11.10+0';
-
-      final dynamicBump = await modifier.dynamicBump(
-        'bump',
-        [...patchTarget, ...buildTarget],
+    test('throws error when more than one targets are added', () async {
+      final future = modifier.dynamicBump(
         version,
+        action: 'bump',
+        versionTargets: [...majorTarget, ...patchTarget, ...buildTarget],
       );
 
-      // Bump down version by 1
-      final dynamicDump = await modifier.dynamicBump(
-        'dump',
-        [...patchTarget, ...buildTarget],
+      expect(
+        () async => future,
+        throwsViolation(
+          'Expected only one target for this versioning strategy',
+        ),
+      );
+    });
+
+    test('throws error when dumping versions', () async {
+      final future = modifier.dynamicBump(
         version,
+        action: 'dump',
+        versionTargets: [...majorTarget, ...buildTarget],
       );
 
-      expect(dynamicBump, bumpedVersion);
-      expect(dynamicDump, dumpedVersion);
+      expect(
+        () async => future,
+        throwsViolation(
+          'This versioning strategy does not allow bumping down versions',
+        ),
+      );
     });
   });
 

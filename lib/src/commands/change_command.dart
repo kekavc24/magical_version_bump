@@ -16,9 +16,31 @@ class ChangeNodesCommand extends Command<int> {
             '''Tells CLI to request file path instead of checking current directory''',
         negatable: false,
       )
+      ..addFlag(
+        'keep-pre',
+        help:
+            '''Explicitly indicates that the tool should keep any existing prerelease version found''',
+        negatable: false,
+      )
+      ..addFlag(
+        'keep-build',
+        help:
+            '''Explicitly indicates that the tool should keep any existing build metadata found''',
+        negatable: false,
+      )
       ..addOption(
         'set-path',
         help: '''Tell CLI where to check for a pubspec.yaml file''',
+      )
+      ..addOption(
+        'set-prerelease',
+        help:
+            '''Change the prerelease version in the version specified in your pubspec.yaml file''',
+      )
+      ..addOption(
+        'set-build',
+        help:
+            '''Change build metadata appended to the version in your pubspec.yaml file''',
       )
       ..addOption(
         'name',
