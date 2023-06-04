@@ -23,10 +23,12 @@ class HandleModifyCommand
     // Normalize args & check validity
     final normalizedArgs = normalizeArgs(args);
 
+    final argsWithNoSetters = checkForSetters(normalizedArgs);
+
     final validated = await validateArgs(
-      normalizedArgs.args,
+      argsWithNoSetters.args,
       isModify: true,
-      userSetPath: normalizedArgs.hasPath,
+      userSetPath: argsWithNoSetters.path != null,
       logger: logger,
     );
 
@@ -43,7 +45,7 @@ class HandleModifyCommand
     final fileData = await readFile(
       requestPath: preppedArgs.requestPath,
       logger: logger,
-      setPath: normalizedArgs.setPath,
+      setPath: argsWithNoSetters.path,
     );
 
     // Validate version and get correct version
