@@ -4,12 +4,20 @@ typedef ArgsAndValues = Map<String, String>;
 
 /// This mixin normalizes arguments passed passed in by user
 mixin NormalizeArgs {
+  /// Flags that match these must be removed first
+  final setters = <String>[
+    'set-path',
+    'set-build',
+    'set-prelease',
+    'set-version',
+    'keep-pre',
+    'keep-build'
+  ];
+
   /// Normalize arguments. Remove '-' or '--' present.
   ///
   /// Also obtains the set path
-  ({List<String> args, bool hasPath, String? setPath}) normalizeArgs(
-    List<String> args,
-  ) {
+  List<String> normalizeArgs(List<String> args) {
     final sanitizedArgs = args.map((e) {
       var mod = e.replaceFirst(RegExp('--'), '');
 
@@ -18,19 +26,67 @@ mixin NormalizeArgs {
       return mod;
     }).toList();
 
-    final hasPath = sanitizedArgs.any((arg) => arg.contains('set-path'));
+    return sanitizedArgs;
+  }
+
+  /// Check whether user set/used these flags
+  /// 1. set-path
+  /// 2. set-build
+  /// 3. set-prelease
+  /// 4. set-version
+  /// 5. keep-pre
+  /// 6. keep-build
+  ({
+    List<String> args,
+    String? path,
+    String? version,
+    String? build,
+    String? prerelease,
+    bool keepPre,
+    bool keepBuild,
+  }) checkForSetters(List<String> args) {
+    final modifiableArgs = [...args]; // Modifiable list
+
+    final modifiableMap = <String, dynamic>{
+      'set-path': null,
+      'set-build': null,
+      'set-prelease': null,
+      'set-version': null,
+      'keep-pre': false,
+      'keep-build': false,
+    };
+
+    for (final setter in setters) {
+      // Check if setter is any
+      final hasSetter =
+          modifiableArgs.any((element) => element.contains(setter));
+
+      if (hasSetter) {
+        // Retain only elements without this value
+        modifiableArgs.retainWhere((element) => !element.contains(setter));
+
+        if (setter == 'keep-pre' || setter == 'keep-build') {
+          modifiableMap.update(setter, (value) => true);
+        } else {
+          modifiableMap.update(
+            setter,
+            (value) => args
+                .firstWhere((element) => element.contains(setter))
+                .split('=')
+                .last,
+          );
+        }
+      }
+    }
 
     return (
-      args: hasPath
-          ? sanitizedArgs.where((arg) => !arg.contains('set-path')).toList()
-          : sanitizedArgs,
-      hasPath: hasPath,
-      setPath: hasPath
-          ? sanitizedArgs
-              .firstWhere((arg) => arg.contains('set-path'))
-              .split('=')
-              .last
-          : null
+      args: modifiableArgs,
+      path: modifiableMap['set-path'],
+      version: modifiableMap['set-version'],
+      build: modifiableMap['set-build'],
+      prerelease: modifiableMap['set-prelease'],
+      keepPre: modifiableMap['keep-pre'],
+      keepBuild: modifiableMap['keep-build'],
     );
   }
 
