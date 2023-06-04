@@ -97,6 +97,13 @@ extension VersionExtension on Version {
     String? updatedPre,
     String? updatedBuild,
   }) {
+    if ((keepPre && preRelease.isEmpty) || (keepBuild && build.isEmpty)) {
+      throw MagicalException(
+        violation:
+            '''You cannot change to new version and keep old prelease and build info''',
+      );
+    }
+
     return Version(
       major,
       minor,
