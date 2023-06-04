@@ -11,7 +11,8 @@ mixin NormalizeArgs {
     'set-prerelease',
     'set-version',
     'keep-pre',
-    'keep-build'
+    'keep-build',
+    'preset'
   ];
 
   /// Normalize arguments. Remove '-' or '--' present.
@@ -44,6 +45,7 @@ mixin NormalizeArgs {
     String? prerelease,
     bool keepPre,
     bool keepBuild,
+    bool preset,
   }) checkForSetters(List<String> args) {
     final modifiableArgs = [...args]; // Modifiable list
 
@@ -54,6 +56,7 @@ mixin NormalizeArgs {
       'set-version': null,
       'keep-pre': false,
       'keep-build': false,
+      'preset': false,
     };
 
     for (final setter in setters) {
@@ -65,7 +68,9 @@ mixin NormalizeArgs {
         // Retain only elements without this value
         modifiableArgs.retainWhere((element) => !element.contains(setter));
 
-        if (setter == 'keep-pre' || setter == 'keep-build') {
+        if (setter == 'keep-pre' ||
+            setter == 'keep-build' ||
+            setter == 'preset') {
           modifiableMap.update(setter, (value) => true);
         } else {
           modifiableMap.update(
@@ -87,6 +92,9 @@ mixin NormalizeArgs {
       prerelease: modifiableMap['set-prerelease'],
       keepPre: modifiableMap['keep-pre'],
       keepBuild: modifiableMap['keep-build'],
+      // set-version defaults preset to true
+      preset: (modifiableMap['set-version'] != null) ||
+          modifiableMap['preset'] as bool
     );
   }
 
