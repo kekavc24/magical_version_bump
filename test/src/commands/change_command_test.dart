@@ -24,6 +24,7 @@ void main() {
   const docArg = '--documentation=https://url.to.documentation';
   const preleaseArg = '--set-prerelease=test';
   const buildArg = '--set-build=100';
+  const setVersionArg = '--set-version=8.8.8+8';
 
   setUp(() {
     logger = _MockLogger();
@@ -57,6 +58,18 @@ void main() {
 
       expect(result, equals(ExitCode.usage.code));
       verify(() => logger.err('undefined-arg is not a defined flag')).called(1);
+    });
+
+    test('changes the version and keeps build info', () async {
+      const error =
+          '''You cannot change to new version and keep old prelease and build info''';
+
+      final result = await commandRunner.run(
+        ['change', '--set-version=8.8.8', '--keep-build', '--set-path=$path'],
+      );
+
+      expect(result, equals(ExitCode.usage.code));
+      verify(() => logger.err(error)).called(1);
     });
   });
 
@@ -157,6 +170,34 @@ void main() {
 
       final current = await readFileNode('documentation');
       await resetFile(node: 'documentation', remove: true);
+
+      expect(result, equals(ExitCode.success.code));
+      expect(current, expectedChange);
+    });
+
+    test('changes the version using set-version', () async {
+      final result = await commandRunner.run(
+        ['change', setVersionArg, '--set-path=$path'],
+      );
+
+      const expectedChange = '8.8.8+8';
+
+      final current = await readFileNode('version');
+      await resetFile();
+
+      expect(result, equals(ExitCode.success.code));
+      expect(current, expectedChange);
+    });
+
+    test('changes the version and removes build & prelease info', () async {
+      final result = await commandRunner.run(
+        ['change', '--set-version=8.8.8', '--set-path=$path'],
+      );
+
+      const expectedChange = '8.8.8';
+
+      final current = await readFileNode('version');
+      await resetFile();
 
       expect(result, equals(ExitCode.success.code));
       expect(current, expectedChange);
