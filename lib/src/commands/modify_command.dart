@@ -60,6 +60,12 @@ class ModifyVersionCommand extends Command<int> {
         negatable: false,
       )
       ..addFlag(
+        'preset',
+        help:
+            '''Explicitly indicates that the tool should preset any version, prerelease and build info before bumping up/down the version''',
+        negatable: false,
+      )
+      ..addFlag(
         'keep-pre',
         help:
             '''Explicitly indicates that the tool should keep any existing prerelease version found''',
