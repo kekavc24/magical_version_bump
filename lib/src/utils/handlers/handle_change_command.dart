@@ -94,7 +94,8 @@ class HandleChangeCommand
 
     // Update any 'set-prerelease' or 'set-build' options after 'yaml-version'
     if (argsWithoutSetters.build != null ||
-        argsWithoutSetters.prerelease != null) {
+        argsWithoutSetters.prerelease != null ||
+        argsWithoutSetters.version != null) {
       final updatedVersion = Version.parse(version).setPreAndBuild(
         keepPre: argsWithoutSetters.keepPre,
         keepBuild: argsWithoutSetters.keepBuild,
