@@ -108,10 +108,8 @@ extension VersionExtension on Version {
       major,
       minor,
       patch,
-      pre: updatedPre ??
-          (keepPre || preRelease.isNotEmpty ? preRelease.join('.') : null),
-      build: updatedBuild ??
-          (keepBuild || build.isNotEmpty ? build.join('.') : null),
+      pre: updatedPre ?? (keepPre ? preRelease.join('.') : null),
+      build: updatedBuild ?? (keepBuild ? build.join('.') : null),
     ).toString();
   }
 
