@@ -47,16 +47,16 @@ mixin ValidatePreppedArgs {
     required Logger logger,
     bool isModify = false,
   }) async {
-    // Args must not be empty
-    if (args.isEmpty && isModify) {
-      return (
-        invalidReason: const InvalidReason(
-          'Missing arguments',
-          'No arguments found',
-        ),
-        args: <String>[],
-      );
-    }
+    // // Args must not be empty
+    // if (args.isEmpty && isModify) {
+    //   return (
+    //     invalidReason: const InvalidReason(
+    //       'Missing arguments',
+    //       'No arguments found',
+    //     ),
+    //     args: <String>[],
+    //   );
+    // }
 
     final modifiableArgs = [...args];
 
@@ -91,7 +91,7 @@ mixin ValidatePreppedArgs {
 
     // Check for correct order of flags as specified above on `actions` &
     // `targets` variables
-    if (isModify) {
+    if (isModify && args.isNotEmpty) {
       final standardsError = _checkFlags(modifiableArgs);
 
       if (standardsError.isNotEmpty) {
