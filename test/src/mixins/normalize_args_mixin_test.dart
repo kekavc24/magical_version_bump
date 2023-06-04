@@ -28,6 +28,30 @@ void main() {
 
       expect(wasNormalized, true);
     });
+
+    test('gets all setter options in args', () {
+      final args = <String>[
+        'myArg',
+        'set-path=path',
+        'set-build=build',
+        'set-prerelease=prerelease',
+        'set-version=1.0.0',
+        'keep-pre',
+        'keep-build',
+        'preset',
+      ];
+
+      final checkedSetters = normalizer.checkForSetters(args);
+
+      expect(listEquality.equals(checkedSetters.args, ['myArg']), true);
+      expect(checkedSetters.path, 'path');
+      expect(checkedSetters.build, 'build');
+      expect(checkedSetters.prerelease, 'prerelease');
+      expect(checkedSetters.version, '1.0.0');
+      expect(checkedSetters.keepBuild, true);
+      expect(checkedSetters.keepPre, true);
+      expect(checkedSetters.preset, true);
+    });
   });
 
   group('preps modify commands args', () {
