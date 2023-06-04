@@ -8,7 +8,7 @@ mixin NormalizeArgs {
   final setters = <String>[
     'set-path',
     'set-build',
-    'set-prelease',
+    'set-prerelease',
     'set-version',
     'keep-pre',
     'keep-build'
@@ -50,7 +50,7 @@ mixin NormalizeArgs {
     final modifiableMap = <String, dynamic>{
       'set-path': null,
       'set-build': null,
-      'set-prelease': null,
+      'set-prerelease': null,
       'set-version': null,
       'keep-pre': false,
       'keep-build': false,
@@ -84,7 +84,7 @@ mixin NormalizeArgs {
       path: modifiableMap['set-path'],
       version: modifiableMap['set-version'],
       build: modifiableMap['set-build'],
-      prerelease: modifiableMap['set-prelease'],
+      prerelease: modifiableMap['set-prerelease'],
       keepPre: modifiableMap['keep-pre'],
       keepBuild: modifiableMap['keep-build'],
     );

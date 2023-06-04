@@ -52,8 +52,8 @@ class HandleChangeCommand
 
     // If user wants version change, check if valid
     if (validatedArgs.args.contains('yaml-version') ||
-        validatedArgs.args.contains('set-prerelease') ||
-        validatedArgs.args.contains('set-build') ||
+        argsWithoutSetters.prerelease != null ||
+        argsWithoutSetters.build != null ||
         argsWithoutSetters.version != null) {
       logger.warn('Version flag detected. Must verify version is valid');
 

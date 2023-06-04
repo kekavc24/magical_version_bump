@@ -48,7 +48,7 @@ mixin ValidatePreppedArgs {
     bool isModify = false,
   }) async {
     // Args must not be empty
-    if (args.isEmpty) {
+    if (args.isEmpty && isModify) {
       return (
         invalidReason: const InvalidReason(
           'Missing arguments',
