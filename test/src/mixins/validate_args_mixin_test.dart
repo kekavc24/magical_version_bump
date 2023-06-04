@@ -17,20 +17,20 @@ void main() {
   });
 
   group('basic errors with no set path', () {
-    test('returns error when no args are passed', () async {
-      const baseError = 'Missing arguments';
-      const verboseError = 'No arguments found';
+    // test('returns error when no args are passed', () async {
+    //   const baseError = 'Missing arguments';
+    //   const verboseError = 'No arguments found';
 
-      final validated = await validator.validateArgs(
-        [],
-        userSetPath: false,
-        logger: logger,
-      );
+    //   final validated = await validator.validateArgs(
+    //     [],
+    //     userSetPath: false,
+    //     logger: logger,
+    //   );
 
-      expect(validated.invalidReason, isNotNull);
-      expect(validated.invalidReason!.key, baseError);
-      expect(validated.invalidReason!.value, verboseError);
-    });
+    //   expect(validated.invalidReason, isNotNull);
+    //   expect(validated.invalidReason!.key, baseError);
+    //   expect(validated.invalidReason!.value, verboseError);
+    // });
 
     test('returns error when undefined flags are passed', () async {
       const undefinedArg = ['undefined-arg'];

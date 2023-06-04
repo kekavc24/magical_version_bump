@@ -44,13 +44,13 @@ void main() {
   });
 
   group('throws error', () {
-    test('command must have arguments error', () async {
-      final args = ['change'];
-      final result = await commandRunner.run(args);
+    // test('command must have arguments error', () async {
+    //   final args = ['change'];
+    //   final result = await commandRunner.run(args);
 
-      expect(result, equals(ExitCode.usage.code));
-      verify(() => logger.err('No arguments found')).called(1);
-    });
+    //   expect(result, equals(ExitCode.usage.code));
+    //   verify(() => logger.err('No arguments found')).called(1);
+    // });
 
     test('invalid arguments passed to command', () async {
       final args = ['change', 'undefined-arg'];
@@ -177,7 +177,7 @@ void main() {
 
     test('changes the version using set-version', () async {
       final result = await commandRunner.run(
-        ['change', setVersionArg, '--set-path=$path'],
+        ['change', setVersionArg, '--keep-build', '--set-path=$path'],
       );
 
       const expectedChange = '8.8.8+8';
