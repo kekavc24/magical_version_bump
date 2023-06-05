@@ -46,6 +46,7 @@ mixin NormalizeArgs {
     bool keepPre,
     bool keepBuild,
     bool preset,
+    bool presetOnlyVersion,
   }) checkForSetters(List<String> args) {
     final modifiableArgs = [...args]; // Modifiable list
 
@@ -92,9 +93,9 @@ mixin NormalizeArgs {
       prerelease: modifiableMap['set-prerelease'],
       keepPre: modifiableMap['keep-pre'],
       keepBuild: modifiableMap['keep-build'],
-      // set-version defaults preset to true
-      preset: (modifiableMap['set-version'] != null) ||
-          modifiableMap['preset'] as bool
+      preset: modifiableMap['preset'],
+      // set-version defaults presetVersion to true
+      presetOnlyVersion: modifiableMap['set-version'] != null
     );
   }
 

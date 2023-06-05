@@ -53,7 +53,7 @@ class HandleModifyCommand
 
     // Preset any values before validation. This assumes you want keep your old
     // build number and prelease info
-    if (argsWithNoSetters.preset) {
+    if (argsWithNoSetters.preset || argsWithNoSetters.presetOnlyVersion) {
       // Parse old version
       Version? oldVersion;
 
@@ -86,7 +86,8 @@ class HandleModifyCommand
     currentVersion = await validateVersion(
       logger: logger,
       // Use isModify only when preset is false
-      isModify: !argsWithNoSetters.preset,
+      isModify:
+          !argsWithNoSetters.preset && !argsWithNoSetters.presetOnlyVersion,
       yamlMap: fileData.yamlMap,
       version: currentVersion,
     );
@@ -109,7 +110,7 @@ class HandleModifyCommand
 
     /// If preset is false, but user passed in prerelease & build info.
     /// Update it.
-    if (!argsWithNoSetters.preset &&
+    if ((!argsWithNoSetters.preset || argsWithNoSetters.presetOnlyVersion) &&
         (argsWithNoSetters.prerelease != null ||
             argsWithNoSetters.build != null)) {
       modifiedVersion = Version.parse(modifiedVersion).setPreAndBuild(
