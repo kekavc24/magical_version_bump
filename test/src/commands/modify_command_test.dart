@@ -211,11 +211,11 @@ void main() {
     );
 
     test(
-      'sets version & build before bumping major version & build-number',
+      'sets version only before bumping major version then sets build-number',
       () async {
         const setVersion = '11.12.13';
         const setBuild = '13';
-        const updatedVersion = '12.0.0+14';
+        const updatedVersion = '12.0.0+13';
 
         final args = [
           'modify',

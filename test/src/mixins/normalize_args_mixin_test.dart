@@ -52,6 +52,20 @@ void main() {
       expect(checkedSetters.keepPre, true);
       expect(checkedSetters.preset, true);
     });
+
+    test('returns preset as false and preset-version as true', () {
+      final args = <String>[
+        'myArg',
+        'set-version=1.0.0',
+      ];
+
+      final checkedSetters = normalizer.checkForSetters(args);
+
+      expect(listEquality.equals(checkedSetters.args, ['myArg']), true);
+      expect(checkedSetters.version, '1.0.0');
+      expect(checkedSetters.preset, false);
+      expect(checkedSetters.presetOnlyVersion, true);
+    });
   });
 
   group('preps modify commands args', () {
