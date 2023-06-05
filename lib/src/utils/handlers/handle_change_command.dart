@@ -58,19 +58,20 @@ class HandleChangeCommand
       logger.warn('Version flag detected. Must verify version is valid');
 
       if (validatedArgs.args.contains('yaml-version')) {
-        logger..warn(
-          """Consider using 'set-version'. 'yaml-version' will be deprecated soon""",
-        )
-        ..warn(
-          """'set-version' will overwrite 'yaml-version' if both are used""",
-        );
+        logger
+          ..warn(
+            """Consider using 'set-version'. 'yaml-version' will be deprecated soon""",
+          )
+          ..warn(
+            """'set-version' will overwrite 'yaml-version' if both are used""",
+          );
       }
 
       // Check version that user want to change to or the current version
       version = await validateVersion(
         logger: logger,
-        version: preppedArgs['yaml-version'] ??
-            argsWithoutSetters.version ??
+        version: argsWithoutSetters.version ??
+            preppedArgs['yaml-version'] ??
             fileData.yamlMap['version'] as String?,
       );
     }
@@ -105,7 +106,9 @@ class HandleChangeCommand
     if (argsWithoutSetters.build != null ||
         argsWithoutSetters.prerelease != null ||
         argsWithoutSetters.version != null) {
-      final updatedVersion = Version.parse(version).setPreAndBuild(
+      final updatedVersion = Version.parse(
+        argsWithoutSetters.version ?? version,
+      ).setPreAndBuild(
         keepPre: argsWithoutSetters.keepPre,
         keepBuild: argsWithoutSetters.keepBuild,
         updatedPre: argsWithoutSetters.prerelease,
