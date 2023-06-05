@@ -57,6 +57,15 @@ class HandleChangeCommand
         argsWithoutSetters.version != null) {
       logger.warn('Version flag detected. Must verify version is valid');
 
+      if (validatedArgs.args.contains('yaml-version')) {
+        logger..warn(
+          """Consider using 'set-version'. 'yaml-version' will be deprecated soon""",
+        )
+        ..warn(
+          """'set-version' will overwrite 'yaml-version' if both are used""",
+        );
+      }
+
       // Check version that user want to change to or the current version
       version = await validateVersion(
         logger: logger,

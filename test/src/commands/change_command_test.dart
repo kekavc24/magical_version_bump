@@ -62,7 +62,7 @@ void main() {
 
     test('changes the version and keeps build info', () async {
       const error =
-          '''You cannot change to new version and keep old prelease and build info''';
+          '''You cannot change to new version and keep old prerelease and build info''';
 
       final result = await commandRunner.run(
         ['change', '--set-version=8.8.8', '--keep-build', '--set-path=$path'],
@@ -109,6 +109,17 @@ void main() {
       final result = await commandRunner.run(
         ['change', versionArg, '--with-path'],
       );
+
+      verify(
+        () => logger.warn(
+          """Consider using 'set-version'. 'yaml-version' will be deprecated soon""",
+        ),
+      ).called(1);
+      verify(
+        () => logger.warn(
+          "'set-version' will overwrite 'yaml-version' if both are used",
+        ),
+      ).called(1);
 
       final expectedChange = versionArg.split('=').last;
 
@@ -189,7 +200,7 @@ void main() {
       expect(current, expectedChange);
     });
 
-    test('changes the version and removes build & prelease info', () async {
+    test('changes the version and removes build & prerelease info', () async {
       final result = await commandRunner.run(
         ['change', '--set-version=8.8.8', '--set-path=$path'],
       );
