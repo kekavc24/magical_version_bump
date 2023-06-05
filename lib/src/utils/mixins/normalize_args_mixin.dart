@@ -33,7 +33,7 @@ mixin NormalizeArgs {
   /// Check whether user set/used these flags
   /// 1. set-path
   /// 2. set-build
-  /// 3. set-prelease
+  /// 3. set-prerelease
   /// 4. set-version
   /// 5. keep-pre
   /// 6. keep-build

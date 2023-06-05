@@ -52,7 +52,7 @@ class HandleModifyCommand
     var currentVersion = '';
 
     // Preset any values before validation. This assumes you want keep your old
-    // build number and prelease info
+    // build number and prerelease info
     if (argsWithNoSetters.preset || argsWithNoSetters.presetOnlyVersion) {
       // Parse old version
       Version? oldVersion;

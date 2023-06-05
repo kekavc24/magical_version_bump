@@ -100,7 +100,7 @@ extension VersionExtension on Version {
     if ((keepPre && preRelease.isEmpty) || (keepBuild && build.isEmpty)) {
       throw MagicalException(
         violation:
-            '''You cannot change to new version and keep old prelease and build info''',
+            '''You cannot change to new version and keep old prerelease and build info''',
       );
     }
 

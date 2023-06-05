@@ -256,7 +256,7 @@ void main() {
       expect(bumpedVersion, updatedVersion);
     });
 
-    test('sets prelease and removes build', () async {
+    test('sets prerelease and removes build', () async {
       const setPre = 'alpha';
       const updatedVersion = '10.10.10-alpha';
 
@@ -276,7 +276,7 @@ void main() {
       expect(bumpedVersion, updatedVersion);
     });
 
-    test('sets prelease and bumps & keeps build', () async {
+    test('sets prerelease and bumps & keeps build', () async {
       const setPre = 'alpha';
       const updatedVersion = '10.10.10-alpha+11';
 
