@@ -137,8 +137,12 @@ class HandleModifyCommand
     );
 
     /// Show success
-    logger.success(
-      """Version ${preppedArgs.action == 'b' || preppedArgs.action == 'bump' ? 'bumped up' : 'bumped down'} from $currentVersion to $modifiedVersion""",
-    );
+    logger
+      ..success(
+        """Version ${preppedArgs.action == 'b' || preppedArgs.action == 'bump' ? 'bumped up' : 'bumped down'} from $currentVersion to $modifiedVersion""",
+      )
+      ..write(
+        'v$modifiedVersion',
+      );
   }
 }
