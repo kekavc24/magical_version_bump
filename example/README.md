@@ -134,7 +134,7 @@ mag modify --set-version=2.8.4 -b major --keep-build --keep-pre
 ```
 
 
-- You can also preset the build and prerelease info if you need to perform any action on the build metadata. Use the `preset` flag to nudget tool to preset them before bumping anything.
+- You can also preset the build and prerelease info if you need to perform any action on the build metadata. Use the `preset` flag to nudge tool to preset them before bumping anything.
 
 ```sh
 
