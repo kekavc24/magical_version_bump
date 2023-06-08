@@ -72,7 +72,7 @@ When using the `modify` command, flags are split into 2 categories:
 
 | Flags            | Shorthand abbreviation | Type        | Function |
 |------------------|------------------------|-------------|----------|
-| `--bump`         |
+| `--bump`         | `-b`                   | `action`    | Tells CLI tool to increment by 1 |
 | `--dump`         | `-d`                   | `action`    | Tells CLI tool to decrement by 1 |
 | `--major`        | -                      | `target`    | Tells CLI tool to target the major version number |
 | `--minor`        | -                      | `target`    | Tells CLI tool to target the minor version number |
