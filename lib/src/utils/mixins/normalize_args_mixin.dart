@@ -85,6 +85,8 @@ mixin NormalizeArgs {
       }
     }
 
+    final preset = modifiableMap['preset'] as bool;
+
     return (
       args: modifiableArgs,
       path: modifiableMap['set-path'],
@@ -93,9 +95,9 @@ mixin NormalizeArgs {
       prerelease: modifiableMap['set-prerelease'],
       keepPre: modifiableMap['keep-pre'],
       keepBuild: modifiableMap['keep-build'],
-      preset: modifiableMap['preset'],
-      // set-version defaults presetVersion to true
-      presetOnlyVersion: modifiableMap['set-version'] != null
+      preset: preset,
+      // set-version defaults presetOnlyVersion to true if preset is not true
+      presetOnlyVersion: modifiableMap['set-version'] != null && !preset
     );
   }
 

@@ -108,8 +108,8 @@ class HandleModifyCommand
       strategy: preppedArgs.strategy,
     );
 
-    /// If preset is false, but user passed in prerelease & build info.
-    /// Update it.
+    // If preset is false, but user passed in prerelease & build info.
+    // Update it.
     if ((!argsWithNoSetters.preset || argsWithNoSetters.presetOnlyVersion) &&
         (argsWithNoSetters.prerelease != null ||
             argsWithNoSetters.build != null)) {
