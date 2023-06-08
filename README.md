@@ -102,6 +102,7 @@ These, on the other hand, take in values you explicitly specify. When using opti
 Other useful options available include:
 
 | Options           | Function                        |
+|-------------------|---------------------------------|
 | `--name`          | Change the name in pubspec.yaml |
 | `--description`   | Change the description of your project in pubspec.yaml |
 | `--yaml-version`  | Option to completely change the version in pubspec.yaml |
