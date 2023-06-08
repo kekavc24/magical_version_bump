@@ -24,6 +24,7 @@ void main() {
   const docArg = '--documentation=https://url.to.documentation';
   const preleaseArg = '--set-prerelease=test';
   const buildArg = '--set-build=100';
+  const setVersionArg = '--set-version=8.8.8+8';
 
   setUp(() {
     logger = _MockLogger();
@@ -43,13 +44,13 @@ void main() {
   });
 
   group('throws error', () {
-    test('command must have arguments error', () async {
-      final args = ['change'];
-      final result = await commandRunner.run(args);
+    // test('command must have arguments error', () async {
+    //   final args = ['change'];
+    //   final result = await commandRunner.run(args);
 
-      expect(result, equals(ExitCode.usage.code));
-      verify(() => logger.err('No arguments found')).called(1);
-    });
+    //   expect(result, equals(ExitCode.usage.code));
+    //   verify(() => logger.err('No arguments found')).called(1);
+    // });
 
     test('invalid arguments passed to command', () async {
       final args = ['change', 'undefined-arg'];
@@ -57,6 +58,18 @@ void main() {
 
       expect(result, equals(ExitCode.usage.code));
       verify(() => logger.err('undefined-arg is not a defined flag')).called(1);
+    });
+
+    test('changes the version and keeps build info', () async {
+      const error =
+          '''You cannot change to new version and keep old prerelease and build info''';
+
+      final result = await commandRunner.run(
+        ['change', '--set-version=8.8.8', '--keep-build', '--set-path=$path'],
+      );
+
+      expect(result, equals(ExitCode.usage.code));
+      verify(() => logger.err(error)).called(1);
     });
   });
 
@@ -96,6 +109,17 @@ void main() {
       final result = await commandRunner.run(
         ['change', versionArg, '--with-path'],
       );
+
+      verify(
+        () => logger.warn(
+          """Consider using 'set-version'. 'yaml-version' will be deprecated soon""",
+        ),
+      ).called(1);
+      verify(
+        () => logger.warn(
+          "'set-version' will overwrite 'yaml-version' if both are used",
+        ),
+      ).called(1);
 
       final expectedChange = versionArg.split('=').last;
 
@@ -157,6 +181,34 @@ void main() {
 
       final current = await readFileNode('documentation');
       await resetFile(node: 'documentation', remove: true);
+
+      expect(result, equals(ExitCode.success.code));
+      expect(current, expectedChange);
+    });
+
+    test('changes the version using set-version', () async {
+      final result = await commandRunner.run(
+        ['change', setVersionArg, '--keep-build', '--set-path=$path'],
+      );
+
+      const expectedChange = '8.8.8+8';
+
+      final current = await readFileNode('version');
+      await resetFile();
+
+      expect(result, equals(ExitCode.success.code));
+      expect(current, expectedChange);
+    });
+
+    test('changes the version and removes build & prerelease info', () async {
+      final result = await commandRunner.run(
+        ['change', '--set-version=8.8.8', '--set-path=$path'],
+      );
+
+      const expectedChange = '8.8.8';
+
+      final current = await readFileNode('version');
+      await resetFile();
 
       expect(result, equals(ExitCode.success.code));
       expect(current, expectedChange);

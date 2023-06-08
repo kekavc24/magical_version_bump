@@ -22,33 +22,49 @@ void main() {
       final normalizedFlags = normalizer.normalizeArgs(flags);
 
       final wasNormalized = listEquality.equals(
-        normalizedFlags.args,
+        normalizedFlags,
         sanitizedFlags,
       );
 
       expect(wasNormalized, true);
-      expect(normalizedFlags.hasPath, false);
-      expect(normalizedFlags.setPath, isNull);
     });
 
-    test("removes the '--' & '-' appended to flags with set path", () {
-      final flags = <String>[
-        '--double-fake-flag',
-        '-single-fake-flag',
-        '--set-path=myPath'
+    test('gets all setter options in args', () {
+      final args = <String>[
+        'myArg',
+        'set-path=path',
+        'set-build=build',
+        'set-prerelease=prerelease',
+        'set-version=1.0.0',
+        'keep-pre',
+        'keep-build',
+        'preset',
       ];
-      final sanitizedFlags = <String>['double-fake-flag', 'single-fake-flag'];
 
-      final normalizedFlags = normalizer.normalizeArgs(flags);
+      final checkedSetters = normalizer.checkForSetters(args);
 
-      final wasNormalized = listEquality.equals(
-        normalizedFlags.args,
-        sanitizedFlags,
-      );
+      expect(listEquality.equals(checkedSetters.args, ['myArg']), true);
+      expect(checkedSetters.path, 'path');
+      expect(checkedSetters.build, 'build');
+      expect(checkedSetters.prerelease, 'prerelease');
+      expect(checkedSetters.version, '1.0.0');
+      expect(checkedSetters.keepBuild, true);
+      expect(checkedSetters.keepPre, true);
+      expect(checkedSetters.preset, true);
+    });
 
-      expect(wasNormalized, true);
-      expect(normalizedFlags.hasPath, true);
-      expect(normalizedFlags.setPath, 'myPath');
+    test('returns preset as false and preset-version as true', () {
+      final args = <String>[
+        'myArg',
+        'set-version=1.0.0',
+      ];
+
+      final checkedSetters = normalizer.checkForSetters(args);
+
+      expect(listEquality.equals(checkedSetters.args, ['myArg']), true);
+      expect(checkedSetters.version, '1.0.0');
+      expect(checkedSetters.preset, false);
+      expect(checkedSetters.presetOnlyVersion, true);
     });
   });
 

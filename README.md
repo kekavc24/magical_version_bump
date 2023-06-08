@@ -8,12 +8,14 @@ A command-line tool for changing/modifying the version specified in Flutter/Dart
 
 ## Table of Contents
 - [Getting Started](#getting-started)
-- [Overview](#overview)
-    - [Executable Name](#executable-name)
-    - [Available Commands](#commands)
-    - [Available Flags and Options](#flags-and-options)
-- [Default](#default)
+- [Executable Name](#executable-name)
+- [Available Commands](#commands)
 - [Basic Usage](#basic-usage)
+- [Available Flags](#flags)
+- [Available Options](#options)
+- [Flag & Options in Command](#flags--options-in-commands)
+- [Default](#default)
+- [Known Caveats](#known-caveats)
 
 ## Getting Started
 
@@ -25,7 +27,7 @@ dart pub global activate magical_version_bump
 
 ## Overview
 
-`magical_version_bump` is a simple command-line tool. Use it to update your yaml files in your project ci/cd. Check out our github action in the repository.
+`magical_version_bump` is a simple command-line tool. Use it to update your yaml files in your project ci or even locally. Check out our github action in the repository.
 
 ![Update meme](https://storage.googleapis.com/magical_kenya_bucket/7lqtb5.jpg)
 
@@ -42,43 +44,101 @@ dart pub global activate magical_version_bump
 | `modify` | This command explicitly modifies a specific [SemVer](https://semver.org/) version number in the version specified in your pubspec.yaml.|
 | `change` | This command overwrites specified node in pubspec.yaml file.|
 
-## Flags and Options
+## Basic Usage
 
-The `modify` command dictates that `action` flags precede the `target` flags. Available flags include: 
+Usage of the CLI is easy and straight-forward.
+
+```sh
+# Check package version
+$ mag -v
+
+# Print help menu
+$ mag -h
+
+# Print command help menu
+$ mag modify -h
+
+$ mag change -h
+
+```
+
+Check example tab/folder for more.
+
+## Flags
+
+When using the `modify` command, flags are split into 2 categories:
+- `action` - specifies whether to `bump` or `dump` the version by 1.
+- `target` - specifies which specific [SemVer](https://semver.org/) version number you are targeting.
 
 | Flags            | Shorthand abbreviation | Type        | Function |
 |------------------|------------------------|-------------|----------|
-| `--bump`         | `-b`                   | `action`    | Tells CLI to increment by 1 |
-| `--dump`         | `-d`                   | `action`    | Tells CLI to decrement by 1 |
-| `--major`        | -                      | `target`    | Tells CLI to target the major version number |
-| `--minor`        | -                      | `target`    | Tells CLI to target the minor version number |
-| `--patch`        | -                      | `target`    | Tells CLI to target the patch version number |
-| `--build-number` | -                      | `target`    | Tells CLI to target the build-number |
-| `--with-path`    | -                      | `target`    | Tells CLI to request the path from you and not check the current directory |
-| `--set-path`     |                        | `N/A`       | Sets path to pubspec.yaml file |
+| `--bump`         |
+| `--dump`         | `-d`                   | `action`    | Tells CLI tool to decrement by 1 |
+| `--major`        | -                      | `target`    | Tells CLI tool to target the major version number |
+| `--minor`        | -                      | `target`    | Tells CLI tool to target the minor version number |
+| `--patch`        | -                      | `target`    | Tells CLI tool to target the patch version number |
+| `--build-number` | -                      | `target`    | Tells CLI tool to target the build-number |
+| `--with-path`    | -                      | `target`    | Tells CLI tool to request the path from you and not check the current directory |
+| `--preset`       | -                      | N/A         | Explicitly indicates that the tool should preset any version, prerelease and build info before bumping up/down the version |
+| `--keep-pre`     | -                      | N/A         | Explicitly indicates that the tool should keep any existing prerelease version found |
+| `--keep-build`   | -                      | N/A         | Explicitly indicates that the tool should keep any existing build metadata found |
 
-NOTE: `set-path` takes precedence over `with-path`. Tool will remove the `with-path` or any duplicates for this found.
 
-The `change` command takes in options which you can pass in values to. It also includes one flag.
+NOTE: Flags do not take in any value. They are passed in as is.
 
-| Flags           | Shorthand abbreviation | Function |
-|-----------------|------------------------|----------|
-| `--with-path`   | -                      | Tells CLI to request the path from you and not check the current directory |
-| `--keep-pre`    | -                      | Explicitly indicates that the tool should keep any existing prerelease version found |
-| `--keep-build`  | -                      | Explicitly indicates that the tool should keep any existing build metadata found |
+## Options
 
-| Options           | Shorthand abbreviation | Function                        |
-|-------------------|------------------------|---------------------------------|
-| `--set-path`      | -                      | Sets path to pubspec.yaml file |
-| `--set-prerelease`  | -                      | Change the prerelease version in the version specified in your pubspec.yaml file |
-| `--set-build`     | -                      | Change build metadata appended to the version in your pubspec.yaml file |
-| `--name`          | -                      | Change the name in pubspec.yaml |
-| `--description`   | -                      | Change the description of your project in pubspec.yaml |
-| `--yaml-version`  | -                      | Option to completely change the version in pubspec.yaml |
-| `--homepage`      | -                      | Change the homepage url in pubspec.yaml |
-| `--repository`    | -                      | Change the repository url for project in pubspec.yaml |
-| `--issue_tracker` | -                      | Change the url pointing to an issue tracker in pubspec.yaml |
-| `--documentation` | -                      | Change the url pointing to your project's documentation in pubspec.yaml |
+These, on the other hand, take in values you explicitly specify. When using options:
+- Pass in a value using `=` sign. Like so: `--option=value`
+- If the value has any spaces, enclose it with speech marks/double quotes. Like so : `--option="my value with space"`
+
+| Options             | Function                        |
+|---------------------|---------------------------------|
+| `--set-path`        | Sets path to pubspec.yaml file |
+| `--set-prerelease`  | Change the prerelease version in the version specified in your pubspec.yaml file |
+| `--set-build`       | Change build metadata appended to the version in your pubspec.yaml file |
+| `--set-version`     | Change the version in your pubspec.yaml file |
+
+Other useful options available include:
+
+| Options           | Function                        |
+| `--name`          | Change the name in pubspec.yaml |
+| `--description`   | Change the description of your project in pubspec.yaml |
+| `--yaml-version`  | Option to completely change the version in pubspec.yaml |
+| `--homepage`      | Change the homepage url in pubspec.yaml |
+| `--repository`    | Change the repository url for project in pubspec.yaml |
+| `--issue_tracker` | Change the url pointing to an issue tracker in pubspec.yaml |
+| `--documentation` | Change the url pointing to your project's documentation in pubspec.yaml |
+
+NOTE: `yaml-version` will be deprecated in favour of `set-version` in future release after `v0.5.0`.
+
+## Flags & Options in Commands
+
+Some flags/options can be used in both command while others cannot. Check table below.
+
+| Flag/Option           | `modify` command  | `change` command  |
+| --------------------- | ----------------- | ----------------- |
+| `--bump`              |         ✅        |         ❌        |   
+| `--dump`              |         ✅        |         ❌        |
+| `--major`             |         ✅        |         ❌        |
+| `--minor`             |         ✅        |         ❌        |
+| `--patch`             |         ✅        |         ❌        |
+| `--build-number`      |         ✅        |         ❌        |
+| `--with-path`         |         ✅        |         ✅        |
+| `--preset`            |         ✅        |         ❌        |
+| `--keep-pre`          |         ✅        |         ✅        |
+| `--keep-build`        |         ✅        |         ✅        |
+| `--set-path`          |         ✅        |         ✅        |
+| `--set-prerelease`    |         ✅        |         ✅        |
+| `--set-build`         |         ✅        |         ✅        |
+| `--set-version`       |         ✅        |         ✅        |
+| `--name`              |         ❌        |         ✅        |
+| `--description`       |         ❌        |         ✅        |
+| `--yaml-version`      |         ❌        |         ✅        |
+| `--homepage`          |         ❌        |         ✅        |
+| `--repository`        |         ❌        |         ✅        |
+| `--issue_tracker`     |         ❌        |         ✅        |
+| `--documentation`     |         ❌        |         ✅        |
 
 ## Default
 * The tool will always check the current folder for the pubspec.yaml file. Add a `--with-path` flag to nudge the CLI to request the path from you.
@@ -88,10 +148,10 @@ mag modify -b --major --with-path # Requests path
 
 mag modify -b --major --set-path=path-to-fil # Checks directory specified
 
-
+# If set-path is used, with-path will be removed
 ```
 
-* The tool will always do a relative versioning strategy. The collective version will be bumped up/down based on the position of the version passed in.
+* The tool will always do a relative versioning strategy. The collective version will be bumped up/down based on the position of the version passed in. This is the default versioning recommended by `Dart` & [SemVer](https://semver.org/).
 
 ```sh
 mag modify --bump --major # Bumps version 1.1.1 to 2.0.0
@@ -124,25 +184,37 @@ mag modify --bump --major --minor --patch --absolute
 
 ```
 
-## Basic Usage
-
-Usage of the CLI is easy and straight-forward.
+* If you pass in `set-version` when using `modify` command, the version will be updated before any other action is performed on the version.
 
 ```sh
-# Check package version
-$ mag -v
+# Initial version was 2.3.4
 
-# Print help menu
-$ mag -h
+mag modify --set-version=8.8.8 --bump major
 
-# Print command help menu
-$ mag modify -h
-
-$ mag change -h
+# Version 2.3.4 updated to 8.8.8 first.
+# Version 8.8.8 then bumped to 9.0.0
 
 ```
 
-Check example tab/folder for more.
+* Using `set-version` also removes the build metadata and any prerelease info in the version. Pass in `--keep-build` or `--keep-pre` to keep desired data
+```sh
+# Initial version was 2.3.4-alpha+22
+
+mag modify --set-version=8.8.8
+
+# Final version will be 8.8.8
+
+mag modify --set-version=8.8.8 --keep-build --keep-pre
+
+# Final version will be 8.8.8-alpha+22
+
+```
+
+## Known Caveats
+* Cannot bump prerelease or custom build numbers. To work around this, consider using `set-prerelease` or `set-build`.
+
+If you notice any more issue, please do raise them. Hope you like the package!
+
 
 <!--[coverage_badge]: coverage_badge.svg-->
 [license_badge]: https://img.shields.io/badge/license-MIT-blue.svg

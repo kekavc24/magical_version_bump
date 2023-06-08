@@ -58,6 +58,38 @@ class ModifyVersionCommand extends Command<int> {
         help:
             '''Tells CLI to bump each version independent of the other versions present''',
         negatable: false,
+      )
+      ..addFlag(
+        'preset',
+        help:
+            '''Explicitly indicates that the tool should preset any version, prerelease and build info before bumping up/down the version''',
+        negatable: false,
+      )
+      ..addFlag(
+        'keep-pre',
+        help:
+            '''Explicitly indicates that the tool should keep any existing prerelease version found''',
+        negatable: false,
+      )
+      ..addFlag(
+        'keep-build',
+        help:
+            '''Explicitly indicates that the tool should keep any existing build metadata found''',
+        negatable: false,
+      )
+      ..addOption(
+        'set-prerelease',
+        help:
+            '''Change the prerelease version in the version specified in your pubspec.yaml file''',
+      )
+      ..addOption(
+        'set-build',
+        help:
+            '''Change build metadata appended to the version in your pubspec.yaml file''',
+      )
+      ..addOption(
+        'set-version',
+        help: '''Option to completely change the version in pubspec.yaml''',
       );
   }
 

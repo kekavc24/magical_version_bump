@@ -43,6 +43,10 @@ class ChangeNodesCommand extends Command<int> {
             '''Change build metadata appended to the version in your pubspec.yaml file''',
       )
       ..addOption(
+        'set-version',
+        help: '''Option to completely change the version in pubspec.yaml''',
+      )
+      ..addOption(
         'name',
         help: '''Change the name in pubspec.yaml''',
       )

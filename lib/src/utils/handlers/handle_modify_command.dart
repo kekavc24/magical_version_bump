@@ -1,8 +1,9 @@
 import 'package:magical_version_bump/src/utils/enums/enums.dart';
 import 'package:magical_version_bump/src/utils/exceptions/command_exceptions.dart';
-import 'package:magical_version_bump/src/utils/extensions/iterable_extension.dart';
+import 'package:magical_version_bump/src/utils/extensions/extensions.dart';
 import 'package:magical_version_bump/src/utils/mixins/command_mixins.dart';
 import 'package:mason_logger/mason_logger.dart';
+import 'package:pub_semver/pub_semver.dart';
 
 class HandleModifyCommand
     with
@@ -23,10 +24,12 @@ class HandleModifyCommand
     // Normalize args & check validity
     final normalizedArgs = normalizeArgs(args);
 
+    final argsWithNoSetters = checkForSetters(normalizedArgs);
+
     final validated = await validateArgs(
-      normalizedArgs.args,
+      argsWithNoSetters.args,
       isModify: true,
-      userSetPath: normalizedArgs.hasPath,
+      userSetPath: argsWithNoSetters.path != null,
       logger: logger,
     );
 
@@ -43,14 +46,50 @@ class HandleModifyCommand
     final fileData = await readFile(
       requestPath: preppedArgs.requestPath,
       logger: logger,
-      setPath: normalizedArgs.setPath,
+      setPath: argsWithNoSetters.path,
     );
 
+    var currentVersion = '';
+
+    // Preset any values before validation. This assumes you want keep your old
+    // build number and prerelease info
+    if (argsWithNoSetters.preset || argsWithNoSetters.presetOnlyVersion) {
+      // Parse old version
+      Version? oldVersion;
+
+      if (fileData.yamlMap['version'] != null) {
+        oldVersion = Version.parse(fileData.yamlMap['version'].toString());
+      }
+
+      // Throw error if both 'set-version' and old version are null
+      if (argsWithNoSetters.version == null && oldVersion == null) {
+        throw MagicalException(
+          violation: 'At least one valid version is required.',
+        );
+      }
+
+      currentVersion = Version.parse(
+        argsWithNoSetters.version ?? oldVersion.toString(),
+      ).setPreAndBuild(
+        updatedPre: argsWithNoSetters.keepPre
+            ? (oldVersion!.preRelease.isEmpty
+                ? null
+                : oldVersion.preRelease.join('.'))
+            : argsWithNoSetters.prerelease,
+        updatedBuild: argsWithNoSetters.keepBuild
+            ? (oldVersion!.build.isEmpty ? null : oldVersion.build.join('.'))
+            : argsWithNoSetters.build,
+      );
+    }
+
     // Validate version and get correct version
-    final currentVersion = await validateVersion(
+    currentVersion = await validateVersion(
       logger: logger,
-      isModify: true,
+      // Use isModify only when preset is false
+      isModify:
+          !argsWithNoSetters.preset && !argsWithNoSetters.presetOnlyVersion,
       yamlMap: fileData.yamlMap,
+      version: currentVersion,
     );
 
     // Modify the version
@@ -60,7 +99,7 @@ class HandleModifyCommand
           : 'Bumping down version',
     );
 
-    final modifiedVersion = await dynamicBump(
+    var modifiedVersion = await dynamicBump(
       currentVersion,
       action: preppedArgs.action,
       versionTargets: preppedArgs.strategy == ModifyStrategy.absolute
@@ -68,6 +107,19 @@ class HandleModifyCommand
           : preppedArgs.versionTargets.getRelative(),
       strategy: preppedArgs.strategy,
     );
+
+    // If preset is false, but user passed in prerelease & build info.
+    // Update it.
+    if ((!argsWithNoSetters.preset || argsWithNoSetters.presetOnlyVersion) &&
+        (argsWithNoSetters.prerelease != null ||
+            argsWithNoSetters.build != null)) {
+      modifiedVersion = Version.parse(modifiedVersion).setPreAndBuild(
+        keepPre: argsWithNoSetters.keepPre,
+        keepBuild: argsWithNoSetters.keepBuild,
+        updatedPre: argsWithNoSetters.prerelease,
+        updatedBuild: argsWithNoSetters.build,
+      );
+    }
 
     final modifiedFile = await editYamlFile(
       fileData.file,

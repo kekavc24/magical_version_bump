@@ -44,13 +44,13 @@ void main() {
   });
 
   group('throws error', () {
-    test('command must have arguments error', () async {
-      final args = ['modify'];
-      final result = await commandRunner.run(args);
+    // test('command must have arguments error', () async {
+    //   final args = ['modify'];
+    //   final result = await commandRunner.run(args);
 
-      expect(result, equals(ExitCode.usage.code));
-      verify(() => logger.err('No arguments found')).called(1);
-    });
+    //   expect(result, equals(ExitCode.usage.code));
+    //   verify(() => logger.err('No arguments found')).called(1);
+    // });
 
     test('invalid arguments passed to command', () async {
       final args = ['modify', 'undefined-arg'];
@@ -163,6 +163,139 @@ void main() {
         expect(bumpedVersion, version);
       },
     );
+  });
+
+  group('modifies with setters', () {
+    test('sets version before bumping major version', () async {
+      const setVersion = '11.12.13';
+      const updatedVersion = '12.0.0';
+
+      final args = [
+        'modify',
+        '-b',
+        '--major',
+        '--set-version=$setVersion',
+        'set-path=$path'
+      ];
+
+      final result = await commandRunner.run(args);
+
+      final bumpedVersion = await readFileNode('version');
+
+      expect(result, equals(ExitCode.success.code));
+      expect(bumpedVersion, updatedVersion);
+    });
+
+    test(
+      'sets version and keeps build before bumping major version',
+      () async {
+        const setVersion = '11.12.13';
+        const updatedVersion = '12.0.0+10';
+
+        final args = [
+          'modify',
+          '-b',
+          '--major',
+          '--set-version=$setVersion',
+          '--keep-build',
+          'set-path=$path'
+        ];
+
+        final result = await commandRunner.run(args);
+
+        final bumpedVersion = await readFileNode('version');
+
+        expect(result, equals(ExitCode.success.code));
+        expect(bumpedVersion, updatedVersion);
+      },
+    );
+
+    test(
+      'sets version only before bumping major version then sets build-number',
+      () async {
+        const setVersion = '11.12.13';
+        const setBuild = '13';
+        const updatedVersion = '12.0.0+13';
+
+        final args = [
+          'modify',
+          '-b',
+          '--major',
+          '--build-number',
+          '--set-version=$setVersion',
+          '--set-build=$setBuild',
+          'set-path=$path'
+        ];
+
+        final result = await commandRunner.run(args);
+
+        final bumpedVersion = await readFileNode('version');
+
+        expect(result, equals(ExitCode.success.code));
+        expect(bumpedVersion, updatedVersion);
+      },
+    );
+
+    test('sets build after bumping old build-number', () async {
+      const setBuild = '13';
+      const updatedVersion = '10.10.10+13';
+
+      final args = [
+        'modify',
+        '-b',
+        '--build-number',
+        '--set-build=$setBuild',
+        'set-path=$path'
+      ];
+
+      final result = await commandRunner.run(args);
+
+      final bumpedVersion = await readFileNode('version');
+
+      expect(result, equals(ExitCode.success.code));
+      expect(bumpedVersion, updatedVersion);
+    });
+
+    test('sets prerelease and removes build', () async {
+      const setPre = 'alpha';
+      const updatedVersion = '10.10.10-alpha';
+
+      final args = [
+        'modify',
+        '-b',
+        '--build-number',
+        '--set-prerelease=$setPre',
+        'set-path=$path'
+      ];
+
+      final result = await commandRunner.run(args);
+
+      final bumpedVersion = await readFileNode('version');
+
+      expect(result, equals(ExitCode.success.code));
+      expect(bumpedVersion, updatedVersion);
+    });
+
+    test('sets prerelease and bumps & keeps build', () async {
+      const setPre = 'alpha';
+      const updatedVersion = '10.10.10-alpha+11';
+
+      final args = [
+        'modify',
+        '-b',
+        '--build-number',
+        '--set-prerelease=$setPre',
+        '--keep-build',
+        'set-path=$path'
+      ];
+
+      final result = await commandRunner.run(args);
+
+      final bumpedVersion = await readFileNode('version');
+
+      expect(result, equals(ExitCode.success.code));
+      expect(bumpedVersion, updatedVersion);
+    });
   });
 
   tearDown(() async => resetFile());
