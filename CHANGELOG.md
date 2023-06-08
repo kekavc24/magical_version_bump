@@ -1,3 +1,16 @@
+# 0.5.0
+**Features**
+* added new `set-version` option to both commands. `yaml-version` will be deprecated in future versions.
+* added new `preset` flag to `modify` command.
+* added `keep-pre` & `keep-build` flags to `modify` command.
+* added `set-build` & `set-prerelease` options to `modify` command.
+
+Check README & example for more info.
+
+**Improvements**
+* updated README & examples to be more clear and concise.
+* added new tests for new flags & options.
+
 # 0.4.0
 **Features**
 * added new `flags` and `options` to `change` command
