@@ -222,7 +222,7 @@ mag modify --set-version=8.8.8 --keep-build --keep-pre
 ```
 
 ## Known Caveats
-* Cannot bump prerelease or custom build numbers. To work around this, consider using `set-prerelease` or `set-build`.
+* Cannot bump prerelease or custom build numbers. Consider using `set-prerelease` or `set-build` as a work around.
 
 If you notice any more issues, please do raise them. Hope you like the package!
 
