@@ -142,7 +142,7 @@ Some flags/options can be used in both command while others cannot. Check table 
 | `--documentation`     |         ❌        |         ✅        |
 
 ## Default
-* The tool will always check the current folder for the pubspec.yaml file. Add a `--with-path` flag to nudge the CLI to request the path from you.
+* The tool will always check the current folder for the pubspec.yaml file. Add a `--with-path` flag to nudge the CLI to request the path from you. Use `set-path` to point it to file.
 
 ```sh
 mag modify -b --major --with-path # Requests path
