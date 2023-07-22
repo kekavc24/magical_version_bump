@@ -61,8 +61,7 @@ void main() {
     });
 
     test('changing to new version with missing build info', () async {
-      const error =
-          '''Missing prelease/build info''';
+      const error = 'Missing prelease/build info';
 
       final result = await commandRunner.run(
         ['change', '--set-version=8.8.8', '--keep-build', '--set-path=$path'],

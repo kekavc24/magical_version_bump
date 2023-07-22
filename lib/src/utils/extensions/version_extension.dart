@@ -127,8 +127,7 @@ extension VersionExtension on Version {
   }) {
     if ((keepPre && preRelease.isEmpty) || (keepBuild && build.isEmpty)) {
       throw MagicalException(
-        violation:
-            '''Missing prelease/build info''',
+        violation: 'Missing prelease/build info',
       );
     }
 
