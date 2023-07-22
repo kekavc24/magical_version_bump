@@ -60,9 +60,8 @@ void main() {
       verify(() => logger.err('undefined-arg is not a defined flag')).called(1);
     });
 
-    test('changes the version and keeps build info', () async {
-      const error =
-          '''You cannot change to new version and keep old prerelease and build info''';
+    test('changing to new version with missing build info', () async {
+      const error = 'Missing prelease/build info';
 
       final result = await commandRunner.run(
         ['change', '--set-version=8.8.8', '--keep-build', '--set-path=$path'],

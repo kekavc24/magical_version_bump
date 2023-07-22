@@ -18,19 +18,17 @@ mixin ModifyYaml {
   /// behaviour i.e
   ///
   /// 1.1.1 -> bump major version -> 2.0.0
-  Future<String> dynamicBump(
+  Future<({bool buildBumpFailed, String version})> dynamicBump(
     String version, {
     required String action,
     required List<String> versionTargets,
     ModifyStrategy strategy = ModifyStrategy.relative,
   }) async {
-    final modifiedVersion = Version.parse(version).modifyVersion(
+    return Version.parse(version).modifyVersion(
       action.bumpType,
       versionTargets: versionTargets,
       strategy: strategy,
     );
-
-    return modifiedVersion;
   }
 
   /// Edit yaml file

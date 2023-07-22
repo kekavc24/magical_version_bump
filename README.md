@@ -199,22 +199,32 @@ mag modify --set-version=8.8.8 --bump major
 
 * Using `set-version` also removes the build metadata and any prerelease info in the version. Pass in `--keep-build` or `--keep-pre` to keep desired data
 ```sh
+
 # Initial version was 2.3.4-alpha+22
 
-mag modify --set-version=8.8.8
+mag modify --set-version=8.8.8 --major
 
-# Final version will be 8.8.8
+# Version will be set to 8.8.8
+# Ignores prerelease and build info
+# Version 8.8.8 then bumped to 9.0.0
+
 
 mag modify --set-version=8.8.8 --keep-build --keep-pre
 
-# Final version will be 8.8.8-alpha+22
+# Version will be set to 8.8.8
+# Version 8.8.8 then bumped to 9.0.0
+# Ignores prerelease. New versions exit prerelease stage
+# Appends build number
+# Final version is 9.0.0+22
+
+# Check examples for more tricks
 
 ```
 
 ## Known Caveats
 * Cannot bump prerelease or custom build numbers. To work around this, consider using `set-prerelease` or `set-build`.
 
-If you notice any more issue, please do raise them. Hope you like the package!
+If you notice any more issues, please do raise them. Hope you like the package!
 
 
 <!--[coverage_badge]: coverage_badge.svg-->

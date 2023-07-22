@@ -4,16 +4,11 @@ import 'package:pub_semver/pub_semver.dart';
 
 extension VersionExtension on Version {
   /// Bump up version
-  String modifyVersion(
+  ({bool buildBumpFailed, String version}) modifyVersion(
     BumpType bumpType, {
     required List<String> versionTargets,
     ModifyStrategy strategy = ModifyStrategy.relative,
   }) {
-    // Get build number just incase
-    final buildFromVersion = int.tryParse(
-      build.isEmpty ? '' : build.last.toString(),
-    );
-
     var modifiedVersion = '';
 
     // Get version targets less build-number
@@ -21,8 +16,11 @@ extension VersionExtension on Version {
       (element) => element != 'build-number',
     );
 
+    // Whether we can bump non-build targets
+    final bumpNonBuild = nonBuildTargets.isNotEmpty;
+
     // Bump version relatively
-    if (strategy == ModifyStrategy.relative && nonBuildTargets.isNotEmpty) {
+    if (strategy == ModifyStrategy.relative && bumpNonBuild) {
       if (nonBuildTargets.length > 1) {
         throw MagicalException(
           violation: 'Expected only one target for this versioning strategy',
@@ -39,10 +37,10 @@ extension VersionExtension on Version {
       final target = nonBuildTargets.first;
 
       modifiedVersion = nextRelativeVersion(target).toString();
-    }
 
-    // Just perform an absolute bump
-    if (strategy == ModifyStrategy.absolute && nonBuildTargets.isNotEmpty) {
+      //
+    } else if (strategy == ModifyStrategy.absolute && bumpNonBuild) {
+      // Just perform an absolute bump
       final mappedVersion = getVersionAsMap();
 
       // Loop all targets and bump by one
@@ -66,28 +64,58 @@ extension VersionExtension on Version {
       }
     }
 
+    // An empty modified version means user targeted the build number
     if (modifiedVersion.isEmpty) {
       modifiedVersion = '$major.$minor.$patch';
 
+      //
       if (isPreRelease && strategy == ModifyStrategy.absolute) {
         modifiedVersion += "-${preRelease.join('.')}";
       }
     }
 
-    if (versionTargets.contains('build-number')) {
+    // Check if build is just one integer. This makes it "bump-able"
+    final canBumpBuild = buildIsNumber();
+    final canModifyBuild = versionTargets.contains('build-number');
+
+    // Get build number just incase
+    final buildFromVersion = canBumpBuild
+        ? build.first as int
+        : build.isEmpty && canModifyBuild
+            ? 1
+            : null;
+
+    // If build is bumpable, bump it
+    if (canModifyBuild) {
       final buildToModify = buildFromVersion ?? 1;
 
       final buildNumber =
           bumpType == BumpType.up ? buildToModify + 1 : buildToModify - 1;
 
       modifiedVersion += '+${buildNumber < 0 ? 0 : buildNumber}';
+
+      //
+    } else {
+      // Just add build number as is.
+      var buildNumber = build.isEmpty
+          ? ''
+          : build.fold(
+              '+',
+              (previousValue, element) => '$previousValue.$element',
+            );
+
+      // If build number was added, remove first "." added
+      if (buildNumber.isNotEmpty) {
+        buildNumber = buildNumber.replaceFirst('.', '');
+      }
+
+      modifiedVersion += buildNumber;
     }
 
-    if (!versionTargets.contains('build-number') && buildFromVersion != null) {
-      modifiedVersion += '+$buildFromVersion';
-    }
+    // Check if build was bumped on user's request
+    final didFail = !canBumpBuild && versionTargets.contains('build-number');
 
-    return modifiedVersion;
+    return (buildBumpFailed: didFail, version: modifiedVersion);
   }
 
   /// Set prerelease and build-number
@@ -99,8 +127,7 @@ extension VersionExtension on Version {
   }) {
     if ((keepPre && preRelease.isEmpty) || (keepBuild && build.isEmpty)) {
       throw MagicalException(
-        violation:
-            '''You cannot change to new version and keep old prerelease and build info''',
+        violation: 'Missing prelease/build info',
       );
     }
 
@@ -115,20 +142,22 @@ extension VersionExtension on Version {
 
   /// Get value of next relative version
   Version nextRelativeVersion(String target) {
-    switch (target) {
-      case 'minor':
-        return nextMinor;
-
-      case 'patch':
-        return nextPatch;
-
-      default:
-        return nextMajor;
-    }
+    return switch (target) {
+      'minor' => nextMinor,
+      'patch' => nextPatch,
+      _ => nextMajor
+    };
   }
 
   /// Get versions as map
   Map<String, int> getVersionAsMap() {
     return {'major': major, 'minor': minor, 'patch': patch};
+  }
+
+  /// Check if build is valid
+  /// Check if the build numbers are valid build. Must have one value &
+  /// should be an integer
+  bool buildIsNumber() {
+    return build.length == 1 && build.first is int;
   }
 }

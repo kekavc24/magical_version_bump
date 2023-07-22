@@ -1,3 +1,11 @@
+# 0.5.1
+**Fixes**
+* tool now keeps custom `build number` by default. Warns the user in console
+
+**Improvements**
+* updated wrong example in README
+* added & updated tests
+
 # 0.5.0
 **Features**
 * added new `set-version` option to both commands. `yaml-version` will be deprecated in future versions.
@@ -76,4 +84,3 @@ Check README & example for more info.
 * Initial package release
 * feat: added basic bump/dump for common dart/flutter versioning in pubspec.yaml
 * Currently package has no tests yet (working progress). Still works great though. (source: Dude Trust Me) ;)
-

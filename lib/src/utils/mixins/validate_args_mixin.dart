@@ -47,16 +47,16 @@ mixin ValidatePreppedArgs {
     required Logger logger,
     bool isModify = false,
   }) async {
-    // // Args must not be empty
-    // if (args.isEmpty && isModify) {
-    //   return (
-    //     invalidReason: const InvalidReason(
-    //       'Missing arguments',
-    //       'No arguments found',
-    //     ),
-    //     args: <String>[],
-    //   );
-    // }
+    // Args must not be empty
+    if (args.isEmpty && isModify) {
+      return (
+        invalidReason: const InvalidReason(
+          'Missing arguments',
+          'Additional arguments for this command are missing',
+        ),
+        args: <String>[],
+      );
+    }
 
     final modifiableArgs = [...args];
 
