@@ -62,7 +62,7 @@ $ mag change -h
 
 ```
 
-Check example tab/folder for more.
+Check examples for more.
 
 ## Flags
 
