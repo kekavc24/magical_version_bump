@@ -67,6 +67,7 @@ jobs:
         run: |
           git commit -am "chore: v${{steps.get-version.outputs.version}}"
           git tag -a ${{steps.get-version.outputs.version}} HEAD -m "v${{steps.get-version.outputs.version}}"
+          git push
           git push origin ${{steps.get-version.outputs.version}}
         env:
             GIT_AUTHOR_NAME: ${{ steps.corn-fig-git.outputs.name }}
