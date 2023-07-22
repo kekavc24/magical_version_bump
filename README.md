@@ -42,7 +42,7 @@ dart pub global activate magical_version_bump
 | Command  | Function |
 |----------|----------|
 | `modify` | This command explicitly modifies a specific [SemVer](https://semver.org/) version number in the version specified in your pubspec.yaml.|
-| `change` | This command overwrites specified node in pubspec.yaml file.|
+| `change` | This command overwrites a specified node in pubspec.yaml file.|
 
 ## Basic Usage
 
