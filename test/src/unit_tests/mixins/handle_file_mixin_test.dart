@@ -3,6 +3,8 @@ import 'package:mason_logger/mason_logger.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:test/test.dart';
 
+import '../../../helpers/helpers.dart';
+
 class _MockLogger extends Mock implements Logger {}
 
 class _MockProgress extends Mock implements Progress {}
@@ -13,7 +15,7 @@ void main() {
   late Logger logger;
   late _FakeFileHandler handler;
 
-  const testpath = 'test/files/fake.yaml';
+  final testpath = getTestFile();
   const defaultPath = 'pubspec.yaml';
   const wrongPath = 'pubspec';
 

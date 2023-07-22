@@ -13,7 +13,7 @@ void main() {
   late Logger logger;
   late MagicalVersionBumpCommandRunner commandRunner;
 
-  const path = 'test/files/fake.yaml';
+  final path = getTestFile();
 
   const modifyFlags = [
     '--major',

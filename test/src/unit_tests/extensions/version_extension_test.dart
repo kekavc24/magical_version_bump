@@ -4,7 +4,7 @@ import 'package:magical_version_bump/src/utils/extensions/version_extension.dart
 import 'package:pub_semver/pub_semver.dart';
 import 'package:test/test.dart';
 
-import '../../helpers/helpers.dart';
+import '../../../helpers/helpers.dart';
 
 void main() {
   const version = '10.10.10-prerelease+21';
