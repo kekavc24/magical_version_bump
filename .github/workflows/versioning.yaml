@@ -58,7 +58,7 @@ jobs:
         id: get-version
         if: ${{ (github.event.pull_request.merged == true) && (contains(github.event.pull_request.labels.*.name, 'publish')) }}
         run: | 
-          version="$(cat pubspec.yaml | grep version | awk -F: '{print $2};' | tr -d "[:blank:]")"
+          version="$(cat pubspec.yaml | grep "version:" | awk -F: '{print $2};' | tr -d "[:blank:]")"
           echo "Version: $version"
           echo "version=$version" >> "$GITHUB_OUTPUT"
           
