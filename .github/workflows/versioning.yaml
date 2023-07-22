@@ -6,7 +6,7 @@ concurrency:
 
 on:
   pull_request:
-    branches: [ "main" ]
+    branches: [ "master" ]
     types: [closed]
   
 jobs:
@@ -66,8 +66,8 @@ jobs:
         if: ${{ (github.event.pull_request.merged == true) && (contains(github.event.pull_request.labels.*.name, 'publish')) }}
         run: |
           git commit -am "chore: v${{steps.get-version.outputs.version}}"
-          git tag -m ${{steps.get-version.outputs.version}}
-          git push
+          git tag -a ${{steps.get-version.outputs.version}} HEAD -m "v${{steps.get-version.outputs.version}}"
+          git push origin ${{steps.get-version.outputs.version}}
         env:
             GIT_AUTHOR_NAME: ${{ steps.corn-fig-git.outputs.name }}
             GIT_AUTHOR_EMAIL: ${{ steps.corn-fig-git.outputs.email }}
