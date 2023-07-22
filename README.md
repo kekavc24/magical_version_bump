@@ -35,7 +35,7 @@ dart pub global activate magical_version_bump
 
 | Executable Name | Function                    |
 |-----------------|-----------------------------|
-| `mag`           | Global executable for command-line tool|
+| `mag`           | Global executable for the command-line tool|
 
 ## Commands 
 
@@ -62,7 +62,7 @@ $ mag change -h
 
 ```
 
-Check example tab/folder for more.
+Check examples for more.
 
 ## Flags
 
@@ -115,7 +115,7 @@ NOTE: `yaml-version` will be deprecated in favour of `set-version` in future rel
 
 ## Flags & Options in Commands
 
-Some flags/options can be used in both command while others cannot. Check table below.
+Some flags/options can be used in both command while others cannot. Check table below for more info:
 
 | Flag/Option           | `modify` command  | `change` command  |
 | --------------------- | ----------------- | ----------------- |
