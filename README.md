@@ -35,7 +35,7 @@ dart pub global activate magical_version_bump
 
 | Executable Name | Function                    |
 |-----------------|-----------------------------|
-| `mag`           | Global executable for command-line tool|
+| `mag`           | Global executable for the command-line tool|
 
 ## Commands 
 
