@@ -66,7 +66,7 @@ jobs:
         if: ${{ (github.event.pull_request.merged == true) && (contains(github.event.pull_request.labels.*.name, 'publish')) }}
         run: |
           git commit -am "chore: v${{steps.get-version.outputs.version}}"
-          git tag ${{steps.get-version.outputs.version}}
+          git tag -m ${{steps.get-version.outputs.version}}
           git push
         env:
             GIT_AUTHOR_NAME: ${{ steps.corn-fig-git.outputs.name }}
