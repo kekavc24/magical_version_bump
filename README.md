@@ -115,7 +115,7 @@ NOTE: `yaml-version` will be deprecated in favour of `set-version` in future rel
 
 ## Flags & Options in Commands
 
-Some flags/options can be used in both command while others cannot. Check table below.
+Some flags/options can be used in both command while others cannot. Check table below for more info:
 
 | Flag/Option           | `modify` command  | `change` command  |
 | --------------------- | ----------------- | ----------------- |
