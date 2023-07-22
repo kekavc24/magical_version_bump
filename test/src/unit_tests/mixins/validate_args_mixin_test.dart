@@ -17,12 +17,13 @@ void main() {
   });
 
   group('basic errors with no set path', () {
-    test('returns error when no args are passed', () async {
+    test('returns error when no args are passed in modify command', () async {
       const baseError = 'Missing arguments';
       const verboseError = 'Additional arguments for this command are missing';
 
       final validated = await validator.validateArgs(
         [],
+        isModify: true,
         userSetPath: false,
         logger: logger,
       );
