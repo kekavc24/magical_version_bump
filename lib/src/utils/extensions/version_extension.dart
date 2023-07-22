@@ -4,7 +4,7 @@ import 'package:pub_semver/pub_semver.dart';
 
 extension VersionExtension on Version {
   /// Bump up version
-  String modifyVersion(
+  ({bool buildBumpFailed, String version}) modifyVersion(
     BumpType bumpType, {
     required List<String> versionTargets,
     ModifyStrategy strategy = ModifyStrategy.relative,
@@ -81,7 +81,7 @@ extension VersionExtension on Version {
     }
 
     // If build is bumpable, bump it
-    if (versionTargets.contains('build-number')) {
+    if (versionTargets.contains('build-number') && canBumpBuild) {
       final buildToModify = buildFromVersion ?? 1;
 
       final buildNumber =
@@ -107,7 +107,10 @@ extension VersionExtension on Version {
       modifiedVersion += buildNumber;
     }
 
-    return modifiedVersion;
+    // Check if build was bumped on user's request
+    final didFail = !canBumpBuild && versionTargets.contains('build-number');
+
+    return (buildBumpFailed: didFail, version: modifiedVersion);
   }
 
   /// Set prerelease and build-number
@@ -135,16 +138,11 @@ extension VersionExtension on Version {
 
   /// Get value of next relative version
   Version nextRelativeVersion(String target) {
-    switch (target) {
-      case 'minor':
-        return nextMinor;
-
-      case 'patch':
-        return nextPatch;
-
-      default:
-        return nextMajor;
-    }
+    return switch (target) {
+      'minor' => nextMinor,
+      'patch' => nextPatch,
+      _ => nextMajor
+    };
   }
 
   /// Get versions as map

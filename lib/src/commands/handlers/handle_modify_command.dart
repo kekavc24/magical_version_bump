@@ -99,7 +99,7 @@ class HandleModifyCommand
           : 'Bumping down version',
     );
 
-    var modifiedVersion = await dynamicBump(
+    final modifiedVersion = await dynamicBump(
       currentVersion,
       action: preppedArgs.action,
       versionTargets: preppedArgs.strategy == ModifyStrategy.absolute
@@ -108,12 +108,19 @@ class HandleModifyCommand
       strategy: preppedArgs.strategy,
     );
 
+    // If build failed silently, warn user
+    if (modifiedVersion.buildBumpFailed) {
+      logger.warn('Your custom build could not be modified');
+    }
+
+    var versionToSave = modifiedVersion.version;
+
     // If preset is false, but user passed in prerelease & build info.
     // Update it.
     if ((!argsWithNoSetters.preset || argsWithNoSetters.presetOnlyVersion) &&
         (argsWithNoSetters.prerelease != null ||
             argsWithNoSetters.build != null)) {
-      modifiedVersion = Version.parse(modifiedVersion).setPreAndBuild(
+      versionToSave = Version.parse(versionToSave).setPreAndBuild(
         keepPre: argsWithNoSetters.keepPre,
         keepBuild: argsWithNoSetters.keepBuild,
         updatedPre: argsWithNoSetters.prerelease,
@@ -124,7 +131,7 @@ class HandleModifyCommand
     final modifiedFile = await editYamlFile(
       fileData.file,
       'version',
-      modifiedVersion,
+      versionToSave,
     );
 
     modProgress.complete('Modified version');
@@ -138,7 +145,7 @@ class HandleModifyCommand
 
     /// Show success
     logger.success(
-      """Version ${preppedArgs.action == 'b' || preppedArgs.action == 'bump' ? 'bumped up' : 'bumped down'} from $currentVersion to $modifiedVersion""",
+      """Version ${preppedArgs.action == 'b' || preppedArgs.action == 'bump' ? 'bumped up' : 'bumped down'} from $currentVersion to $versionToSave""",
     );
   }
 }
