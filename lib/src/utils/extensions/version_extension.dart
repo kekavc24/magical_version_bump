@@ -9,10 +9,11 @@ extension VersionExtension on Version {
     required List<String> versionTargets,
     ModifyStrategy strategy = ModifyStrategy.relative,
   }) {
+    // Check if build is just one number. This makes it "bump-able"
+    final canBumpBuild = buildIsNumber();
+
     // Get build number just incase
-    final buildFromVersion = int.tryParse(
-      build.isEmpty ? '' : build.last.toString(),
-    );
+    final buildFromVersion = canBumpBuild ? build.first as int : null;
 
     var modifiedVersion = '';
 
@@ -21,8 +22,11 @@ extension VersionExtension on Version {
       (element) => element != 'build-number',
     );
 
+    // Whether we can bump non-build targets
+    final bumpNonBuild = nonBuildTargets.isNotEmpty;
+
     // Bump version relatively
-    if (strategy == ModifyStrategy.relative && nonBuildTargets.isNotEmpty) {
+    if (strategy == ModifyStrategy.relative && bumpNonBuild) {
       if (nonBuildTargets.length > 1) {
         throw MagicalException(
           violation: 'Expected only one target for this versioning strategy',
@@ -39,10 +43,10 @@ extension VersionExtension on Version {
       final target = nonBuildTargets.first;
 
       modifiedVersion = nextRelativeVersion(target).toString();
-    }
 
-    // Just perform an absolute bump
-    if (strategy == ModifyStrategy.absolute && nonBuildTargets.isNotEmpty) {
+      //
+    } else if (strategy == ModifyStrategy.absolute && bumpNonBuild) {
+      // Just perform an absolute bump
       final mappedVersion = getVersionAsMap();
 
       // Loop all targets and bump by one
@@ -66,14 +70,17 @@ extension VersionExtension on Version {
       }
     }
 
+    // An empty modified version means user targeted the build number
     if (modifiedVersion.isEmpty) {
       modifiedVersion = '$major.$minor.$patch';
 
+      //
       if (isPreRelease && strategy == ModifyStrategy.absolute) {
         modifiedVersion += "-${preRelease.join('.')}";
       }
     }
 
+    // If build is bumpable, bump it
     if (versionTargets.contains('build-number')) {
       final buildToModify = buildFromVersion ?? 1;
 
@@ -81,10 +88,23 @@ extension VersionExtension on Version {
           bumpType == BumpType.up ? buildToModify + 1 : buildToModify - 1;
 
       modifiedVersion += '+${buildNumber < 0 ? 0 : buildNumber}';
-    }
 
-    if (!versionTargets.contains('build-number') && buildFromVersion != null) {
-      modifiedVersion += '+$buildFromVersion';
+      //
+    } else {
+      // Just add build number as is.
+      var buildNumber = build.isEmpty
+          ? ''
+          : build.fold(
+              '+',
+              (previousValue, element) => '$previousValue.$element',
+            );
+
+      // If build number was added, remove first "." added
+      if (build.isNotEmpty) {
+        buildNumber = buildNumber.replaceFirst('.', '');
+      }
+
+      modifiedVersion += buildNumber;
     }
 
     return modifiedVersion;
@@ -130,5 +150,12 @@ extension VersionExtension on Version {
   /// Get versions as map
   Map<String, int> getVersionAsMap() {
     return {'major': major, 'minor': minor, 'patch': patch};
+  }
+
+  /// Check if build is valid
+  /// Check if the build numbers are valid build. Must have one value &
+  /// should be an integer
+  bool buildIsNumber() {
+    return build.length == 1 && build.first is int;
   }
 }

@@ -3,6 +3,7 @@ extension Operations on Iterable<String> {
   /// position. Affinity/preference in descending order is:
   ///
   /// major > minor > patch
+  ///
   List<String> getRelative() {
     final targets = <String>[];
 

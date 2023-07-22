@@ -245,5 +245,16 @@ void main() {
 
       expect(setPre, updatedVersion);
     });
+
+    test('checks if build number can be bumped/dumped', () {
+      const versionWithBuild = '8.8.8+21';
+      const versionWithCustomBuild = '8.8.8+MagicalVersionBump';
+
+      final isValidNumber = Version.parse(versionWithBuild).buildIsNumber();
+      final isCustom = !Version.parse(versionWithCustomBuild).buildIsNumber();
+
+      expect(isValidNumber, true);
+      expect(isCustom, true);
+    });
   });
 }
