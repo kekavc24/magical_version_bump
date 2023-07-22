@@ -35,7 +35,7 @@ dart pub global activate magical_version_bump
 
 | Executable Name | Function                    |
 |-----------------|-----------------------------|
-| `mag`           | Global executable for command-line tool|
+| `mag`           | Global executable for the command-line tool|
 
 ## Commands 
 
@@ -62,7 +62,7 @@ $ mag change -h
 
 ```
 
-Check example tab/folder for more.
+Check examples for more.
 
 ## Flags
 
@@ -115,7 +115,7 @@ NOTE: `yaml-version` will be deprecated in favour of `set-version` in future rel
 
 ## Flags & Options in Commands
 
-Some flags/options can be used in both command while others cannot. Check table below.
+Some flags/options can be used in both command while others cannot. Check table below for more info:
 
 | Flag/Option           | `modify` command  | `change` command  |
 | --------------------- | ----------------- | ----------------- |
@@ -142,7 +142,7 @@ Some flags/options can be used in both command while others cannot. Check table 
 | `--documentation`     |         ❌        |         ✅        |
 
 ## Default
-* The tool will always check the current folder for the pubspec.yaml file. Add a `--with-path` flag to nudge the CLI to request the path from you.
+* The tool will always check the current folder for the pubspec.yaml file. Add a `--with-path` flag to nudge the CLI to request the path from you. Use `set-path` to point it to file.
 
 ```sh
 mag modify -b --major --with-path # Requests path
@@ -222,7 +222,7 @@ mag modify --set-version=8.8.8 --keep-build --keep-pre
 ```
 
 ## Known Caveats
-* Cannot bump prerelease or custom build numbers. To work around this, consider using `set-prerelease` or `set-build`.
+* Cannot bump prerelease or custom build numbers. Consider using `set-prerelease` or `set-build` as a work around.
 
 If you notice any more issues, please do raise them. Hope you like the package!
 
