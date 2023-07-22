@@ -1,4 +1,5 @@
 import 'package:magical_version_bump/src/utils/enums/enums.dart';
+import 'package:magical_version_bump/src/utils/exceptions/command_exceptions.dart';
 
 typedef ArgsAndValues = Map<String, String>;
 
@@ -108,6 +109,11 @@ mixin NormalizeArgs {
     List<String> versionTargets,
     bool requestPath,
   }) prepArgs(List<String> args) {
+    // Flags must not be empty
+    if (args.isEmpty) {
+      throw MagicalException(violation: 'Missing flags in modify command');
+    }
+
     final actionFlag = args.first; // Action command
 
     // Targets

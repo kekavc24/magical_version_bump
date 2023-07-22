@@ -18,7 +18,7 @@ void main() {
         versionTargets: ['major'],
       );
 
-      expect(bumpedVersion, expectedBumpedVersion);
+      expect(bumpedVersion.version, expectedBumpedVersion);
     });
 
     test('bumps minor version', () {
@@ -29,7 +29,7 @@ void main() {
         versionTargets: ['minor'],
       );
 
-      expect(bumpedVersion, expectedBumpedVersion);
+      expect(bumpedVersion.version, expectedBumpedVersion);
     });
 
     test('bumps patch version', () {
@@ -40,7 +40,7 @@ void main() {
         versionTargets: ['patch'],
       );
 
-      expect(bumpedVersion, expectedBumpedVersion);
+      expect(bumpedVersion.version, expectedBumpedVersion);
     });
 
     test('bumps build number', () {
@@ -51,7 +51,7 @@ void main() {
         versionTargets: ['build-number'],
       );
 
-      expect(bumpedVersion, expectedBumpedVersion);
+      expect(bumpedVersion.version, expectedBumpedVersion);
     });
 
     test('throws error if more than one target is passed in', () {
@@ -96,8 +96,8 @@ void main() {
         strategy: ModifyStrategy.absolute,
       );
 
-      expect(bumpedVersion, expectedBumpedVersion);
-      expect(dumpedVersion, expectedDumpedVersion);
+      expect(bumpedVersion.version, expectedBumpedVersion);
+      expect(dumpedVersion.version, expectedDumpedVersion);
     });
 
     test('bumps up/down minor version', () {
@@ -116,8 +116,8 @@ void main() {
         strategy: ModifyStrategy.absolute,
       );
 
-      expect(bumpedVersion, expectedBumpedVersion);
-      expect(dumpedVersion, expectedDumpedVersion);
+      expect(bumpedVersion.version, expectedBumpedVersion);
+      expect(dumpedVersion.version, expectedDumpedVersion);
     });
 
     test('bumps up/down patch version', () {
@@ -136,8 +136,8 @@ void main() {
         strategy: ModifyStrategy.absolute,
       );
 
-      expect(bumpedVersion, expectedBumpedVersion);
-      expect(dumpedVersion, expectedDumpedVersion);
+      expect(bumpedVersion.version, expectedBumpedVersion);
+      expect(dumpedVersion.version, expectedDumpedVersion);
     });
 
     test('bumps up/down build number', () {
@@ -156,8 +156,8 @@ void main() {
         strategy: ModifyStrategy.absolute,
       );
 
-      expect(bumpedVersion, expectedBumpedVersion);
-      expect(dumpedVersion, expectedDumpedVersion);
+      expect(bumpedVersion.version, expectedBumpedVersion);
+      expect(dumpedVersion.version, expectedDumpedVersion);
     });
   });
 

@@ -52,8 +52,8 @@ void main() {
         strategy: ModifyStrategy.absolute,
       );
 
-      expect(dynamicBump, bumpedVersion);
-      expect(dynamicDump, dumpedVersion);
+      expect(dynamicBump.version, bumpedVersion);
+      expect(dynamicDump.version, dumpedVersion);
     });
 
     test('bumps up/down only minor version', () async {
@@ -76,8 +76,8 @@ void main() {
         strategy: ModifyStrategy.absolute,
       );
 
-      expect(dynamicBump, bumpedVersion);
-      expect(dynamicDump, dumpedVersion);
+      expect(dynamicBump.version, bumpedVersion);
+      expect(dynamicDump.version, dumpedVersion);
     });
 
     test('bumps up/down only patch version', () async {
@@ -100,8 +100,8 @@ void main() {
         strategy: ModifyStrategy.absolute,
       );
 
-      expect(dynamicBump, bumpedVersion);
-      expect(dynamicDump, dumpedVersion);
+      expect(dynamicBump.version, bumpedVersion);
+      expect(dynamicDump.version, dumpedVersion);
     });
 
     test('bumps up/down only build number', () async {
@@ -123,8 +123,8 @@ void main() {
         versionTargets: buildTarget,
         strategy: ModifyStrategy.absolute,
       );
-      expect(dynamicBump, bumpedVersion);
-      expect(dynamicDump, dumpedVersion);
+      expect(dynamicBump.version, bumpedVersion);
+      expect(dynamicDump.version, dumpedVersion);
     });
 
     test('appends and bumps up/down only build number', () async {
@@ -147,8 +147,8 @@ void main() {
         strategy: ModifyStrategy.absolute,
       );
 
-      expect(dynamicBump, bumpedVersion);
-      expect(dynamicDump, dumpedVersion);
+      expect(dynamicBump.version, bumpedVersion);
+      expect(dynamicDump.version, dumpedVersion);
     });
   });
 
@@ -162,7 +162,7 @@ void main() {
         versionTargets: majorTarget,
       );
 
-      expect(dynamicBump, bumpedVersion);
+      expect(dynamicBump.version, bumpedVersion);
     });
 
     test('collectively bumps up/down minor version', () async {
@@ -174,7 +174,7 @@ void main() {
         versionTargets: minorTarget,
       );
 
-      expect(dynamicBump, bumpedVersion);
+      expect(dynamicBump.version, bumpedVersion);
     });
 
     test('collectively bumps up/down patch version', () async {
@@ -186,7 +186,7 @@ void main() {
         versionTargets: patchTarget,
       );
 
-      expect(dynamicBump, bumpedVersion);
+      expect(dynamicBump.version, bumpedVersion);
     });
 
     test('throws error when more than one targets are added', () async {
