@@ -176,7 +176,7 @@ mag modify --bump --major --minor --patch
 
 ```
 
-* If you need each version to be bumped independently, pass in the `--absolute` flag. 
+* If you need each version to be bumped independently, just pass in the `--absolute` flag. 
 
 ```sh
 mag modify --bump --major --minor --patch --absolute
@@ -222,7 +222,7 @@ mag modify --set-version=8.8.8 --keep-build --keep-pre
 ```
 
 ## Known Caveats
-* Cannot bump prerelease or custom build numbers. Consider using `set-prerelease` or `set-build` as a work around.
+* This tool cannot bump custom prerelease or build numbers. Consider using `set-prerelease` or `set-build` as a work around.
 
 If you notice any more issues, please do raise them. Hope you like the package!
 
