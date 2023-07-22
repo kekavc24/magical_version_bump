@@ -9,12 +9,6 @@ extension VersionExtension on Version {
     required List<String> versionTargets,
     ModifyStrategy strategy = ModifyStrategy.relative,
   }) {
-    // Check if build is just one number. This makes it "bump-able"
-    final canBumpBuild = buildIsNumber();
-
-    // Get build number just incase
-    final buildFromVersion = canBumpBuild ? build.first as int : null;
-
     var modifiedVersion = '';
 
     // Get version targets less build-number
@@ -80,8 +74,19 @@ extension VersionExtension on Version {
       }
     }
 
+    // Check if build is just one integer. This makes it "bump-able"
+    final canBumpBuild = buildIsNumber();
+    final canModifyBuild = versionTargets.contains('build-number');
+
+    // Get build number just incase
+    final buildFromVersion = canBumpBuild
+        ? build.first as int
+        : build.isEmpty && canModifyBuild
+            ? 1
+            : null;
+
     // If build is bumpable, bump it
-    if (versionTargets.contains('build-number') && canBumpBuild) {
+    if (canModifyBuild) {
       final buildToModify = buildFromVersion ?? 1;
 
       final buildNumber =
@@ -100,7 +105,7 @@ extension VersionExtension on Version {
             );
 
       // If build number was added, remove first "." added
-      if (build.isNotEmpty) {
+      if (buildNumber.isNotEmpty) {
         buildNumber = buildNumber.replaceFirst('.', '');
       }
 
@@ -123,7 +128,7 @@ extension VersionExtension on Version {
     if ((keepPre && preRelease.isEmpty) || (keepBuild && build.isEmpty)) {
       throw MagicalException(
         violation:
-            '''You cannot change to new version and keep old prerelease and build info''',
+            '''Missing prelease/build info''',
       );
     }
 
