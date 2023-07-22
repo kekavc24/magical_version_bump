@@ -13,7 +13,7 @@ void main() {
   late Logger logger;
   late MagicalVersionBumpCommandRunner commandRunner;
 
-  const path = 'test/files/fake.yaml';
+  final path = getTestFile();
 
   const nameArg = '--name=Test File';
   const descArg = '--description=This is a test';

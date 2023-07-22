@@ -4,19 +4,12 @@ import 'package:yaml_edit/yaml_edit.dart';
 
 import 'helpers.dart';
 
-/// Read current directory
-String getTestPath() {
-  var dir = Directory.current.path;
-  if (dir.endsWith('/test')) {
-    dir = dir.replaceAll('/test', '');
-  }
-
-  return '$dir/test/files/fake.yaml';
-}
+/// Get file path for
+String getTestFile() => 'fake.yaml';
 
 /// Get version from fake.yaml before test starts
 Future<String> readFileNode(String node) async {
-  final path = getTestPath();
+  final path = getTestFile();
 
   final file = await File(path).readAsString();
 
@@ -29,7 +22,7 @@ Future<void> resetFile({
   String node = 'version',
   String nodeValue = '10.10.10+10',
 }) async {
-  final path = getTestPath();
+  final path = getTestFile();
   final file = await File(path).readAsString();
 
   final yamlEdit = YamlEditor(file);
