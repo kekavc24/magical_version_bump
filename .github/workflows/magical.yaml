@@ -1,0 +1,70 @@
+name: Check & Test PRs
+
+concurrency:
+    group: ${{ github.workflow }}-${{ github.ref }}
+    cancel-in-progress: true
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/**"
+      - "lib/**"
+      - "test/**"
+      - "pubspec.yaml"
+
+  push:
+    branches:
+      - master
+
+    paths:
+      - ".github/workflows/**"
+      - "lib/**"
+      - "test/**"
+      - "pubspec.yaml"
+
+jobs:
+  # Check if PR is semantic
+  semantic-pull-request:
+    uses: VeryGoodOpenSource/very_good_workflows/.github/workflows/semantic_pull_request.yml@v1
+  
+  # Spell Check
+  spell-check:
+    uses: VeryGoodOpenSource/very_good_workflows/.github/workflows/spell_check.yml@v1
+    with:
+      includes: |
+        **/*.md
+        !brick/**/*.md
+        .*/**/*.md
+      modified_files_only: false
+  
+  # Run tests
+  run_tests:
+    runs-on: ubuntu-latest
+    steps:
+        - name: 📚 Git Checkout
+          uses: actions/checkout@v3
+
+        - name: 🎯 Setup Dart
+          uses: dart-lang/setup-dart@v1
+          with:
+            sdk: "stable"
+
+        - name: 📦 Install Dependencies
+          run: dart pub get
+
+        - name: ✨ Check Formatting
+          run: dart format --set-exit-if-changed .
+
+        - name: 🕵️ Analyze
+          run: dart analyze --fatal-infos --fatal-warnings .
+
+        - name: 📰 Set up test file
+          run: |
+            touch fake.yaml
+            echo -e "Name: Fake\ndescription: A Very Good description\nversion: 10.10.10+10" >> fake.yaml
+        
+        - name: 🧪 Run unit tests
+          run: dart test -j, --concurrency=1 test/src/unit_tests
+
+        - name: 🧪 Run end-to-end tests
+          run: dart test -j, --concurrency=1 test/src/end_to_end_tests
