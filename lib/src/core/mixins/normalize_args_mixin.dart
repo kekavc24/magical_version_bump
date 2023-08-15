@@ -1,8 +1,3 @@
-import 'package:magical_version_bump/src/core/enums/enums.dart';
-import 'package:magical_version_bump/src/core/exceptions/command_exceptions.dart';
-
-typedef ArgsAndValues = Map<String, String>;
-
 /// This mixin normalizes arguments passed passed in by user
 mixin NormalizeArgs {
   /// Flags that match these must be removed first
@@ -17,8 +12,6 @@ mixin NormalizeArgs {
   ];
 
   /// Normalize arguments. Remove '-' or '--' present.
-  ///
-  /// Also obtains the set path
   List<String> normalizeArgs(List<String> args) {
     final sanitizedArgs = args.map((e) {
       var mod = e.replaceFirst(RegExp('--'), '');
@@ -31,13 +24,7 @@ mixin NormalizeArgs {
     return sanitizedArgs;
   }
 
-  /// Check whether user set/used these flags
-  /// 1. set-path
-  /// 2. set-build
-  /// 3. set-prerelease
-  /// 4. set-version
-  /// 5. keep-pre
-  /// 6. keep-build
+  /// Check whether user set/used any `setter` flags/options
   ({
     List<String> args,
     String? path,
@@ -100,48 +87,5 @@ mixin NormalizeArgs {
       // set-version defaults presetOnlyVersion to true if preset is not true
       presetOnlyVersion: modifiableMap['set-version'] != null && !preset
     );
-  }
-
-  /// Prep normalized args
-  ({
-    ModifyStrategy strategy,
-    String action,
-    List<String> versionTargets,
-    bool requestPath,
-  }) prepArgs(List<String> args) {
-    // Flags must not be empty
-    if (args.isEmpty) {
-      throw MagicalException(violation: 'Missing flags in modify command');
-    }
-
-    final actionFlag = args.first; // Action command
-
-    // Targets
-    final targetFlags = args.where((element) => element != actionFlag).toList();
-
-    // Check if path was in list
-    final wasInTargetFlags = targetFlags.remove('with-path');
-
-    final isAbsolute = targetFlags.remove('absolute');
-
-    return (
-      strategy: isAbsolute ? ModifyStrategy.absolute : ModifyStrategy.relative,
-      action: actionFlag,
-      versionTargets: targetFlags,
-      requestPath: wasInTargetFlags,
-    );
-  }
-
-  /// Prep normalized args for `Change` and `Generate`(may change) commands.
-  ArgsAndValues getArgAndValues(List<String> args) {
-    final argsAndValues = <String, String>{};
-
-    for (final argument in args) {
-      final value = argument.split('=');
-
-      argsAndValues.addEntries([MapEntry(value.first, value.last)]);
-    }
-
-    return argsAndValues;
   }
 }

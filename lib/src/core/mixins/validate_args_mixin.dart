@@ -1,6 +1,4 @@
-import 'package:mason_logger/mason_logger.dart';
-
-typedef InvalidReason = MapEntry<String, String>;
+import 'package:magical_version_bump/src/core/extensions/iterable_extension.dart';
 
 /// This mixin validates args normalized to make sure they follow guidelines
 mixin ValidatePreppedArgs {
@@ -40,99 +38,36 @@ mixin ValidatePreppedArgs {
     // For generate command
   ];
 
-  /// Check if args normalized correctly
-  Future<({InvalidReason? invalidReason, List<String> args})> validateArgs(
-    List<String> args, {
-    required bool userSetPath,
-    required Logger logger,
-    bool isModify = false,
-  }) async {
-    // Args must not be empty
-    if (args.isEmpty && isModify) {
-      return (
-        invalidReason: const InvalidReason(
-          'Missing arguments',
-          'Additional arguments for this command are missing',
-        ),
-        args: <String>[],
-      );
-    }
-
-    final modifiableArgs = [...args];
-
-    // Check for undefined flags
-    final undefinedFlags = _checkForUndefinedFlags(modifiableArgs);
-
-    if (undefinedFlags.isNotEmpty) {
-      return (
-        invalidReason: InvalidReason(
-          'Invalid arguments',
-          """${undefinedFlags.join(', ')} ${undefinedFlags.length <= 1 ? 'is not a defined flag' : 'are not  defined flags'}""",
-        ),
-        args: <String>[],
-      );
-    }
-
-    // Remove any "with-path" flag if user set path. Warn too
-    if (userSetPath) {
-      // Warn user
-      final hasPathFlag = modifiableArgs.any(
-        (element) => element == 'with-path' || element.contains('set-path'),
-      );
-
-      if (hasPathFlag) {
-        logger.warn('Duplicate flags were found when path was set');
-
-        modifiableArgs
-          ..remove('with-path')
-          ..retainWhere((element) => !element.contains('set-path'));
-      }
-    }
-
-    // Check for correct order of flags as specified above on `actions` &
-    // `targets` variables
-    if (isModify && args.isNotEmpty) {
-      final standardsError = _checkFlags(modifiableArgs);
-
-      if (standardsError.isNotEmpty) {
-        return (
-          invalidReason: InvalidReason('Wrong flag sequence', standardsError),
-          args: <String>[],
-        );
-      }
-    }
-
-    // Get duplicated flags
-    final repeatedFlags = _checkForDuplicates(modifiableArgs);
-
-    if (repeatedFlags.isNotEmpty) {
-      return (
-        args: <String>[],
-        invalidReason: InvalidReason('Duplicate flags', repeatedFlags),
-      );
-    }
-
-    return (invalidReason: null, args: modifiableArgs);
+  /// Check for any undefined flags
+  List<String> checkForUndefinedFlags(List<String> args) {
+    return args
+        .where(
+          (element) =>
+              !actions.contains(element) &&
+              !targets.contains(element) &&
+              !otherAcceptedFlags.contains(element),
+        )
+        .toList();
   }
 
-  /// Check for any undefined flags
-  List<String> _checkForUndefinedFlags(List<String> args) => args
-      .where(
-        (element) =>
-            !actions.contains(element) &&
-            !targets.contains(element) &&
-            !otherAcceptedFlags.contains(element),
-      )
-      .toList();
-
-  /// Verify that first flag is an action flag and contains at least one target
-  /// flag
-  String _checkFlags(List<String> args) {
+  /// Checks if modify flags follow specified sequence i.e. :
+  ///
+  /// * Starts with an `action` flag
+  /// * Never has `bump` or `dump` args used together
+  /// * Has at least one target
+  String checkModifyFlags(List<String> args) {
     // Check if action flag is first
     final firstArgIsAction = actions.contains(args.first);
 
     if (!firstArgIsAction) {
       return "${actions.join(', ')} flags should come first";
+    }
+
+    // Bump and dump should never be used together
+    final hasBumpAndDump = args.containsBumpAndDump();
+
+    if (hasBumpAndDump) {
+      return 'bump and dump flags cannot be used together';
     }
 
     final hasTargetFlag = args.any(
@@ -146,12 +81,8 @@ mixin ValidatePreppedArgs {
     return '';
   }
 
-  /// Check if action/targets flags occured more than once in command. Return
-  /// a string indicating which action flags raised the violation where:
-  ///   1. bump > 1 || dump > 1 - any occurs more than once
-  ///   2. bump && dump - are both used in the same command
-  ///   3. any target flag > 1
-  String _checkForDuplicates(List<String> args) {
+  /// Check if any flag occured more than once in command. 
+  String checkForDuplicates(List<String> args) {
     // Create map with count of each command. Should occur only once
     final map = args.fold(
       <String, int>{},
