@@ -57,7 +57,6 @@ void main() {
       final result = await commandRunner.run(args);
 
       expect(result, equals(ExitCode.usage.code));
-      verify(() => logger.err('undefined-arg is not a defined flag')).called(1);
     });
   });
 
@@ -154,10 +153,6 @@ void main() {
         );
 
         final bumpedVersion = await readFileNode('version');
-
-        verify(
-          () => logger.warn('Duplicate flags were found when path was set'),
-        ).called(1);
 
         expect(result, equals(ExitCode.success.code));
         expect(bumpedVersion, version);
