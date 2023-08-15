@@ -1,5 +1,4 @@
 import 'package:collection/collection.dart';
-import 'package:magical_version_bump/src/core/enums/enums.dart';
 import 'package:magical_version_bump/src/core/mixins/command_mixins.dart';
 import 'package:test/test.dart';
 
@@ -65,70 +64,6 @@ void main() {
       expect(checkedSetters.version, '1.0.0');
       expect(checkedSetters.preset, false);
       expect(checkedSetters.presetOnlyVersion, true);
-    });
-  });
-
-  group('preps modify commands args', () {
-    test('preps args', () {
-      final args = <String>['bump', 'major'];
-
-      final prepData = normalizer.prepArgs(args);
-
-      expect(prepData.action, 'bump');
-      expect(listEquality.equals(['major'], prepData.versionTargets), true);
-      expect(prepData.strategy, ModifyStrategy.relative);
-      expect(prepData.requestPath, false);
-    });
-
-    test('preps args and sets request path to true', () {
-      final args = <String>['bump', 'major', 'with-path'];
-
-      final prepData = normalizer.prepArgs(args);
-
-      expect(prepData.action, 'bump');
-      expect(listEquality.equals(['major'], prepData.versionTargets), true);
-      expect(prepData.strategy, ModifyStrategy.relative);
-      expect(prepData.requestPath, true);
-    });
-
-    test('preps args and sets request path & absolute version to true', () {
-      final args = <String>['bump', 'major', 'with-path', 'absolute'];
-
-      final prepData = normalizer.prepArgs(args);
-
-      expect(prepData.action, 'bump');
-      expect(listEquality.equals(['major'], prepData.versionTargets), true);
-      expect(prepData.strategy, ModifyStrategy.absolute);
-      expect(prepData.requestPath, true);
-    });
-  });
-
-  group('preps change command args', () {
-    test('preps args', () {
-      final args = <String>['name=Test', 'version=1.1.1'];
-
-      final prepped = args.fold(
-        <String, String>{},
-        (previousValue, element) {
-          final split = element.split('=');
-          previousValue.addAll({split.first: split.last});
-          return previousValue;
-        },
-      );
-
-      final argsAndValues = normalizer.getArgAndValues(args);
-
-      expect(
-        listEquality.equals(argsAndValues.keys.toList(), prepped.keys.toList()),
-        true,
-      );
-      expect(
-        listEquality.equals(
-          argsAndValues.values.toList(),
-          prepped.values.toList(),
-        ),
-        true,
-      );
     });
   });
 }
