@@ -37,6 +37,7 @@ class HandleModifyCommand with HandleFile, ValidateVersion, ModifyYaml {
     // Read pubspec.yaml file
     final fileData = await readFile(
       logger: logger,
+      requestPath: sanitizedArgs.requestPath,
       setPath: sanitizedArgs.path,
     );
 

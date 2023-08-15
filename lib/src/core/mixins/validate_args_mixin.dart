@@ -13,7 +13,6 @@ mixin ValidatePreppedArgs {
     'minor',
     'patch',
     'build-number',
-    'with-path',
     'absolute'
   ];
 
@@ -71,7 +70,7 @@ mixin ValidatePreppedArgs {
     }
 
     final hasTargetFlag = args.any(
-      (element) => element != 'with-path' && targets.contains(element),
+      targets.contains,
     );
 
     if (!hasTargetFlag) {

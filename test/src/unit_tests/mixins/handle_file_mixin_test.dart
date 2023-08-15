@@ -28,7 +28,7 @@ void main() {
 
   group('handle file mixin test', () {
     test('reads pubspec.yaml file from path', () async {
-      final data = await handler.readFile(logger: logger);
+      final data = await handler.readFile(logger: logger, requestPath: false);
 
       verify(() => logger.progress('Reading file')).called(1);
 
@@ -38,6 +38,7 @@ void main() {
     test('reads pubspec.yaml file from path set by user', () async {
       final data = await handler.readFile(
         logger: logger,
+        requestPath: false,
         setPath: testpath,
       );
 

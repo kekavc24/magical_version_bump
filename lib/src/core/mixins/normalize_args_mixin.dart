@@ -8,7 +8,8 @@ mixin NormalizeArgs {
     'set-version',
     'keep-pre',
     'keep-build',
-    'preset'
+    'preset',
+    'with-path'
   ];
 
   /// Normalize arguments. Remove '-' or '--' present.
@@ -35,6 +36,7 @@ mixin NormalizeArgs {
     bool keepBuild,
     bool preset,
     bool presetOnlyVersion,
+    bool requestPath,
   }) checkForSetters(List<String> args) {
     final modifiableArgs = [...args]; // Modifiable list
 
@@ -46,6 +48,7 @@ mixin NormalizeArgs {
       'keep-pre': false,
       'keep-build': false,
       'preset': false,
+      'with-path': false
     };
 
     for (final setter in setters) {
@@ -59,7 +62,7 @@ mixin NormalizeArgs {
 
         if (setter == 'keep-pre' ||
             setter == 'keep-build' ||
-            setter == 'preset') {
+            setter == 'preset' || setter == 'with-path') {
           modifiableMap.update(setter, (value) => true);
         } else {
           modifiableMap.update(
@@ -74,6 +77,7 @@ mixin NormalizeArgs {
     }
 
     final preset = modifiableMap['preset'] as bool;
+    final requestPath = modifiableMap['with-path'] as bool;
 
     return (
       args: modifiableArgs,
@@ -84,8 +88,12 @@ mixin NormalizeArgs {
       keepPre: modifiableMap['keep-pre'],
       keepBuild: modifiableMap['keep-build'],
       preset: preset,
+
       // set-version defaults presetOnlyVersion to true if preset is not true
-      presetOnlyVersion: modifiableMap['set-version'] != null && !preset
+      presetOnlyVersion: modifiableMap['set-version'] != null && !preset,
+
+      // Only true if setPath is null & with-path is true
+      requestPath: modifiableMap['set-path'] == null && requestPath,
     );
   }
 }

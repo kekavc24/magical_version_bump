@@ -26,6 +26,7 @@ base class ArgumentSanitizer with NormalizeArgs, ValidatePreppedArgs {
     bool keepBuild,
     bool preset,
     bool presetOnlyVersion,
+    bool requestPath,
   }) sanitizeArgs(List<String> args) {
     final normalizedArgs = normalizeArgs(args);
 
