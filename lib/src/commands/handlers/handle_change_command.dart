@@ -21,7 +21,7 @@ class HandleChangeCommand with HandleFile, ValidateVersion, ModifyYaml {
     final sanitizedArgs = sanitizer.sanitizeArgs(args);
 
     // Get desired format
-    final preppedArgs = sanitizer.prepArgs(args);
+    final preppedArgs = sanitizer.prepArgs(sanitizedArgs.args);
 
     // Actual option are keys
     final argKeys = preppedArgs.keys.toList();
