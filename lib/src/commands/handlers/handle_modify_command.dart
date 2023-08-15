@@ -78,7 +78,7 @@ class HandleModifyCommand with HandleFile, ValidateVersion, ModifyYaml {
     // version if the version was never preset
     currentVersion = await validateVersion(
       logger: logger,
-      isModify: !sanitizedArgs.preset && !sanitizedArgs.presetOnlyVersion,
+      useYamlVersion: !sanitizedArgs.preset && !sanitizedArgs.presetOnlyVersion,
       yamlMap: fileData.yamlMap,
       version: currentVersion,
     );

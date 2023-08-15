@@ -15,7 +15,7 @@ mixin ValidateVersion {
   /// * `version` - only passed in by `Change` command
   Future<String> validateVersion({
     required Logger logger,
-    bool isModify = false,
+    required bool useYamlVersion, 
     YamlMap? yamlMap,
     String? version,
   }) async {
@@ -24,7 +24,7 @@ mixin ValidateVersion {
     var validVersion = '';
 
     // Modify command uses version in yaml.
-    if (isModify) {
+    if (useYamlVersion) {
       if (yamlMap == null) {
         throw MagicalException(violation: 'YAML Map cannot be null');
       }

@@ -65,6 +65,7 @@ class HandleChangeCommand with HandleFile, ValidateVersion, ModifyYaml {
       // Check version that user want to change to or the current version
       version = await validateVersion(
         logger: logger,
+        useYamlVersion: false,
         version: sanitizedArgs.version ??
             preppedArgs['yaml-version'] ??
             fileData.yamlMap['version'] as String?,
