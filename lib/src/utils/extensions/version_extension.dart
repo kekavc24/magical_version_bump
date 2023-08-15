@@ -154,9 +154,8 @@ extension VersionExtension on Version {
     return {'major': major, 'minor': minor, 'patch': patch};
   }
 
-  /// Check if build is valid
-  /// Check if the build numbers are valid build. Must have one value &
-  /// should be an integer
+  /// Check if build is valid.
+  /// Must have one value & should be an integer
   bool buildIsNumber() {
     return build.length == 1 && build.first is int;
   }

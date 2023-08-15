@@ -28,7 +28,9 @@ extension Operations on Iterable<String> {
 
     targets.add(maxWeight.key);
 
-    if (contains('build-number')) targets.add('build-number');
+    if (contains('build-number')) {
+      targets.add('build-number');
+    }
 
     return targets;
   }
