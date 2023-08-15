@@ -1,4 +1,4 @@
-import 'package:magical_version_bump/src/utils/enums/enums.dart';
+import 'package:magical_version_bump/src/core/enums/enums.dart';
 
 extension Versioning on String {
   /// Get the bump type. Up or down

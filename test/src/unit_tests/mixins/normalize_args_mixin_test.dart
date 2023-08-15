@@ -1,6 +1,6 @@
 import 'package:collection/collection.dart';
-import 'package:magical_version_bump/src/utils/enums/enums.dart';
-import 'package:magical_version_bump/src/utils/mixins/command_mixins.dart';
+import 'package:magical_version_bump/src/core/enums/enums.dart';
+import 'package:magical_version_bump/src/core/mixins/command_mixins.dart';
 import 'package:test/test.dart';
 
 class _FakeNormalizer with NormalizeArgs {}

@@ -1,4 +1,4 @@
-import 'package:magical_version_bump/src/utils/mixins/command_mixins.dart';
+import 'package:magical_version_bump/src/core/mixins/command_mixins.dart';
 import 'package:mason_logger/mason_logger.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:test/test.dart';

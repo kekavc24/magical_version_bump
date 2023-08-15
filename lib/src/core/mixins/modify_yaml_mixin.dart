@@ -1,6 +1,5 @@
-import 'package:magical_version_bump/src/utils/enums/enums.dart';
-import 'package:magical_version_bump/src/utils/extensions/string_extensions.dart';
-import 'package:magical_version_bump/src/utils/extensions/version_extension.dart';
+import 'package:magical_version_bump/src/core/enums/enums.dart';
+import 'package:magical_version_bump/src/core/extensions/extensions.dart';
 import 'package:pub_semver/pub_semver.dart';
 import 'package:yaml_edit/yaml_edit.dart';
 

@@ -1,4 +1,4 @@
-import 'package:magical_version_bump/src/utils/exceptions/command_exceptions.dart';
+import 'package:magical_version_bump/src/core/exceptions/command_exceptions.dart';
 import 'package:mason_logger/mason_logger.dart';
 import 'package:pub_semver/pub_semver.dart';
 import 'package:yaml/yaml.dart';
