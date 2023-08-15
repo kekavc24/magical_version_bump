@@ -1,5 +1,8 @@
+import 'dart:convert';
 import 'dart:io';
 
+import 'package:magical_version_bump/src/core/enums/enums.dart';
+import 'package:magical_version_bump/src/core/extensions/extensions.dart';
 import 'package:mason_logger/mason_logger.dart';
 import 'package:yaml/yaml.dart';
 
@@ -7,10 +10,11 @@ import 'package:yaml/yaml.dart';
 mixin HandleFile {
   /// Read yaml file from path. If:
   ///   * `requestPath` is true. The user will be prompted for the path-to-file
-  ///   * `requestPath` is false. Will check `setPath` before checking 
+  ///   * `requestPath` is false. Will check `setPath` before checking
   ///      current directory
   ///
-  Future<({String file, String path, YamlMap yamlMap})> readFile({
+  Future<({String file, FileType type, String path, YamlMap yamlMap})>
+      readFile({
     required Logger logger,
     required bool requestPath,
     String? setPath,
@@ -36,7 +40,12 @@ mixin HandleFile {
 
     readProgress.complete('Read file');
 
-    return (path: path, file: file, yamlMap: yamlMap);
+    return (
+      path: path,
+      type: path.split('.').last.fileType,
+      file: file,
+      yamlMap: yamlMap,
+    );
   }
 
   /// Save file changes
@@ -44,8 +53,13 @@ mixin HandleFile {
     required String data,
     required String path,
     required Logger logger,
+    required FileType type,
   }) async {
     final saveProgress = logger.progress('Saving changes');
+
+    if (type == FileType.json) {
+      data = json.encode(_convertToMap(data));
+    }
 
     await File(path).writeAsString(data);
 

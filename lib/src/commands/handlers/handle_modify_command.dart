@@ -132,6 +132,7 @@ class HandleModifyCommand with HandleFile, ValidateVersion, ModifyYaml {
       data: modifiedFile,
       path: fileData.path,
       logger: logger,
+      type: fileData.type,
     );
 
     /// Show success

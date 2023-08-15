@@ -105,7 +105,12 @@ class HandleChangeCommand with HandleFile, ValidateVersion, ModifyYaml {
     changeProgress.complete('Changed all nodes');
 
     /// Save file changes
-    await saveFile(data: editedFile, path: fileData.path, logger: logger);
+    await saveFile(
+      data: editedFile,
+      path: fileData.path,
+      logger: logger,
+      type: fileData.type,
+    );
 
     /// Show success
     logger.success('Updated your yaml file!');
