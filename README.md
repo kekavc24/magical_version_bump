@@ -27,7 +27,9 @@ dart pub global activate magical_version_bump
 
 ## Overview
 
-`magical_version_bump` is a simple command-line tool. Use it to update your yaml files in your project ci or even locally. Check out our github action in the repository.
+`magical_version_bump` is a simple command-line tool. Use it to update your yaml files in your project ci or even locally. Check out our github workflow in the repository.
+
+You can use a custom action using this package at `magical_workflows`. [Checkout repo ✨][workflow_repo_link]
 
 ![Update meme](https://storage.googleapis.com/magical_kenya_bucket/7lqtb5.jpg)
 
@@ -233,3 +235,4 @@ If you notice any more issues, please do raise them. Hope you like the package!
 [very_good_analysis_badge]: https://img.shields.io/badge/style-very_good_analysis-B22C89.svg
 [very_good_analysis_link]: https://pub.dev/packages/very_good_analysis
 [very_good_cli_link]: https://github.com/VeryGoodOpenSource/very_good_cli
+[workflow_repo_link]: https://github.com/kekavc24/magical_workflows
