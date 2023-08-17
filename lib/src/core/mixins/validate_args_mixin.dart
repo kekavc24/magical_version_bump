@@ -80,7 +80,7 @@ mixin ValidatePreppedArgs {
     return '';
   }
 
-  /// Check if any flag occured more than once in command. 
+  /// Check if any flag occured more than once in command.
   String checkForDuplicates(List<String> args) {
     // Create map with count of each command. Should occur only once
     final map = args.fold(

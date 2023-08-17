@@ -62,7 +62,8 @@ mixin NormalizeArgs {
 
         if (setter == 'keep-pre' ||
             setter == 'keep-build' ||
-            setter == 'preset' || setter == 'with-path') {
+            setter == 'preset' ||
+            setter == 'with-path') {
           modifiableMap.update(setter, (value) => true);
         } else {
           modifiableMap.update(

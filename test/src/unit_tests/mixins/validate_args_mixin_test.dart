@@ -42,7 +42,8 @@ void main() {
 
     test('returns error when no target flag is passed in', () {
       const args = ['bump'];
-      final error = """Command should have at least one of ${validator.targets.take(4).join(', ')} flags""";
+      final error =
+          """Command should have at least one of ${validator.targets.take(4).join(', ')} flags""";
 
       final returnedError = validator.checkModifyFlags(args);
 

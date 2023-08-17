@@ -15,7 +15,7 @@ mixin ValidateVersion {
   /// * `version` - only passed in by `Change` command
   Future<String> validateVersion({
     required Logger logger,
-    required bool useYamlVersion, 
+    required bool useYamlVersion,
     YamlMap? yamlMap,
     String? version,
   }) async {
