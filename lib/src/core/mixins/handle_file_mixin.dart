@@ -42,7 +42,7 @@ mixin HandleFile {
 
     return (
       path: path,
-      type: path.split('.').last.fileType,
+      type: path.split('.').last.toLowerCase().fileType,
       file: file,
       yamlMap: yamlMap,
     );
