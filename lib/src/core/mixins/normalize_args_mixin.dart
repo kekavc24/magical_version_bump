@@ -9,7 +9,7 @@ mixin NormalizeArgs {
     'keep-pre',
     'keep-build',
     'preset',
-    'with-path'
+    'with-path',
   ];
 
   /// Normalize arguments. Remove '-' or '--' present.
@@ -48,7 +48,7 @@ mixin NormalizeArgs {
       'keep-pre': false,
       'keep-build': false,
       'preset': false,
-      'with-path': false
+      'with-path': false,
     };
 
     for (final setter in setters) {

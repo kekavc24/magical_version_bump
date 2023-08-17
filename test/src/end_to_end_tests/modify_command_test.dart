@@ -170,7 +170,7 @@ void main() {
         '-b',
         '--major',
         '--set-version=$setVersion',
-        'set-path=$path'
+        'set-path=$path',
       ];
 
       final result = await commandRunner.run(args);
@@ -193,7 +193,7 @@ void main() {
           '--major',
           '--set-version=$setVersion',
           '--keep-build',
-          'set-path=$path'
+          'set-path=$path',
         ];
 
         final result = await commandRunner.run(args);
@@ -219,7 +219,7 @@ void main() {
           '--build-number',
           '--set-version=$setVersion',
           '--set-build=$setBuild',
-          'set-path=$path'
+          'set-path=$path',
         ];
 
         final result = await commandRunner.run(args);
@@ -240,7 +240,7 @@ void main() {
         '-b',
         '--build-number',
         '--set-build=$setBuild',
-        'set-path=$path'
+        'set-path=$path',
       ];
 
       final result = await commandRunner.run(args);
@@ -260,7 +260,7 @@ void main() {
         '-b',
         '--build-number',
         '--set-prerelease=$setPre',
-        'set-path=$path'
+        'set-path=$path',
       ];
 
       final result = await commandRunner.run(args);
@@ -281,7 +281,7 @@ void main() {
         '--build-number',
         '--set-prerelease=$setPre',
         '--keep-build',
-        'set-path=$path'
+        'set-path=$path',
       ];
 
       final result = await commandRunner.run(args);

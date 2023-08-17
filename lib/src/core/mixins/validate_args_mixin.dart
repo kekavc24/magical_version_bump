@@ -13,7 +13,7 @@ mixin ValidatePreppedArgs {
     'minor',
     'patch',
     'build-number',
-    'absolute'
+    'absolute',
   ];
 
   /// List of any other accepted flags for `Change` and `Generate` commands
@@ -32,7 +32,7 @@ mixin ValidatePreppedArgs {
     'repository',
     'homepage',
     'description',
-    'name'
+    'name',
 
     // For generate command
   ];
