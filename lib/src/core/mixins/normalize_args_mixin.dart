@@ -1,3 +1,5 @@
+import 'package:magical_version_bump/src/core/exceptions/command_exceptions.dart';
+
 /// This mixin normalizes arguments passed passed in by user
 mixin NormalizeArgs {
   /// Flags that match these must be removed first
@@ -14,12 +16,17 @@ mixin NormalizeArgs {
 
   /// Normalize arguments. Remove '-' or '--' present.
   List<String> normalizeArgs(List<String> args) {
+    // Args must not be empty
+    if (args.isEmpty) {
+      throw MagicalException(violation: 'No arguments found');
+    }
+
     final sanitizedArgs = args.map((e) {
       var mod = e.replaceFirst(RegExp('--'), '');
 
       if (mod[0] == '-') mod = mod.replaceFirst(RegExp('-'), '');
 
-      return mod;
+      return mod.isEmpty ? 'null' : mod;
     }).toList();
 
     return sanitizedArgs;
