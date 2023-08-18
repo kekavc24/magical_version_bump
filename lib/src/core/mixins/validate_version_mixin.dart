@@ -7,7 +7,7 @@ import 'package:yaml/yaml.dart';
 mixin ValidateVersion {
   /// Check if version is valid and return the correct version.
   ///
-  /// * `isModify` - check whether the modify command triggered this function.
+  /// * `useYamlVersion` - check whether to use version in yaml.
   /// `Modify` command uses the version in yaml wherease `Change` command passes
   /// in a preferred version to change to.
   ///
