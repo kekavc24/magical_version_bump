@@ -20,7 +20,7 @@ void main() {
     '--minor',
     '--patch',
     '--build-number',
-    '--with-path'
+    '--with-path',
   ];
 
   const bumpArgs = ['modify', '-b', ...modifyFlags];
@@ -111,7 +111,7 @@ void main() {
         [
           ...bumpArgs.where(
             (element) => element != '--major' && element != '--minor',
-          )
+          ),
         ],
       );
 

@@ -3,7 +3,7 @@
 * add json support. Just checks file extension for now.
 
 **Improvements**
-* code maintainablity and testability
+* code maintainability and testability
 
 # 0.5.1
 **Fixes**
