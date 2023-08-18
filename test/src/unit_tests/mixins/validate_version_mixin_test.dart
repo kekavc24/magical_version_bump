@@ -1,4 +1,4 @@
-import 'package:magical_version_bump/src/utils/mixins/command_mixins.dart';
+import 'package:magical_version_bump/src/core/mixins/command_mixins.dart';
 import 'package:mason_logger/mason_logger.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:test/test.dart';
@@ -55,7 +55,7 @@ void main() {
     test('validates version from yaml map as valid', () async {
       final validatedVersion = await validator.validateVersion(
         logger: logger,
-        isModify: true,
+        useYamlVersion: true,
         yamlMap: yamlMap,
       );
 
@@ -67,6 +67,7 @@ void main() {
     test('validates version passed as valid', () async {
       final validatedVersion = await validator.validateVersion(
         logger: logger,
+        useYamlVersion: false,
         version: version,
       );
 
@@ -80,7 +81,7 @@ void main() {
 
       final validatedVersion = validator.validateVersion(
         logger: logger,
-        isModify: true,
+        useYamlVersion: true,
       );
 
       expect(() async => validatedVersion, throwsViolation(violation));
@@ -91,7 +92,7 @@ void main() {
     test('prompts when yaml map version is null', () async {
       final validatedVersion = await validator.validateVersion(
         logger: logger,
-        isModify: true,
+        useYamlVersion: true,
         yamlMap: nullYamlMap,
       );
 
@@ -103,6 +104,7 @@ void main() {
     test('prompts when version passed is null', () async {
       final validatedVersion = await validator.validateVersion(
         logger: logger,
+        useYamlVersion: false,
       );
 
       verify(() => logger.progress('Checking version number')).called(1);
@@ -113,7 +115,7 @@ void main() {
     test('prompts when yaml map version is invalid', () async {
       final validatedVersion = await validator.validateVersion(
         logger: logger,
-        isModify: true,
+        useYamlVersion: true,
         yamlMap: invalidYamlMap,
       );
 
@@ -125,6 +127,7 @@ void main() {
     test('prompts when version passed is invalid', () async {
       final validatedVersion = await validator.validateVersion(
         logger: logger,
+        useYamlVersion: false,
         version: '1.',
       );
 

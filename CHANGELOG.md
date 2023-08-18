@@ -1,3 +1,10 @@
+# 0.5.2
+**Features**
+* add json support. Just checks file extension for now.
+
+**Improvements**
+* code maintainability and testability
+
 # 0.5.1
 **Fixes**
 * tool now keeps custom `build number` by default. Warns the user in console

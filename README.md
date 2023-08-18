@@ -27,7 +27,11 @@ dart pub global activate magical_version_bump
 
 ## Overview
 
-`magical_version_bump` is a simple command-line tool. Use it to update your yaml files in your project ci or even locally. Check out our github action in the repository.
+`magical_version_bump` is a simple command-line tool. Use it to update your yaml files in your project ci or even locally. 
+
+Check out our github workflow.
+
+A github action using this package is available at `magical_workflows`.  [Checkout repo ✨][workflow_repo_link]
 
 ![Update meme](https://storage.googleapis.com/magical_kenya_bucket/7lqtb5.jpg)
 
@@ -222,10 +226,11 @@ mag modify --set-version=8.8.8 --keep-build --keep-pre
 ```
 
 ## Known Caveats
-* This tool cannot bump custom prerelease or build numbers. Consider using `set-prerelease` or `set-build` as a work around.
+* This tool cannot bump custom prerelease or build numbers. Consider using `set-prerelease` or `set-build` as a work around. However, if you would like this implemented, create a feature request in the repo 👍🏼.
 
 If you notice any more issues, please do raise them. Hope you like the package!
 
+All code contributions and reviews are welcome ❤.
 
 <!--[coverage_badge]: coverage_badge.svg-->
 [license_badge]: https://img.shields.io/badge/license-MIT-blue.svg
@@ -233,3 +238,4 @@ If you notice any more issues, please do raise them. Hope you like the package!
 [very_good_analysis_badge]: https://img.shields.io/badge/style-very_good_analysis-B22C89.svg
 [very_good_analysis_link]: https://pub.dev/packages/very_good_analysis
 [very_good_cli_link]: https://github.com/VeryGoodOpenSource/very_good_cli
+[workflow_repo_link]: https://github.com/kekavc24/magical_workflows

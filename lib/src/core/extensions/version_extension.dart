@@ -1,5 +1,5 @@
-import 'package:magical_version_bump/src/utils/enums/enums.dart';
-import 'package:magical_version_bump/src/utils/exceptions/command_exceptions.dart';
+import 'package:magical_version_bump/src/core/enums/enums.dart';
+import 'package:magical_version_bump/src/core/exceptions/command_exceptions.dart';
 import 'package:pub_semver/pub_semver.dart';
 
 extension VersionExtension on Version {
@@ -154,9 +154,8 @@ extension VersionExtension on Version {
     return {'major': major, 'minor': minor, 'patch': patch};
   }
 
-  /// Check if build is valid
-  /// Check if the build numbers are valid build. Must have one value &
-  /// should be an integer
+  /// Check if build is valid.
+  /// Must have one value & should be an integer
   bool buildIsNumber() {
     return build.length == 1 && build.first is int;
   }

@@ -1,63 +1,54 @@
-import 'package:magical_version_bump/src/utils/exceptions/command_exceptions.dart';
-import 'package:magical_version_bump/src/utils/extensions/extensions.dart';
-import 'package:magical_version_bump/src/utils/mixins/command_mixins.dart';
-import 'package:mason_logger/mason_logger.dart';
-import 'package:pub_semver/pub_semver.dart';
+part of 'command_handlers.dart';
 
-typedef ChangeableNodes = Iterable<MapEntry<String, String>>;
-
-class HandleChangeCommand
-    with
-        HandleFile,
-        NormalizeArgs,
-        ValidatePreppedArgs,
-        ValidateVersion,
-        ModifyYaml {
+class HandleChangeCommand extends CommandHandler {
   HandleChangeCommand({required this.logger});
 
   final Logger logger;
 
   /// Change specified node in yaml file
+  @override
   Future<void> handleCommand(List<String> args) async {
+    // Start progress
     final prepProgress = logger.progress('Checking arguments');
 
-    // Normalize args & check validity
-    final normalizedArgs = normalizeArgs(args);
+    final sanitizer = ChangeArgumentSanitizer();
 
-    final argsWithoutSetters = checkForSetters(normalizedArgs);
+    // Sanitize args
+    final sanitizedArgs = sanitizer.sanitizeArgs(args);
 
-    final preppedArgs = getArgAndValues(argsWithoutSetters.args);
+    // Get desired format
+    final preppedArgs = sanitizer.prepArgs(sanitizedArgs.args);
 
-    final validatedArgs = await validateArgs(
-      preppedArgs.keys.toList(),
-      userSetPath: argsWithoutSetters.path != null,
-      logger: logger,
-    );
+    // Actual option are keys
+    final argKeys = preppedArgs.keys.toList();
 
-    if (validatedArgs.invalidReason != null) {
-      prepProgress.fail(validatedArgs.invalidReason!.key);
-      throw MagicalException(violation: validatedArgs.invalidReason!.value);
+    // Validate all options.
+    final validatedArgs = sanitizer.validateArgs(argKeys);
+
+    if (!validatedArgs.isValid) {
+      prepProgress.fail(validatedArgs.reason!.key);
+      throw MagicalException(violation: validatedArgs.reason!.value);
     }
 
     prepProgress.complete('Checked arguments');
 
     // Read pubspec.yaml file
     final fileData = await readFile(
-      requestPath: validatedArgs.args.contains('with-path'),
       logger: logger,
-      setPath: argsWithoutSetters.path,
+      requestPath: sanitizedArgs.requestPath,
+      setPath: sanitizedArgs.path,
     );
 
     var version = '';
 
     // If user wants version change, check if valid
-    if (validatedArgs.args.contains('yaml-version') ||
-        argsWithoutSetters.prerelease != null ||
-        argsWithoutSetters.build != null ||
-        argsWithoutSetters.version != null) {
+    if (argKeys.contains('yaml-version') ||
+        sanitizedArgs.prerelease != null ||
+        sanitizedArgs.build != null ||
+        sanitizedArgs.version != null) {
       logger.warn('Version flag detected. Must verify version is valid');
 
-      if (validatedArgs.args.contains('yaml-version')) {
+      if (argKeys.contains('yaml-version')) {
         logger
           ..warn(
             """Consider using 'set-version'. 'yaml-version' will be deprecated soon""",
@@ -70,7 +61,8 @@ class HandleChangeCommand
       // Check version that user want to change to or the current version
       version = await validateVersion(
         logger: logger,
-        version: argsWithoutSetters.version ??
+        useYamlVersion: false,
+        version: sanitizedArgs.version ??
             preppedArgs['yaml-version'] ??
             fileData.yamlMap['version'] as String?,
       );
@@ -81,18 +73,7 @@ class HandleChangeCommand
 
     final changeProgress = logger.progress('Changing yaml nodes');
 
-    // Loop all entries and match with validated args
-    final validMap = validatedArgs.args.fold(
-      <String, String>{},
-      (previousValue, element) {
-        previousValue.addAll({element: preppedArgs[element] ?? ''});
-        return previousValue;
-      },
-    );
-
-    final entries = validMap.entries.where(
-      (element) => element.key != 'with-path',
-    );
+    final entries = preppedArgs.entries;
 
     for (final node in entries) {
       editedFile = await editYamlFile(
@@ -102,17 +83,17 @@ class HandleChangeCommand
       );
     }
 
-    // Update any 'set-prerelease' or 'set-build' options after 'yaml-version'
-    if (argsWithoutSetters.build != null ||
-        argsWithoutSetters.prerelease != null ||
-        argsWithoutSetters.version != null) {
+    // Update any `set-prerelease` or `set-build` after version
+    if (sanitizedArgs.build != null ||
+        sanitizedArgs.prerelease != null ||
+        sanitizedArgs.version != null) {
       final updatedVersion = Version.parse(
-        argsWithoutSetters.version ?? version,
+        sanitizedArgs.version ?? version,
       ).setPreAndBuild(
-        keepPre: argsWithoutSetters.keepPre,
-        keepBuild: argsWithoutSetters.keepBuild,
-        updatedPre: argsWithoutSetters.prerelease,
-        updatedBuild: argsWithoutSetters.build,
+        keepPre: sanitizedArgs.keepPre,
+        keepBuild: sanitizedArgs.keepBuild,
+        updatedPre: sanitizedArgs.prerelease,
+        updatedBuild: sanitizedArgs.build,
       );
 
       editedFile = await editYamlFile(editedFile, 'version', updatedVersion);
@@ -121,7 +102,12 @@ class HandleChangeCommand
     changeProgress.complete('Changed all nodes');
 
     /// Save file changes
-    await saveFile(data: editedFile, path: fileData.path, logger: logger);
+    await saveFile(
+      data: editedFile,
+      path: fileData.path,
+      logger: logger,
+      type: fileData.type,
+    );
 
     /// Show success
     logger.success('Updated your yaml file!');

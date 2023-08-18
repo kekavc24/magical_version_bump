@@ -1,6 +1,8 @@
+import 'dart:io';
+
 import 'package:args/command_runner.dart';
 import 'package:magical_version_bump/src/commands/handlers/command_handlers.dart';
-import 'package:magical_version_bump/src/utils/exceptions/command_exceptions.dart';
+import 'package:magical_version_bump/src/core/exceptions/command_exceptions.dart';
 import 'package:mason_logger/mason_logger.dart';
 
 /// This command modifies the version by bumping up or dumping down the
@@ -106,13 +108,19 @@ class ModifyVersionCommand extends Command<int> {
   @override
   Future<int> run() async {
     try {
-      // Prep command first
+      // Handle command
       await _handler.handleCommand(argResults!.arguments);
+
+      //
     } on MagicalException catch (e) {
       _logger.err(e.toString());
 
       return ExitCode.usage.code;
-    } on Exception catch (e) {
+    } on PathNotFoundException catch (e) {
+      _logger.err(e.message);
+
+      return ExitCode.osFile.code;
+    } catch (e) {
       _logger.err(e.toString());
 
       return ExitCode.software.code;

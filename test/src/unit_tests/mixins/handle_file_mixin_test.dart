@@ -1,4 +1,4 @@
-import 'package:magical_version_bump/src/utils/mixins/command_mixins.dart';
+import 'package:magical_version_bump/src/core/mixins/command_mixins.dart';
 import 'package:mason_logger/mason_logger.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:test/test.dart';
@@ -28,7 +28,7 @@ void main() {
 
   group('handle file mixin test', () {
     test('reads pubspec.yaml file from path', () async {
-      final data = await handler.readFile(logger: logger);
+      final data = await handler.readFile(logger: logger, requestPath: false);
 
       verify(() => logger.progress('Reading file')).called(1);
 
@@ -38,6 +38,7 @@ void main() {
     test('reads pubspec.yaml file from path set by user', () async {
       final data = await handler.readFile(
         logger: logger,
+        requestPath: false,
         setPath: testpath,
       );
 

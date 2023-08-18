@@ -12,6 +12,7 @@ doc/api/
 coverage/
 .test_runner.dart
 fake.yaml
+fake.json
 
 # Android studio and IntelliJ
 .idea

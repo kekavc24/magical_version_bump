@@ -9,7 +9,7 @@ import 'package:pub_updater/pub_updater.dart';
 const executableName = 'mag';
 const packageName = 'magical_version_bump';
 const description =
-    '''A Very Good Project created to change/modify the version specified in Flutter/Dart pubspec.yaml.''';
+    '''A commandline tool for automatically modifying/changing nodes specified in your pubspec.yaml''';
 
 /// {@template magical_version_bump_command_runner}
 /// A [CommandRunner] for the CLI.

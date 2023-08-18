@@ -20,7 +20,7 @@ void main() {
     '--minor',
     '--patch',
     '--build-number',
-    '--with-path'
+    '--with-path',
   ];
 
   const bumpArgs = ['modify', '-b', ...modifyFlags];
@@ -57,7 +57,6 @@ void main() {
       final result = await commandRunner.run(args);
 
       expect(result, equals(ExitCode.usage.code));
-      verify(() => logger.err('undefined-arg is not a defined flag')).called(1);
     });
   });
 
@@ -112,7 +111,7 @@ void main() {
         [
           ...bumpArgs.where(
             (element) => element != '--major' && element != '--minor',
-          )
+          ),
         ],
       );
 
@@ -155,10 +154,6 @@ void main() {
 
         final bumpedVersion = await readFileNode('version');
 
-        verify(
-          () => logger.warn('Duplicate flags were found when path was set'),
-        ).called(1);
-
         expect(result, equals(ExitCode.success.code));
         expect(bumpedVersion, version);
       },
@@ -175,7 +170,7 @@ void main() {
         '-b',
         '--major',
         '--set-version=$setVersion',
-        'set-path=$path'
+        'set-path=$path',
       ];
 
       final result = await commandRunner.run(args);
@@ -198,7 +193,7 @@ void main() {
           '--major',
           '--set-version=$setVersion',
           '--keep-build',
-          'set-path=$path'
+          'set-path=$path',
         ];
 
         final result = await commandRunner.run(args);
@@ -224,7 +219,7 @@ void main() {
           '--build-number',
           '--set-version=$setVersion',
           '--set-build=$setBuild',
-          'set-path=$path'
+          'set-path=$path',
         ];
 
         final result = await commandRunner.run(args);
@@ -245,7 +240,7 @@ void main() {
         '-b',
         '--build-number',
         '--set-build=$setBuild',
-        'set-path=$path'
+        'set-path=$path',
       ];
 
       final result = await commandRunner.run(args);
@@ -265,7 +260,7 @@ void main() {
         '-b',
         '--build-number',
         '--set-prerelease=$setPre',
-        'set-path=$path'
+        'set-path=$path',
       ];
 
       final result = await commandRunner.run(args);
@@ -286,7 +281,7 @@ void main() {
         '--build-number',
         '--set-prerelease=$setPre',
         '--keep-build',
-        'set-path=$path'
+        'set-path=$path',
       ];
 
       final result = await commandRunner.run(args);

@@ -3,7 +3,7 @@
 class MagicalException implements Exception {
   MagicalException({required this.violation});
 
-  /// String command violation or error
+  /// Command violation or error
   final String violation;
 
   @override

@@ -1,7 +1,4 @@
-import 'package:magical_version_bump/src/utils/enums/enums.dart';
-import 'package:magical_version_bump/src/utils/exceptions/command_exceptions.dart';
-
-typedef ArgsAndValues = Map<String, String>;
+import 'package:magical_version_bump/src/core/exceptions/command_exceptions.dart';
 
 /// This mixin normalizes arguments passed passed in by user
 mixin NormalizeArgs {
@@ -13,31 +10,29 @@ mixin NormalizeArgs {
     'set-version',
     'keep-pre',
     'keep-build',
-    'preset'
+    'preset',
+    'with-path',
   ];
 
   /// Normalize arguments. Remove '-' or '--' present.
-  ///
-  /// Also obtains the set path
   List<String> normalizeArgs(List<String> args) {
+    // Args must not be empty
+    if (args.isEmpty) {
+      throw MagicalException(violation: 'No arguments found');
+    }
+
     final sanitizedArgs = args.map((e) {
       var mod = e.replaceFirst(RegExp('--'), '');
 
       if (mod[0] == '-') mod = mod.replaceFirst(RegExp('-'), '');
 
-      return mod;
+      return mod.isEmpty ? 'null' : mod;
     }).toList();
 
     return sanitizedArgs;
   }
 
-  /// Check whether user set/used these flags
-  /// 1. set-path
-  /// 2. set-build
-  /// 3. set-prerelease
-  /// 4. set-version
-  /// 5. keep-pre
-  /// 6. keep-build
+  /// Check whether user set/used any `setter` flags/options
   ({
     List<String> args,
     String? path,
@@ -48,6 +43,7 @@ mixin NormalizeArgs {
     bool keepBuild,
     bool preset,
     bool presetOnlyVersion,
+    bool requestPath,
   }) checkForSetters(List<String> args) {
     final modifiableArgs = [...args]; // Modifiable list
 
@@ -59,6 +55,7 @@ mixin NormalizeArgs {
       'keep-pre': false,
       'keep-build': false,
       'preset': false,
+      'with-path': false,
     };
 
     for (final setter in setters) {
@@ -72,7 +69,8 @@ mixin NormalizeArgs {
 
         if (setter == 'keep-pre' ||
             setter == 'keep-build' ||
-            setter == 'preset') {
+            setter == 'preset' ||
+            setter == 'with-path') {
           modifiableMap.update(setter, (value) => true);
         } else {
           modifiableMap.update(
@@ -87,6 +85,7 @@ mixin NormalizeArgs {
     }
 
     final preset = modifiableMap['preset'] as bool;
+    final requestPath = modifiableMap['with-path'] as bool;
 
     return (
       args: modifiableArgs,
@@ -97,51 +96,12 @@ mixin NormalizeArgs {
       keepPre: modifiableMap['keep-pre'],
       keepBuild: modifiableMap['keep-build'],
       preset: preset,
+
       // set-version defaults presetOnlyVersion to true if preset is not true
-      presetOnlyVersion: modifiableMap['set-version'] != null && !preset
+      presetOnlyVersion: modifiableMap['set-version'] != null && !preset,
+
+      // Only true if setPath is null & with-path is true
+      requestPath: modifiableMap['set-path'] == null && requestPath,
     );
-  }
-
-  /// Prep normalized args
-  ({
-    ModifyStrategy strategy,
-    String action,
-    List<String> versionTargets,
-    bool requestPath,
-  }) prepArgs(List<String> args) {
-    // Flags must not be empty
-    if (args.isEmpty) {
-      throw MagicalException(violation: 'Missing flags in modify command');
-    }
-
-    final actionFlag = args.first; // Action command
-
-    // Targets
-    final targetFlags = args.where((element) => element != actionFlag).toList();
-
-    // Check if path was in list
-    final wasInTargetFlags = targetFlags.remove('with-path');
-
-    final isAbsolute = targetFlags.remove('absolute');
-
-    return (
-      strategy: isAbsolute ? ModifyStrategy.absolute : ModifyStrategy.relative,
-      action: actionFlag,
-      versionTargets: targetFlags,
-      requestPath: wasInTargetFlags,
-    );
-  }
-
-  /// Prep normalized args for `Change` and `Generate`(may change) commands.
-  ArgsAndValues getArgAndValues(List<String> args) {
-    final argsAndValues = <String, String>{};
-
-    for (final argument in args) {
-      final value = argument.split('=');
-
-      argsAndValues.addEntries([MapEntry(value.first, value.last)]);
-    }
-
-    return argsAndValues;
   }
 }

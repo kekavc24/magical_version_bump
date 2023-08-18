@@ -1,59 +1,46 @@
-import 'package:magical_version_bump/src/utils/enums/enums.dart';
-import 'package:magical_version_bump/src/utils/exceptions/command_exceptions.dart';
-import 'package:magical_version_bump/src/utils/extensions/extensions.dart';
-import 'package:magical_version_bump/src/utils/mixins/command_mixins.dart';
-import 'package:mason_logger/mason_logger.dart';
-import 'package:pub_semver/pub_semver.dart';
+part of 'command_handlers.dart';
 
-class HandleModifyCommand
-    with
-        NormalizeArgs,
-        ValidatePreppedArgs,
-        HandleFile,
-        ValidateVersion,
-        ModifyYaml {
+class HandleModifyCommand extends CommandHandler {
   HandleModifyCommand({required this.logger});
 
   final Logger logger;
 
   /// Modify the version in pubspec.yaml
+  @override
   Future<void> handleCommand(List<String> args) async {
     // Command progress
     final prepProgress = logger.progress('Checking arguments');
 
-    // Normalize args & check validity
-    final normalizedArgs = normalizeArgs(args);
+    final sanitizer = ModifyArgumentSanitizer();
 
-    final argsWithNoSetters = checkForSetters(normalizedArgs);
+    // Initial sanitization
+    final sanitizedArgs = sanitizer.sanitizeArgs(args);
 
-    final validated = await validateArgs(
-      argsWithNoSetters.args,
-      isModify: true,
-      userSetPath: argsWithNoSetters.path != null,
-      logger: logger,
-    );
+    // Validate args
+    final validatedArgs = sanitizer.customValidate(sanitizedArgs.args);
 
-    if (validated.invalidReason != null) {
-      prepProgress.fail(validated.invalidReason!.key);
-      throw MagicalException(violation: validated.invalidReason!.value);
+    if (!validatedArgs.isValid) {
+      prepProgress.fail(validatedArgs.reason!.key);
+      throw MagicalException(violation: validatedArgs.reason!.value);
     }
 
-    final preppedArgs = prepArgs(validated.args);
+    // Final sanitization to desired format
+    final preppedArgs = sanitizer.prepArgs(sanitizedArgs.args);
 
     prepProgress.complete('Checked arguments');
 
     // Read pubspec.yaml file
     final fileData = await readFile(
-      requestPath: preppedArgs.requestPath,
       logger: logger,
-      setPath: argsWithNoSetters.path,
+      requestPath: sanitizedArgs.requestPath,
+      setPath: sanitizedArgs.path,
     );
 
     var currentVersion = '';
 
-    // Preset any values before validation. This assumes you want keep your old
-    // build number and prerelease info
-    if (argsWithNoSetters.preset || argsWithNoSetters.presetOnlyVersion) {
+    // Preset any values before validating the version. When `--preset` flag is
+    // used or `--set-version` option
+    if (sanitizedArgs.preset || sanitizedArgs.presetOnlyVersion) {
       // Parse old version
       Version? oldVersion;
 
@@ -62,32 +49,31 @@ class HandleModifyCommand
       }
 
       // Throw error if both 'set-version' and old version are null
-      if (argsWithNoSetters.version == null && oldVersion == null) {
+      if (sanitizedArgs.version == null && oldVersion == null) {
         throw MagicalException(
           violation: 'At least one valid version is required.',
         );
       }
 
       currentVersion = Version.parse(
-        argsWithNoSetters.version ?? oldVersion.toString(),
+        sanitizedArgs.version ?? oldVersion.toString(),
       ).setPreAndBuild(
-        updatedPre: argsWithNoSetters.keepPre
+        updatedPre: sanitizedArgs.keepPre
             ? (oldVersion!.preRelease.isEmpty
                 ? null
                 : oldVersion.preRelease.join('.'))
-            : argsWithNoSetters.prerelease,
-        updatedBuild: argsWithNoSetters.keepBuild
+            : sanitizedArgs.prerelease,
+        updatedBuild: sanitizedArgs.keepBuild
             ? (oldVersion!.build.isEmpty ? null : oldVersion.build.join('.'))
-            : argsWithNoSetters.build,
+            : sanitizedArgs.build,
       );
     }
 
-    // Validate version and get correct version
+    // Validate version and get correct version if invalid. Only use the local
+    // version if the version was never preset
     currentVersion = await validateVersion(
       logger: logger,
-      // Use isModify only when preset is false
-      isModify:
-          !argsWithNoSetters.preset && !argsWithNoSetters.presetOnlyVersion,
+      useYamlVersion: !sanitizedArgs.preset && !sanitizedArgs.presetOnlyVersion,
       yamlMap: fileData.yamlMap,
       version: currentVersion,
     );
@@ -99,6 +85,7 @@ class HandleModifyCommand
           : 'Bumping down version',
     );
 
+    // Get the target with highest weight in relative strategy
     final modifiedVersion = await dynamicBump(
       currentVersion,
       action: preppedArgs.action,
@@ -117,14 +104,13 @@ class HandleModifyCommand
 
     // If preset is false, but user passed in prerelease & build info.
     // Update it.
-    if ((!argsWithNoSetters.preset || argsWithNoSetters.presetOnlyVersion) &&
-        (argsWithNoSetters.prerelease != null ||
-            argsWithNoSetters.build != null)) {
+    if ((!sanitizedArgs.preset || sanitizedArgs.presetOnlyVersion) &&
+        (sanitizedArgs.prerelease != null || sanitizedArgs.build != null)) {
       versionToSave = Version.parse(versionToSave).setPreAndBuild(
-        keepPre: argsWithNoSetters.keepPre,
-        keepBuild: argsWithNoSetters.keepBuild,
-        updatedPre: argsWithNoSetters.prerelease,
-        updatedBuild: argsWithNoSetters.build,
+        keepPre: sanitizedArgs.keepPre,
+        keepBuild: sanitizedArgs.keepBuild,
+        updatedPre: sanitizedArgs.prerelease,
+        updatedBuild: sanitizedArgs.build,
       );
     }
 
@@ -141,6 +127,7 @@ class HandleModifyCommand
       data: modifiedFile,
       path: fileData.path,
       logger: logger,
+      type: fileData.type,
     );
 
     /// Show success

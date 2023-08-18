@@ -1,4 +1,4 @@
-import 'package:magical_version_bump/src/utils/exceptions/command_exceptions.dart';
+import 'package:magical_version_bump/src/core/exceptions/command_exceptions.dart';
 import 'package:mason_logger/mason_logger.dart';
 import 'package:pub_semver/pub_semver.dart';
 import 'package:yaml/yaml.dart';
@@ -7,7 +7,7 @@ import 'package:yaml/yaml.dart';
 mixin ValidateVersion {
   /// Check if version is valid and return the correct version.
   ///
-  /// * `isModify` - check whether the modify command triggered this function.
+  /// * `useYamlVersion` - check whether to use version in yaml.
   /// `Modify` command uses the version in yaml wherease `Change` command passes
   /// in a preferred version to change to.
   ///
@@ -15,7 +15,7 @@ mixin ValidateVersion {
   /// * `version` - only passed in by `Change` command
   Future<String> validateVersion({
     required Logger logger,
-    bool isModify = false,
+    required bool useYamlVersion,
     YamlMap? yamlMap,
     String? version,
   }) async {
@@ -24,7 +24,7 @@ mixin ValidateVersion {
     var validVersion = '';
 
     // Modify command uses version in yaml.
-    if (isModify) {
+    if (useYamlVersion) {
       if (yamlMap == null) {
         throw MagicalException(violation: 'YAML Map cannot be null');
       }

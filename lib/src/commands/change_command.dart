@@ -1,6 +1,6 @@
 import 'package:args/command_runner.dart';
 import 'package:magical_version_bump/src/commands/handlers/command_handlers.dart';
-import 'package:magical_version_bump/src/utils/exceptions/command_exceptions.dart';
+import 'package:magical_version_bump/src/core/exceptions/command_exceptions.dart';
 import 'package:mason_logger/mason_logger.dart';
 
 /// This command overwrites/writes the version in the pubspec.yaml
@@ -90,9 +90,10 @@ class ChangeNodesCommand extends Command<int> {
   @override
   Future<int> run() async {
     try {
+      // Handle command
       await _handler.handleCommand(argResults!.arguments);
 
-      // Read file
+      //
     } on MagicalException catch (e) {
       _logger.err(e.toString());
 

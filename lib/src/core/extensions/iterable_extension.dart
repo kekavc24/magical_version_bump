@@ -28,8 +28,34 @@ extension Operations on Iterable<String> {
 
     targets.add(maxWeight.key);
 
-    if (contains('build-number')) targets.add('build-number');
+    if (contains('build-number')) {
+      targets.add('build-number');
+    }
 
     return targets;
+  }
+
+  /// Check if args contain both bump and dump
+  bool containsBumpAndDump() {
+    // Check count
+    final checked = fold(
+      <String, int>{
+        'bump': 0,
+        'dump': 0,
+      },
+      (previousValue, element) {
+        if (element == 'bump' || element == 'b') {
+          previousValue.update('bump', (value) => value + 1);
+        }
+
+        if (element == 'dump' || element == 'd') {
+          previousValue.update('dump', (value) => value + 1);
+        }
+
+        return previousValue;
+      },
+    );
+
+    return checked['dump']! > 0 && checked['bump']! > 0;
   }
 }
