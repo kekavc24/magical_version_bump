@@ -1,4 +1,4 @@
-name: Temp Bump Version
+name: Bump Version
 
 on:
     pull_request:
@@ -23,9 +23,9 @@ jobs:
           id: extract-target
           run: |
             target="";
-            if (contains(github.event.pull_request.labels.*.name, 'major release')); then target="major";
-            elif (contains(github.event.pull_request.labels.*.name, 'minor release')); then target="minor";
-            elif (contains(github.event.pull_request.labels.*.name, 'minor release')); then taget="patch";
+            if (${{contains(github.event.pull_request.labels.*.name, 'major release')}}); then target="major";
+            elif (${{contains(github.event.pull_request.labels.*.name, 'minor release')}}); then target="minor";
+            elif (${{contains(github.event.pull_request.labels.*.name, 'patch release')}}); then target="patch";
             else exit 1;
             fi;
             echo "target=${target}" >> "$GITHUB_OUTPUT"
