@@ -90,9 +90,10 @@ class ChangeNodesCommand extends Command<int> {
   @override
   Future<int> run() async {
     try {
+      // Handle command
       await _handler.handleCommand(argResults!.arguments);
 
-      // Read file
+      //
     } on MagicalException catch (e) {
       _logger.err(e.toString());
 

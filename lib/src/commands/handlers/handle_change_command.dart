@@ -1,16 +1,12 @@
-import 'package:magical_version_bump/src/core/exceptions/command_exceptions.dart';
-import 'package:magical_version_bump/src/core/extensions/extensions.dart';
-import 'package:magical_version_bump/src/core/mixins/command_mixins.dart';
-import 'package:magical_version_bump/src/utils/arg_sanitizers/arg_sanitizer.dart';
-import 'package:mason_logger/mason_logger.dart';
-import 'package:pub_semver/pub_semver.dart';
+part of 'command_handlers.dart';
 
-class HandleChangeCommand with HandleFile, ValidateVersion, ModifyYaml {
+class HandleChangeCommand extends CommandHandler {
   HandleChangeCommand({required this.logger});
 
   final Logger logger;
 
   /// Change specified node in yaml file
+  @override
   Future<void> handleCommand(List<String> args) async {
     // Start progress
     final prepProgress = logger.progress('Checking arguments');
