@@ -1,6 +1,6 @@
 import 'package:collection/collection.dart';
-import 'package:magical_version_bump/src/core/enums/enums.dart';
-import 'package:magical_version_bump/src/utils/arg_sanitizers/arg_sanitizer.dart';
+import 'package:magical_version_bump/src/core/arg_sanitizers/arg_sanitizer.dart';
+import 'package:magical_version_bump/src/utils/enums/enums.dart';
 import 'package:test/test.dart';
 
 void main() {

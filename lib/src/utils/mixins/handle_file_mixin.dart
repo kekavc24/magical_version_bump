@@ -1,8 +1,8 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:magical_version_bump/src/core/enums/enums.dart';
-import 'package:magical_version_bump/src/core/extensions/extensions.dart';
+import 'package:magical_version_bump/src/utils/enums/enums.dart';
+import 'package:magical_version_bump/src/utils/extensions/extensions.dart';
 import 'package:mason_logger/mason_logger.dart';
 import 'package:yaml/yaml.dart';
 

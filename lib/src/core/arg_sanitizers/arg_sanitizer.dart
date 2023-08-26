@@ -1,6 +1,6 @@
-import 'package:magical_version_bump/src/core/enums/enums.dart';
-import 'package:magical_version_bump/src/core/mixins/command_mixins.dart';
-import 'package:magical_version_bump/src/core/typedefs/typedefs.dart';
+import 'package:magical_version_bump/src/utils/enums/enums.dart';
+import 'package:magical_version_bump/src/utils/mixins/command_mixins.dart';
+import 'package:magical_version_bump/src/utils/typedefs/typedefs.dart';
 
 part 'change_arg_sanitizer.dart';
 part 'modify_arg_sanitizer.dart';

@@ -1,8 +1,8 @@
 import 'dart:io';
 
 import 'package:args/command_runner.dart';
-import 'package:magical_version_bump/src/commands/handlers/command_handlers.dart';
-import 'package:magical_version_bump/src/core/exceptions/command_exceptions.dart';
+import 'package:magical_version_bump/src/core/command_handlers/command_handlers.dart';
+import 'package:magical_version_bump/src/utils/exceptions/command_exceptions.dart';
 import 'package:mason_logger/mason_logger.dart';
 
 /// This command modifies the version by bumping up or dumping down the

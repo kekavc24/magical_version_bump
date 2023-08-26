@@ -1,4 +1,4 @@
-import 'package:magical_version_bump/src/core/exceptions/command_exceptions.dart';
+import 'package:magical_version_bump/src/utils/exceptions/command_exceptions.dart';
 
 /// This mixin normalizes arguments passed passed in by user
 mixin NormalizeArgs {

@@ -1,4 +1,4 @@
-import 'package:magical_version_bump/src/core/extensions/iterable_extension.dart';
+import 'package:magical_version_bump/src/utils/extensions/iterable_extension.dart';
 
 /// This mixin validates args normalized to make sure they follow guidelines
 mixin ValidatePreppedArgs {

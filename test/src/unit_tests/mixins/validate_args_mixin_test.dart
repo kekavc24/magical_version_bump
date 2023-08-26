@@ -1,5 +1,5 @@
 import 'package:collection/collection.dart';
-import 'package:magical_version_bump/src/core/mixins/command_mixins.dart';
+import 'package:magical_version_bump/src/utils/mixins/command_mixins.dart';
 import 'package:test/test.dart';
 
 class _FakeArgsValidator with ValidatePreppedArgs {}
