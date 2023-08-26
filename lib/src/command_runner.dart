@@ -41,8 +41,7 @@ class MagicalVersionBumpCommandRunner extends CompletionCommandRunner<int> {
 
     // Add sub commands
     addCommand(UpdateCommand(logger: _logger, pubUpdater: _pubUpdater));
-    addCommand(ModifyVersionCommand(logger: _logger));
-    addCommand(ChangeNodesCommand(logger: _logger));
+    addCommand(ModifyCommand(logger: _logger));
   }
 
   @override
