@@ -1,23 +1,18 @@
 part of 'command_handlers.dart';
 
-class HandleModifyCommand extends CommandHandler {
-  HandleModifyCommand({required this.logger});
-
-  final Logger logger;
+final class HandleBumpCommand extends CommandHandler {
+  HandleBumpCommand({required super.logger});
 
   /// Modify the version in pubspec.yaml
   @override
-  Future<void> handleCommand(List<String> args) async {
+  Future<void> handleCommand(ArgResults? argResults) async {
     // Command progress
     final prepProgress = logger.progress('Checking arguments');
 
-    final sanitizer = ModifyArgumentSanitizer();
-
-    // Initial sanitization
-    final sanitizedArgs = sanitizer.sanitizeArgs(args);
+    final sanitizer = BumpArgumentSanitizer(argResults: argResults);
 
     // Validate args
-    final validatedArgs = sanitizer.customValidate(sanitizedArgs.args);
+    final validatedArgs = sanitizer.customValidate();
 
     if (!validatedArgs.isValid) {
       prepProgress.fail(validatedArgs.reason!.key);
@@ -25,22 +20,24 @@ class HandleModifyCommand extends CommandHandler {
     }
 
     // Final sanitization to desired format
-    final preppedArgs = sanitizer.prepArgs(sanitizedArgs.args);
+    final preppedArgs = sanitizer.prepArgs();
+    final checkedPath = sanitizer.pathInfo;
+    final versionModifiers = sanitizer.modifiers;
 
     prepProgress.complete('Checked arguments');
 
     // Read pubspec.yaml file
     final fileData = await readFile(
+      requestPath: checkedPath.requestPath,
       logger: logger,
-      requestPath: sanitizedArgs.requestPath,
-      setPath: sanitizedArgs.path,
+      setPath: checkedPath.path,
     );
 
     var currentVersion = '';
 
     // Preset any values before validating the version. When `--preset` flag is
     // used or `--set-version` option
-    if (sanitizedArgs.preset || sanitizedArgs.presetOnlyVersion) {
+    if (versionModifiers.preset || versionModifiers.presetOnlyVersion) {
       // Parse old version
       Version? oldVersion;
 
@@ -49,23 +46,23 @@ class HandleModifyCommand extends CommandHandler {
       }
 
       // Throw error if both 'set-version' and old version are null
-      if (sanitizedArgs.version == null && oldVersion == null) {
+      if (versionModifiers.version == null && oldVersion == null) {
         throw MagicalException(
           violation: 'At least one valid version is required.',
         );
       }
 
       currentVersion = Version.parse(
-        sanitizedArgs.version ?? oldVersion.toString(),
+        versionModifiers.version ?? oldVersion.toString(),
       ).setPreAndBuild(
-        updatedPre: sanitizedArgs.keepPre
+        updatedPre: versionModifiers.keepPre
             ? (oldVersion!.preRelease.isEmpty
                 ? null
                 : oldVersion.preRelease.join('.'))
-            : sanitizedArgs.prerelease,
-        updatedBuild: sanitizedArgs.keepBuild
+            : versionModifiers.prerelease,
+        updatedBuild: versionModifiers.keepBuild
             ? (oldVersion!.build.isEmpty ? null : oldVersion.build.join('.'))
-            : sanitizedArgs.build,
+            : versionModifiers.build,
       );
     }
 
@@ -73,25 +70,19 @@ class HandleModifyCommand extends CommandHandler {
     // version if the version was never preset
     currentVersion = await validateVersion(
       logger: logger,
-      useYamlVersion: !sanitizedArgs.preset && !sanitizedArgs.presetOnlyVersion,
+      useYamlVersion:
+          !versionModifiers.preset && !versionModifiers.presetOnlyVersion,
       yamlMap: fileData.yamlMap,
       version: currentVersion,
     );
 
     // Modify the version
-    final modProgress = logger.progress(
-      preppedArgs.action == 'b' || preppedArgs.action == 'bump'
-          ? 'Bumping up version'
-          : 'Bumping down version',
-    );
+    final modProgress = logger.progress('Bumping up version');
 
     // Get the target with highest weight in relative strategy
     final modifiedVersion = await dynamicBump(
       currentVersion,
-      action: preppedArgs.action,
-      versionTargets: preppedArgs.strategy == ModifyStrategy.absolute
-          ? preppedArgs.versionTargets
-          : preppedArgs.versionTargets.getRelative(),
+      versionTargets: preppedArgs.targets,
       strategy: preppedArgs.strategy,
     );
 
@@ -104,13 +95,14 @@ class HandleModifyCommand extends CommandHandler {
 
     // If preset is false, but user passed in prerelease & build info.
     // Update it.
-    if ((!sanitizedArgs.preset || sanitizedArgs.presetOnlyVersion) &&
-        (sanitizedArgs.prerelease != null || sanitizedArgs.build != null)) {
+    if ((!versionModifiers.preset || versionModifiers.presetOnlyVersion) &&
+        (versionModifiers.prerelease != null ||
+            versionModifiers.build != null)) {
       versionToSave = Version.parse(versionToSave).setPreAndBuild(
-        keepPre: sanitizedArgs.keepPre,
-        keepBuild: sanitizedArgs.keepBuild,
-        updatedPre: sanitizedArgs.prerelease,
-        updatedBuild: sanitizedArgs.build,
+        keepPre: versionModifiers.keepPre,
+        keepBuild: versionModifiers.keepBuild,
+        updatedPre: versionModifiers.prerelease,
+        updatedBuild: versionModifiers.build,
       );
     }
 
@@ -132,7 +124,7 @@ class HandleModifyCommand extends CommandHandler {
 
     /// Show success
     logger.success(
-      """Version ${preppedArgs.action == 'b' || preppedArgs.action == 'bump' ? 'bumped up' : 'bumped down'} from $currentVersion to $versionToSave""",
+      'Version bumped up from $currentVersion to $versionToSave',
     );
   }
 }

@@ -4,10 +4,9 @@ import 'package:pub_semver/pub_semver.dart';
 
 extension VersionExtension on Version {
   /// Bump up version
-  ({bool buildBumpFailed, String version}) modifyVersion(
-    BumpType bumpType, {
+  ({bool buildBumpFailed, String version}) modifyVersion({
     required List<String> versionTargets,
-    ModifyStrategy strategy = ModifyStrategy.relative,
+    required ModifyStrategy strategy,
   }) {
     var modifiedVersion = '';
 
@@ -27,13 +26,6 @@ extension VersionExtension on Version {
         );
       }
 
-      if (bumpType == BumpType.down) {
-        throw MagicalException(
-          violation:
-              'This versioning strategy does not allow bumping down versions',
-        );
-      }
-
       final target = nonBuildTargets.first;
 
       modifiedVersion = nextRelativeVersion(target).toString();
@@ -47,8 +39,7 @@ extension VersionExtension on Version {
       for (final target in nonBuildTargets) {
         final version = mappedVersion[target] ?? 0;
 
-        final moddedVersion =
-            bumpType == BumpType.up ? version + 1 : version - 1;
+        final moddedVersion = version + 1;
 
         mappedVersion.update(
           target,
@@ -89,8 +80,7 @@ extension VersionExtension on Version {
     if (canModifyBuild) {
       final buildToModify = buildFromVersion ?? 1;
 
-      final buildNumber =
-          bumpType == BumpType.up ? buildToModify + 1 : buildToModify - 1;
+      final buildNumber = buildToModify + 1;
 
       modifiedVersion += '+${buildNumber < 0 ? 0 : buildNumber}';
 

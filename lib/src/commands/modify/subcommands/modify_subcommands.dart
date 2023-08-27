@@ -1,4 +1,8 @@
+import 'dart:io';
+
 import 'package:args/command_runner.dart';
+import 'package:magical_version_bump/src/core/command_handlers/command_handlers.dart';
+import 'package:magical_version_bump/src/utils/exceptions/command_exceptions.dart';
 import 'package:mason_logger/mason_logger.dart';
 
 part 'bump_subcommand.dart';
@@ -23,6 +27,7 @@ abstract class ModifySubCommand extends Command<int> {
         'directory',
         help: 'Directory where to find yaml/json file',
         aliases: ['dir'],
+        defaultsTo: 'pubspec.yaml',
       )
       ..addOption(
         'set-version',

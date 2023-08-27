@@ -5,8 +5,5 @@
 ///   [relative] - normal versioning as specified by SEMVER
 enum ModifyStrategy { absolute, relative }
 
-/// Defines whether version will be bumped up or down by 1
-enum BumpType { up, down }
-
 /// Filetype being read
 enum FileType { yaml, json, unknown }

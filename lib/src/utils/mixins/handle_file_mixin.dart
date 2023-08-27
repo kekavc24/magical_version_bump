@@ -10,41 +10,31 @@ import 'package:yaml/yaml.dart';
 mixin HandleFile {
   /// Read yaml file from path. If:
   ///   * `requestPath` is true. The user will be prompted for the path-to-file
-  ///   * `requestPath` is false. Will check `setPath` before checking
-  ///      current directory
+  ///   * `requestPath` is false. Uses default `setPath` 
   ///
   Future<({String file, FileType type, String path, YamlMap yamlMap})>
       readFile({
-    required Logger logger,
     required bool requestPath,
-    String? setPath,
+    required Logger logger,
+    required String setPath,
   }) async {
-    var path = ''; // path to file
-
     if (requestPath) {
       // Request path to file
-      path = logger.prompt(
+      setPath = logger.prompt(
         'Please enter the path to file:',
         defaultValue: 'pubspec.yaml',
       );
-    } else {
-      path = setPath ?? 'pubspec.yaml';
     }
 
     final readProgress = logger.progress('Reading file');
-
-    // Read file
-    final file = await File(path).readAsString();
-
-    final yamlMap = _convertToMap(file);
-
+    final file = await File(setPath).readAsString();
     readProgress.complete('Read file');
 
     return (
-      path: path,
-      type: path.split('.').last.toLowerCase().fileType,
+      path: setPath,
+      type: setPath.split('.').last.toLowerCase().fileType,
       file: file,
-      yamlMap: yamlMap,
+      yamlMap: _convertToMap(file),
     );
   }
 

@@ -1,5 +1,5 @@
 /// Arguments and their respective values
-typedef ArgsAndValues = Map<String, String>;
+typedef NodesAndValues = Map<String, String>;
 
 /// Reason why an error was thrown:
 ///

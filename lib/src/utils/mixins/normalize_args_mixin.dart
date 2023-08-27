@@ -1,8 +1,7 @@
 import 'package:args/args.dart';
-import 'package:magical_version_bump/src/core/arg_sanitizers/arg_sanitizer.dart';
 
 /// This mixin normalizes arguments passed passed in by user
- base mixin NormalizeArgs on ArgumentSanitizer {
+mixin NormalizeArgs {
   /// Check for path flags & options
   ///
   /// * `requestPath` - Whether to request the path from user, interactively

@@ -1,9 +1,11 @@
+import 'package:args/args.dart';
 import 'package:magical_version_bump/src/utils/enums/enums.dart';
+import 'package:magical_version_bump/src/utils/extensions/extensions.dart';
 import 'package:magical_version_bump/src/utils/mixins/command_mixins.dart';
 import 'package:magical_version_bump/src/utils/typedefs/typedefs.dart';
 
-part 'change_arg_sanitizer.dart';
-part 'modify_arg_sanitizer.dart';
+part 'bump_args_sanitizer.dart';
+part 'set_args_sanitizer.dart';
 
 /// Contains basic code implementations to
 ///   * Normalize args
@@ -14,53 +16,42 @@ part 'modify_arg_sanitizer.dart';
 ///   * Change command - requires no order
 ///
 /// They, however, share some code.
-base class ArgumentSanitizer with NormalizeArgs, ValidatePreppedArgs {
-  /// Normalize args
-  ({
-    List<String> args,
-    String? path,
-    String? version,
-    String? build,
-    String? prerelease,
-    bool keepPre,
-    bool keepBuild,
-    bool preset,
-    bool presetOnlyVersion,
-    bool requestPath,
-  }) sanitizeArgs(List<String> args) {
-    final normalizedArgs = normalizeArgs(args);
+base class ArgumentSanitizer with NormalizeArgs, ValidateArgs {
+  ArgumentSanitizer({required this.argResults});
 
-    return checkForSetters(normalizedArgs);
-  }
+  /// Argument results from command
+  final ArgResults? argResults;
 
-  /// Basic implementation of validate args
-  ({bool isValid, InvalidReason? reason}) validateArgs(List<String> args) {
-    // Check for undefined flags
-    final undefinedFlags = checkForUndefinedFlags(args);
-
-    if (undefinedFlags.isNotEmpty) {
+  /// Basic implementation to check if args are empty or null
+  ({bool isValid, InvalidReason? reason}) validateArgs() {
+    // Args must not be empty or null
+    if (argResults == null || argResults!.arguments.isEmpty) {
       return (
         isValid: false,
-        reason: InvalidReason(
-          'Invalid arguments',
-          """${undefinedFlags.join(', ')} ${undefinedFlags.length <= 1 ? 'is not a defined flag' : 'are not  defined flags'}""",
+        reason: const InvalidReason(
+          'Missing arguments',
+          'Arguments cannot be empty or null',
         ),
-      );
-    }
-
-    // Check for duplicated flags
-    final repeatedFlags = checkForDuplicates(args);
-
-    if (repeatedFlags.isNotEmpty) {
-      return (
-        isValid: false,
-        reason: InvalidReason('Duplicate flags', repeatedFlags),
       );
     }
 
     return (isValid: true, reason: null);
   }
 
-  /// Prep args to desired formart
-  void prepArgs(List<String> args) {}
+  /// Fetch path information
+  ({bool requestPath, String path}) get pathInfo => checkPath(argResults!);
+
+  /// Fetch version modifiers
+  ({
+    bool preset,
+    bool presetOnlyVersion,
+    String? version,
+    String? prerelease,
+    String? build,
+    bool keepPre,
+    bool keepBuild,
+  }) get modifiers => checkForVersionModifiers(argResults!);
+
+  /// Prep args to desired format
+  void prepArgs() {}
 }
