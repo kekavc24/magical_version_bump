@@ -50,7 +50,10 @@ base class ArgumentSanitizer with NormalizeArgs, ValidateArgs {
     String? build,
     bool keepPre,
     bool keepBuild,
-  }) get modifiers => checkForVersionModifiers(argResults!);
+  }) modifiers({required bool checkPreset}) => checkForVersionModifiers(
+        argResults!,
+        checkPreset: checkPreset,
+      );
 
   /// Prep args to desired format
   void prepArgs() {}

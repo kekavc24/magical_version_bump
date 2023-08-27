@@ -31,8 +31,11 @@ mixin NormalizeArgs {
     String? build,
     bool keepPre,
     bool keepBuild,
-  }) checkForVersionModifiers(ArgResults argResults) {
-    final preset = argResults['preset'] as bool;
+  }) checkForVersionModifiers(
+    ArgResults argResults, {
+    required bool checkPreset,
+  }) {
+    final preset = checkPreset ? argResults['preset'] as bool : checkPreset;
 
     return (
       preset: preset,

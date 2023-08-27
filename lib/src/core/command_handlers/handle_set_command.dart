@@ -23,7 +23,7 @@ class HandleSetCommand extends CommandHandler {
 
     final nodesAndValues = preppedArgs.nodesAndValues!;
     final checkedPath = sanitizer.pathInfo;
-    final versionModifiers = sanitizer.modifiers;
+    final versionModifiers = sanitizer.modifiers(checkPreset: false);
 
     // Read pubspec.yaml file
     final fileData = await readFile(

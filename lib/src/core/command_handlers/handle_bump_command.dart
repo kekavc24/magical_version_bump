@@ -22,7 +22,7 @@ final class HandleBumpCommand extends CommandHandler {
     // Final sanitization to desired format
     final preppedArgs = sanitizer.prepArgs();
     final checkedPath = sanitizer.pathInfo;
-    final versionModifiers = sanitizer.modifiers;
+    final versionModifiers = sanitizer.modifiers(checkPreset: true);
 
     prepProgress.complete('Checked arguments');
 
