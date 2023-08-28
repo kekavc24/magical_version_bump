@@ -32,134 +32,80 @@ void main() {
   });
 
   group('independent versioning (absolute)', () {
-    test('bumps up/down only major version', () async {
+    test('bumps up only major version', () async {
       const bumpedVersion = '12.11.11';
-      const dumpedVersion = '10.11.11';
 
       // Bump up version by 1
       final dynamicBump = await modifier.dynamicBump(
         version,
-        action: 'bump',
-        versionTargets: majorTarget,
-        strategy: ModifyStrategy.absolute,
-      );
-
-      // Bump down version by 1
-      final dynamicDump = await modifier.dynamicBump(
-        version,
-        action: 'dump',
         versionTargets: majorTarget,
         strategy: ModifyStrategy.absolute,
       );
 
       expect(dynamicBump.version, bumpedVersion);
-      expect(dynamicDump.version, dumpedVersion);
     });
 
-    test('bumps up/down only minor version', () async {
+    test('bumps up only minor version', () async {
       const bumpedVersion = '11.12.11';
-      const dumpedVersion = '11.10.11';
 
       // Bump up version by 1
       final dynamicBump = await modifier.dynamicBump(
         version,
-        action: 'bump',
-        versionTargets: minorTarget,
-        strategy: ModifyStrategy.absolute,
-      );
-
-      // Bump down version by 1
-      final dynamicDump = await modifier.dynamicBump(
-        version,
-        action: 'dump',
         versionTargets: minorTarget,
         strategy: ModifyStrategy.absolute,
       );
 
       expect(dynamicBump.version, bumpedVersion);
-      expect(dynamicDump.version, dumpedVersion);
     });
 
-    test('bumps up/down only patch version', () async {
+    test('bumps up only patch version', () async {
       const bumpedVersion = '11.11.12';
-      const dumpedVersion = '11.11.10';
 
       // Bump up version by 1
       final dynamicBump = await modifier.dynamicBump(
         version,
-        action: 'bump',
-        versionTargets: patchTarget,
-        strategy: ModifyStrategy.absolute,
-      );
-
-      // Bump down version by 1
-      final dynamicDump = await modifier.dynamicBump(
-        version,
-        action: 'dump',
         versionTargets: patchTarget,
         strategy: ModifyStrategy.absolute,
       );
 
       expect(dynamicBump.version, bumpedVersion);
-      expect(dynamicDump.version, dumpedVersion);
     });
 
-    test('bumps up/down only build number', () async {
+    test('bumps up only build number', () async {
       const bumpedVersion = '11.11.11+12';
-      const dumpedVersion = '11.11.11+10';
 
       // Bump up version by 1
       final dynamicBump = await modifier.dynamicBump(
         versionWithBuild,
-        action: 'bump',
         versionTargets: buildTarget,
         strategy: ModifyStrategy.absolute,
       );
 
-      // Bump down version by 1
-      final dynamicDump = await modifier.dynamicBump(
-        versionWithBuild,
-        action: 'dump',
-        versionTargets: buildTarget,
-        strategy: ModifyStrategy.absolute,
-      );
       expect(dynamicBump.version, bumpedVersion);
-      expect(dynamicDump.version, dumpedVersion);
     });
 
-    test('appends and bumps up/down only build number', () async {
+    test('appends and bumps up only build number', () async {
       const bumpedVersion = '11.11.11+2';
-      const dumpedVersion = '11.11.11+0';
 
       // Bump up version by 1
       final dynamicBump = await modifier.dynamicBump(
         version,
-        action: 'bump',
-        versionTargets: buildTarget,
-        strategy: ModifyStrategy.absolute,
-      );
-
-      // Bump down version by 1
-      final dynamicDump = await modifier.dynamicBump(
-        version,
-        action: 'dump',
         versionTargets: buildTarget,
         strategy: ModifyStrategy.absolute,
       );
 
       expect(dynamicBump.version, bumpedVersion);
-      expect(dynamicDump.version, dumpedVersion);
     });
   });
 
   group('collective versioning (relative)', () {
-    test('collectively bumps up/down major version', () async {
+    test('collectively bumps up major version', () async {
       const bumpedVersion = '12.0.0';
 
       final dynamicBump = await modifier.dynamicBump(
         version,
-        action: 'bump',
         versionTargets: majorTarget,
+        strategy: ModifyStrategy.relative,
       );
 
       expect(dynamicBump.version, bumpedVersion);
@@ -170,8 +116,8 @@ void main() {
 
       final dynamicBump = await modifier.dynamicBump(
         version,
-        action: 'bump',
         versionTargets: minorTarget,
+        strategy: ModifyStrategy.relative,
       );
 
       expect(dynamicBump.version, bumpedVersion);
@@ -182,8 +128,8 @@ void main() {
 
       final dynamicBump = await modifier.dynamicBump(
         version,
-        action: 'bump',
         versionTargets: patchTarget,
+        strategy: ModifyStrategy.relative,
       );
 
       expect(dynamicBump.version, bumpedVersion);
@@ -192,29 +138,14 @@ void main() {
     test('throws error when more than one targets are added', () async {
       final future = modifier.dynamicBump(
         version,
-        action: 'bump',
         versionTargets: [...majorTarget, ...patchTarget, ...buildTarget],
+        strategy: ModifyStrategy.relative,
       );
 
       expect(
         () async => future,
         throwsViolation(
           'Expected only one target for this versioning strategy',
-        ),
-      );
-    });
-
-    test('throws error when dumping versions', () async {
-      final future = modifier.dynamicBump(
-        version,
-        action: 'dump',
-        versionTargets: [...majorTarget, ...buildTarget],
-      );
-
-      expect(
-        () async => future,
-        throwsViolation(
-          'This versioning strategy does not allow bumping down versions',
         ),
       );
     });
@@ -227,7 +158,7 @@ void main() {
 
       final moddedFile = await modifier.editYamlFile(fakeYaml, node, changes);
 
-      final nodeValue = getYamlValue(moddedFile, node);
+      final nodeValue = getNodeValue(moddedFile, node);
 
       expect(nodeValue, changes);
     });
@@ -238,7 +169,7 @@ void main() {
 
       final moddedFile = await modifier.editYamlFile(fakeYaml, node, changes);
 
-      final nodeValue = getYamlValue(moddedFile, node);
+      final nodeValue = getNodeValue(moddedFile, node);
 
       expect(nodeValue, changes);
     });
@@ -249,7 +180,7 @@ void main() {
 
       final moddedFile = await modifier.editYamlFile(fakeYaml, node, changes);
 
-      final nodeValue = getYamlValue(moddedFile, node);
+      final nodeValue = getNodeValue(moddedFile, node);
 
       expect(nodeValue, changes);
     });
@@ -260,7 +191,7 @@ void main() {
 
       final moddedFile = await modifier.editYamlFile(fakeYaml, node, changes);
 
-      final nodeValue = getYamlValue(moddedFile, node);
+      final nodeValue = getNodeValue(moddedFile, node);
 
       expect(nodeValue, changes);
     });
@@ -271,7 +202,7 @@ void main() {
 
       final moddedFile = await modifier.editYamlFile(fakeYaml, node, changes);
 
-      final nodeValue = getYamlValue(moddedFile, node);
+      final nodeValue = getNodeValue(moddedFile, node);
 
       expect(nodeValue, changes);
     });
@@ -282,7 +213,7 @@ void main() {
 
       final moddedFile = await modifier.editYamlFile(fakeYaml, node, changes);
 
-      final nodeValue = getYamlValue(moddedFile, node);
+      final nodeValue = getNodeValue(moddedFile, node);
 
       expect(nodeValue, changes);
     });
@@ -293,7 +224,7 @@ void main() {
 
       final moddedFile = await modifier.editYamlFile(fakeYaml, node, changes);
 
-      final nodeValue = getYamlValue(moddedFile, node);
+      final nodeValue = getNodeValue(moddedFile, node);
 
       expect(nodeValue, changes);
     });

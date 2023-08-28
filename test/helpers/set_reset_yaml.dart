@@ -1,8 +1,4 @@
-import 'dart:io';
-
-import 'package:yaml_edit/yaml_edit.dart';
-
-import 'helpers.dart';
+part of 'helpers.dart';
 
 /// Get file path for
 String getTestFile() => 'fake.yaml';
@@ -13,7 +9,7 @@ Future<String> readFileNode(String node) async {
 
   final file = await File(path).readAsString();
 
-  return getYamlValue(file, node);
+  return getNodeValue(file, node);
 }
 
 /// Reset file to initial version

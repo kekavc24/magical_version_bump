@@ -3,7 +3,7 @@ import 'package:mason_logger/mason_logger.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:test/test.dart';
 
-import '../../helpers/helpers.dart';
+import '../../../helpers/helpers.dart';
 
 class _MockLogger extends Mock implements Logger {}
 
@@ -14,17 +14,8 @@ void main() {
   late MagicalVersionBumpCommandRunner commandRunner;
 
   final path = getTestFile();
-
-  const modifyFlags = [
-    '--major',
-    '--minor',
-    '--patch',
-    '--build-number',
-    '--with-path',
-  ];
-
-  const bumpArgs = ['modify', '-b', ...modifyFlags];
-  const dumpArgs = ['modify', '-d', ...modifyFlags];
+  final defaultArgs = ['modify', 'bump'];
+  final defaultTargets = ['--targets', 'major,minor,patch,build-number'];
 
   setUp(() async {
     logger = _MockLogger();
@@ -44,16 +35,15 @@ void main() {
   });
 
   group('throws error', () {
-    // test('command must have arguments error', () async {
-    //   final args = ['modify'];
-    //   final result = await commandRunner.run(args);
+    test('command must have arguments error', () async {
+      final result = await commandRunner.run(defaultArgs);
 
-    //   expect(result, equals(ExitCode.usage.code));
-    //   verify(() => logger.err('No arguments found')).called(1);
-    // });
+      expect(result, equals(ExitCode.usage.code));
+      verify(() => logger.err('Arguments cannot be empty or null')).called(1);
+    });
 
     test('invalid arguments passed to command', () async {
-      final args = ['modify', 'undefined-arg'];
+      final args = [...defaultArgs, 'undefined-arg'];
       final result = await commandRunner.run(args);
 
       expect(result, equals(ExitCode.usage.code));
@@ -63,17 +53,15 @@ void main() {
   group('independent versioning (absolute)', () {
     test('bumps up all versions', () async {
       const version = '11.11.11+11';
-      final result = await commandRunner.run([...bumpArgs, 'absolute']);
+      final args = [
+        ...defaultArgs,
+        ...defaultTargets,
+        '--strategy',
+        'absolute',
+        '--request-path',
+      ];
 
-      final bumpedVersion = await readFileNode('version');
-
-      expect(result, equals(ExitCode.success.code));
-      expect(bumpedVersion, version);
-    });
-
-    test('bumps down all versions', () async {
-      const version = '9.9.9+9';
-      final result = await commandRunner.run([...dumpArgs, 'absolute']);
+      final result = await commandRunner.run(args);
 
       final bumpedVersion = await readFileNode('version');
 
@@ -85,7 +73,14 @@ void main() {
   group('collective versioning (relative)', () {
     test('bumps up major version and build-number', () async {
       const version = '11.0.0+11';
-      final result = await commandRunner.run(bumpArgs);
+      final args = [
+        ...defaultArgs,
+        '--targets',
+        'major,build-number',
+        '--request-path',
+      ];
+
+      final result = await commandRunner.run(args);
 
       final bumpedVersion = await readFileNode('version');
 
@@ -95,9 +90,14 @@ void main() {
 
     test('bumps up minor version and build-number', () async {
       const version = '10.11.0+11';
-      final result = await commandRunner.run(
-        [...bumpArgs.where((element) => element != '--major')],
-      );
+      final args = [
+        ...defaultArgs,
+        '--targets',
+        'minor,build-number',
+        '--request-path',
+      ];
+
+      final result = await commandRunner.run(args);
 
       final bumpedVersion = await readFileNode('version');
 
@@ -107,13 +107,14 @@ void main() {
 
     test('bumps up patch version and build-number', () async {
       const version = '10.10.11+11';
-      final result = await commandRunner.run(
-        [
-          ...bumpArgs.where(
-            (element) => element != '--major' && element != '--minor',
-          ),
-        ],
-      );
+      final args = [
+        ...defaultArgs,
+        '--targets',
+        'patch,build-number',
+        '--request-path',
+      ];
+
+      final result = await commandRunner.run(args);
 
       final bumpedVersion = await readFileNode('version');
 
@@ -121,20 +122,15 @@ void main() {
       expect(bumpedVersion, version);
     });
 
-    test('throws error when dumping down version', () async {
-      final result = await commandRunner.run(dumpArgs);
-
-      expect(result, equals(ExitCode.usage.code));
-      verify(
-        () => logger.err(
-          'This versioning strategy does not allow bumping down versions',
-        ),
-      ).called(1);
-    });
-
     test('gets highest weighted target and bumps it (major)', () async {
       const version = '11.0.0+11';
-      final result = await commandRunner.run(bumpArgs);
+      final args = [
+        ...defaultArgs,
+        ...defaultTargets,
+        '--request-path',
+      ];
+
+      final result = await commandRunner.run(args);
 
       final bumpedVersion = await readFileNode('version');
 
@@ -145,11 +141,18 @@ void main() {
 
   group('modify with custom path', () {
     test(
-      'sets path and bumps all versions even with duplicated set-path flags',
+      'sets path and bumps all versions even with duplicated directory option',
       () async {
         const version = '11.11.11+11';
+        final args = [
+          ...defaultArgs,
+          ...defaultTargets,
+          '--strategy',
+          'absolute',
+        ];
+
         final result = await commandRunner.run(
-          [...bumpArgs, 'absolute', 'set-path=$path', 'set-path=$path'],
+          [...args, '--directory=$path', '--directory=$path'],
         );
 
         final bumpedVersion = await readFileNode('version');
@@ -166,11 +169,11 @@ void main() {
       const updatedVersion = '12.0.0';
 
       final args = [
-        'modify',
-        '-b',
-        '--major',
+        ...defaultArgs,
+        '--targets',
+        'major',
         '--set-version=$setVersion',
-        'set-path=$path',
+        '--directory=$path',
       ];
 
       final result = await commandRunner.run(args);
@@ -185,15 +188,17 @@ void main() {
       'sets version and keeps build before bumping major version',
       () async {
         const setVersion = '11.12.13';
-        const updatedVersion = '12.0.0+10';
+
+        // Version in fake.yaml is 10.10.10+10
+        const updatedVersion = '12.0.0+10'; 
 
         final args = [
-          'modify',
-          '-b',
-          '--major',
+          ...defaultArgs,
+          '--targets',
+          'major',
           '--set-version=$setVersion',
           '--keep-build',
-          'set-path=$path',
+          '--directory=$path',
         ];
 
         final result = await commandRunner.run(args);
@@ -210,16 +215,15 @@ void main() {
       () async {
         const setVersion = '11.12.13';
         const setBuild = '13';
-        const updatedVersion = '12.0.0+13';
+        const updatedVersion = '12.0.0+$setBuild';
 
         final args = [
-          'modify',
-          '-b',
-          '--major',
-          '--build-number',
+          ...defaultArgs,
+        '--targets',
+        'major',
           '--set-version=$setVersion',
           '--set-build=$setBuild',
-          'set-path=$path',
+          '--directory=$path',
         ];
 
         final result = await commandRunner.run(args);
@@ -236,11 +240,11 @@ void main() {
       const updatedVersion = '10.10.10+13';
 
       final args = [
-        'modify',
-        '-b',
-        '--build-number',
+        ...defaultArgs,
+        '--targets',
+        'build-number',
         '--set-build=$setBuild',
-        'set-path=$path',
+        '--directory=$path',
       ];
 
       final result = await commandRunner.run(args);
@@ -251,16 +255,16 @@ void main() {
       expect(bumpedVersion, updatedVersion);
     });
 
-    test('sets prerelease and removes build', () async {
+    test('sets prerelease and removes build after bumping it', () async {
       const setPre = 'alpha';
       const updatedVersion = '10.10.10-alpha';
 
       final args = [
-        'modify',
-        '-b',
-        '--build-number',
+        ...defaultArgs,
+        '--targets',
+        'build-number',
         '--set-prerelease=$setPre',
-        'set-path=$path',
+        '--directory=$path',
       ];
 
       final result = await commandRunner.run(args);
@@ -271,17 +275,17 @@ void main() {
       expect(bumpedVersion, updatedVersion);
     });
 
-    test('sets prerelease and bumps & keeps build', () async {
+    test('sets prerelease, bumps & keeps build', () async {
       const setPre = 'alpha';
       const updatedVersion = '10.10.10-alpha+11';
 
       final args = [
-        'modify',
-        '-b',
-        '--build-number',
+        ...defaultArgs,
+        '--targets',
+        'build-number',
         '--set-prerelease=$setPre',
         '--keep-build',
-        'set-path=$path',
+        '--directory=$path',
       ];
 
       final result = await commandRunner.run(args);

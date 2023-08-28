@@ -1,7 +1,7 @@
-import 'package:yaml/yaml.dart';
+part of 'helpers.dart';
 
 /// Get version from file
-String getYamlValue(String file, String node) {
+String getNodeValue(String file, String node) {
   final yamlMap = loadYaml(file) as YamlMap;
 
   return yamlMap[node] as String;

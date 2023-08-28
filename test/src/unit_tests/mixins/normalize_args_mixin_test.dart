@@ -1,4 +1,4 @@
-import 'package:collection/collection.dart';
+import 'package:args/args.dart';
 import 'package:magical_version_bump/src/utils/mixins/command_mixins.dart';
 import 'package:test/test.dart';
 
@@ -6,64 +6,125 @@ class _FakeNormalizer with NormalizeArgs {}
 
 void main() {
   late _FakeNormalizer normalizer;
-  late ListEquality<String> listEquality;
+  late ArgParser argParser;
+
+  const directory = 'gym';
+
+  const version = '10.10.10';
+  const prerelease = 'spring-before-summer';
+  const build = 'muscular';
+
+  final modifierArgs = <String>[
+    '--preset',
+    '--set-version',
+    version,
+    '--set-prerelease',
+    prerelease,
+    '--set-build',
+    build,
+  ];
 
   setUp(() {
     normalizer = _FakeNormalizer();
-    listEquality = const ListEquality<String>();
+    argParser = ArgParser()
+      ..addFlag(
+        'request-path',
+      )
+      ..addOption(
+        'directory',
+      )
+      ..addFlag(
+        'preset',
+      )
+      ..addOption(
+        'set-version',
+      )
+      ..addOption(
+        'set-prerelease',
+      )
+      ..addOption(
+        'set-build',
+      )
+      ..addFlag(
+        'keep-pre',
+      )
+      ..addFlag(
+        'keep-build',
+      );
   });
 
-  group('normalizes flags correctly', () {
-    test("removes the '--' & '-' appended to flags with no set path", () {
-      final flags = <String>['--double-fake-flag', '-single-fake-flag'];
-      final sanitizedFlags = <String>['double-fake-flag', 'single-fake-flag'];
-
-      final normalizedFlags = normalizer.normalizeArgs(flags);
-
-      final wasNormalized = listEquality.equals(
-        normalizedFlags,
-        sanitizedFlags,
+  group('modifiers', () {
+    test('returns path and whether to request path', () {
+      final argResults = argParser.parse(
+        ['--request-path', '--directory', directory],
       );
 
-      expect(wasNormalized, true);
+      final checkedPath = normalizer.checkPath(argResults);
+
+      expect(checkedPath.requestPath, true);
+      expect(checkedPath.path, directory);
     });
 
-    test('gets all setter options in args', () {
-      final args = <String>[
-        'myArg',
-        'set-path=path',
-        'set-build=build',
-        'set-prerelease=prerelease',
-        'set-version=1.0.0',
-        'keep-pre',
-        'keep-build',
-        'preset',
-      ];
+    test(
+      'return correct version modifiers, discards old prerelease & build',
+      () {
+        final argResults = argParser.parse(modifierArgs);
 
-      final checkedSetters = normalizer.checkForSetters(args);
+        final versionModifiers = normalizer.checkForVersionModifiers(
+          argResults,
+          checkPreset: true,
+        );
 
-      expect(listEquality.equals(checkedSetters.args, ['myArg']), true);
-      expect(checkedSetters.path, 'path');
-      expect(checkedSetters.build, 'build');
-      expect(checkedSetters.prerelease, 'prerelease');
-      expect(checkedSetters.version, '1.0.0');
-      expect(checkedSetters.keepBuild, true);
-      expect(checkedSetters.keepPre, true);
-      expect(checkedSetters.preset, true);
-    });
+        expect(versionModifiers.preset, true);
+        expect(versionModifiers.presetOnlyVersion, false);
+        expect(versionModifiers.version, version);
+        expect(versionModifiers.prerelease, prerelease);
+        expect(versionModifiers.build, build);
+        expect(versionModifiers.keepPre, false);
+        expect(versionModifiers.keepBuild, false);
+      },
+    );
 
-    test('returns preset as false and preset-version as true', () {
-      final args = <String>[
-        'myArg',
-        'set-version=1.0.0',
-      ];
+    test(
+      'return correct version modifiers, retains old prerelease & build',
+      () {
+        final argResults = argParser.parse(
+          [...modifierArgs, '--keep-pre', '--keep-build'],
+        );
 
-      final checkedSetters = normalizer.checkForSetters(args);
+        final versionModifiers = normalizer.checkForVersionModifiers(
+          argResults,
+          checkPreset: true,
+        );
 
-      expect(listEquality.equals(checkedSetters.args, ['myArg']), true);
-      expect(checkedSetters.version, '1.0.0');
-      expect(checkedSetters.preset, false);
-      expect(checkedSetters.presetOnlyVersion, true);
-    });
+        expect(versionModifiers.preset, true);
+        expect(versionModifiers.presetOnlyVersion, false);
+        expect(versionModifiers.version, version);
+        expect(versionModifiers.prerelease, prerelease);
+        expect(versionModifiers.build, build);
+        expect(versionModifiers.keepPre, true);
+        expect(versionModifiers.keepBuild, true);
+      },
+    );
+
+    test(
+      'returns correct version modifiers, never checks for preset',
+      () {
+        final argResults = argParser.parse(modifierArgs);
+
+        final versionModifiers = normalizer.checkForVersionModifiers(
+          argResults,
+          checkPreset: false,
+        );
+
+        expect(versionModifiers.preset, false);
+        expect(versionModifiers.presetOnlyVersion, true);
+        expect(versionModifiers.version, version);
+        expect(versionModifiers.prerelease, prerelease);
+        expect(versionModifiers.build, build);
+        expect(versionModifiers.keepPre, false);
+        expect(versionModifiers.keepBuild, false);
+      },
+    );
   });
 }

@@ -28,7 +28,11 @@ void main() {
 
   group('handle file mixin test', () {
     test('reads pubspec.yaml file from path', () async {
-      final data = await handler.readFile(logger: logger, requestPath: false);
+      final data = await handler.readFile(
+        logger: logger,
+        requestPath: false,
+        setPath: defaultPath,
+      );
 
       verify(() => logger.progress('Reading file')).called(1);
 
@@ -59,7 +63,11 @@ void main() {
           ),
         ).thenReturn(testpath);
 
-        final data = await handler.readFile(requestPath: true, logger: logger);
+        final data = await handler.readFile(
+          requestPath: true,
+          logger: logger,
+          setPath: '',
+        );
 
         verify(() => logger.progress('Reading file')).called(1);
 
@@ -80,6 +88,7 @@ void main() {
       final data = handler.readFile(
         requestPath: true,
         logger: logger,
+        setPath: '',
       );
 
       verify(() => logger.progress('Reading file')).called(1);
