@@ -25,10 +25,10 @@ mixin ValidateArgs {
       return 'No targets found';
     }
 
-    final allAreTargets = targets.every(targets.contains);
+    final allAreTargets = targets.every(versionTargets.contains);
 
     if (!allAreTargets) {
-      return """Command should have at least one of ${targets.join(', ')} flags""";
+      return """Command should have at least one of ${versionTargets.join(', ')} flags""";
     }
 
     return '';

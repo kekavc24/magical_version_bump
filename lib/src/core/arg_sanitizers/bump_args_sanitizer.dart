@@ -21,7 +21,7 @@ final class BumpArgumentSanitizer extends ArgumentSanitizer {
       isValid: errInTargets.isEmpty,
       reason: errInTargets.isEmpty
           ? null
-          : InvalidReason('Invalid targets found', errInTargets),
+          : InvalidReason('Invalid targets', errInTargets),
     );
   }
 

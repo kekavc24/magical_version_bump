@@ -115,18 +115,14 @@ extension VersionExtension on Version {
     String? updatedPre,
     String? updatedBuild,
   }) {
-    if ((keepPre && preRelease.isEmpty) || (keepBuild && build.isEmpty)) {
-      throw MagicalException(
-        violation: 'Missing prelease/build info',
-      );
-    }
-
     return Version(
       major,
       minor,
       patch,
-      pre: updatedPre ?? (keepPre ? preRelease.join('.') : null),
-      build: updatedBuild ?? (keepBuild ? build.join('.') : null),
+      pre: updatedPre ??
+          (keepPre && preRelease.isNotEmpty ? preRelease.join('.') : null),
+      build: updatedBuild ??
+          (keepBuild && build.isNotEmpty ? build.join('.') : null),
     ).toString();
   }
 

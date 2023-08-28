@@ -20,7 +20,7 @@ mixin ModifyYaml {
   Future<({bool buildBumpFailed, String version})> dynamicBump(
     String version, {
     required List<String> versionTargets,
-    ModifyStrategy strategy = ModifyStrategy.relative,
+    required ModifyStrategy strategy,
   }) async {
     return Version.parse(version).modifyVersion(
       versionTargets: versionTargets,

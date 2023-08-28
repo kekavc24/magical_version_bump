@@ -56,11 +56,11 @@ final class SetArgumentSanitizer extends ArgumentSanitizer {
     bool isValid,
     InvalidReason? reason,
     NodesAndValues? nodesAndValues,
-  }) customValidate() {
+  }) customValidate({required bool didSetVersion}) {
     // Check if arguments results are empty
     final checkedArgs = validateArgs();
 
-    if (!checkedArgs.isValid) {
+    if (!checkedArgs.isValid && !didSetVersion) {
       return (
         isValid: checkedArgs.isValid,
         reason: checkedArgs.reason,
@@ -72,8 +72,8 @@ final class SetArgumentSanitizer extends ArgumentSanitizer {
     final preppedArgs = prepArgs();
 
     return (
-      isValid: preppedArgs.isNotEmpty,
-      reason: preppedArgs.isNotEmpty
+      isValid: preppedArgs.isNotEmpty || didSetVersion,
+      reason: preppedArgs.isNotEmpty || didSetVersion
           ? null
           : const InvalidReason('Missing arguments', 'No arguments found'),
       nodesAndValues: preppedArgs.isNotEmpty ? preppedArgs : null,

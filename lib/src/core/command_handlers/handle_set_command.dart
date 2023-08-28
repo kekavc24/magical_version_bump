@@ -11,19 +11,23 @@ class HandleSetCommand extends CommandHandler {
 
     final sanitizer = SetArgumentSanitizer(argResults: argResults);
 
-    // Validate and prep args simultaneously
-    final preppedArgs = sanitizer.customValidate();
+    // Check for modifiers
+    final checkedPath = sanitizer.pathInfo;
+    final versionModifiers = sanitizer.modifiers(checkPreset: false);
 
-    if (!preppedArgs.isValid) {
+    // Validate and prep args simultaneously
+    final preppedArgs = sanitizer.customValidate(
+      didSetVersion: versionModifiers.version != null ||
+          versionModifiers.prerelease != null ||
+          versionModifiers.build != null,
+    );
+
+    if (!preppedArgs.isValid && versionModifiers.version == null) {
       prepProgress.fail(preppedArgs.reason!.key);
       throw MagicalException(violation: preppedArgs.reason!.value);
     }
 
     prepProgress.complete('Checked arguments');
-
-    final nodesAndValues = preppedArgs.nodesAndValues!;
-    final checkedPath = sanitizer.pathInfo;
-    final versionModifiers = sanitizer.modifiers(checkPreset: false);
 
     // Read pubspec.yaml file
     final fileData = await readFile(
@@ -32,53 +36,78 @@ class HandleSetCommand extends CommandHandler {
       setPath: checkedPath.path,
     );
 
-    var version = '';
+    // Set up re-usable file
+    var editedFile = fileData.file;
 
-    // If user wants version change, check if valid
-    if (nodesAndValues.keys.contains('version') ||
+    final changeProgress = logger.progress('Updating nodes');
+
+    final nodesAndValues = preppedArgs.nodesAndValues;
+
+    if (nodesAndValues != null) {
+      final entries = nodesAndValues.entries;
+
+      for (final node in entries) {
+        editedFile = await editYamlFile(
+          editedFile,
+          node.key,
+          node.value,
+        );
+      }
+    }
+    // Set any version updated
+    if (versionModifiers.build != null ||
         versionModifiers.prerelease != null ||
-        versionModifiers.build != null ||
         versionModifiers.version != null) {
+      var version = '';
+      final oldVersion = fileData.yamlMap['version'] as String?;
+
       logger.warn('Version flag detected. Must verify version is valid');
 
       // Check version that user want to change to or the current version
       version = await validateVersion(
         logger: logger,
         useYamlVersion: false,
-        version:
-            versionModifiers.version ?? fileData.yamlMap['version'] as String?,
+        version: versionModifiers.version ?? oldVersion,
       );
-    }
 
-    // Set up re-usable file
-    var editedFile = fileData.file;
+      Version? parsedOldVersion;
 
-    final changeProgress = logger.progress('Updating nodes');
+      String? updatedVersion;
 
-    final entries = nodesAndValues.entries;
+      if (versionModifiers.keepPre ||
+          versionModifiers.keepBuild ||
+          versionModifiers.prerelease != null ||
+          versionModifiers.build != null) {
+        // Must not be null
+        if (oldVersion == null) {
+          throw MagicalException(
+            violation: 'Old version cannot be empty/null',
+          );
+        }
 
-    for (final node in entries) {
+        parsedOldVersion = Version.parse(oldVersion);
+
+        updatedVersion = Version.parse(
+          version,
+        ).setPreAndBuild(
+          keepPre: versionModifiers.keepPre,
+          keepBuild: versionModifiers.keepBuild,
+          updatedPre:
+              versionModifiers.keepPre && parsedOldVersion.preRelease.isNotEmpty
+                  ? parsedOldVersion.preRelease.join('.')
+                  : versionModifiers.prerelease,
+          updatedBuild:
+              versionModifiers.keepBuild && parsedOldVersion.build.isNotEmpty
+                  ? parsedOldVersion.build.join('.')
+                  : versionModifiers.build,
+        );
+      }
+
       editedFile = await editYamlFile(
         editedFile,
-        node.key ,
-        node.value,
+        'version',
+        updatedVersion ?? version,
       );
-    }
-
-    // Update any `set-prerelease` or `set-build` after version
-    if (versionModifiers.build != null ||
-        versionModifiers.prerelease != null ||
-        versionModifiers.version != null) {
-      final updatedVersion = Version.parse(
-        versionModifiers.version ?? version,
-      ).setPreAndBuild(
-        keepPre: versionModifiers.keepPre,
-        keepBuild: versionModifiers.keepBuild,
-        updatedPre: versionModifiers.prerelease,
-        updatedBuild: versionModifiers.build,
-      );
-
-      editedFile = await editYamlFile(editedFile, 'version', updatedVersion);
     }
 
     changeProgress.complete('Changed all nodes');
