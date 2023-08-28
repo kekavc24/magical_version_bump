@@ -10,7 +10,7 @@ import 'package:yaml/yaml.dart';
 mixin HandleFile {
   /// Read yaml file from path. If:
   ///   * `requestPath` is true. The user will be prompted for the path-to-file
-  ///   * `requestPath` is false. Uses default `setPath` 
+  ///   * `requestPath` is false. Uses default `setPath`
   ///
   Future<({String file, FileType type, String path, YamlMap yamlMap})>
       readFile({

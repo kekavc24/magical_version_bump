@@ -190,7 +190,7 @@ void main() {
         const setVersion = '11.12.13';
 
         // Version in fake.yaml is 10.10.10+10
-        const updatedVersion = '12.0.0+10'; 
+        const updatedVersion = '12.0.0+10';
 
         final args = [
           ...defaultArgs,
@@ -219,8 +219,8 @@ void main() {
 
         final args = [
           ...defaultArgs,
-        '--targets',
-        'major',
+          '--targets',
+          'major',
           '--set-version=$setVersion',
           '--set-build=$setBuild',
           '--directory=$path',

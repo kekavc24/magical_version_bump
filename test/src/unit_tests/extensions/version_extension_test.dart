@@ -64,7 +64,6 @@ void main() {
         ),
       );
     });
-
   });
 
   group('absolute versioning strategy', () {
