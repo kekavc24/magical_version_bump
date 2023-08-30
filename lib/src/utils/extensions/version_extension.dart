@@ -60,7 +60,7 @@ extension VersionExtension on Version {
       modifiedVersion = '$major.$minor.$patch';
 
       //
-      if (isPreRelease && strategy == ModifyStrategy.absolute) {
+      if (isPreRelease) {
         modifiedVersion += "-${preRelease.join('.')}";
       }
     }
@@ -70,24 +70,21 @@ extension VersionExtension on Version {
 
     // Check whether we should bump the build.
     final shouldBumpBuild =
-        buildIsBumpable && versionTargets.contains('build-number');
-
-    // Get build number just incase
-    final buildFromVersion = buildIsBumpable
-        ? build.first as int
-        : build.isEmpty && shouldBumpBuild
-            ? 1
-            : null;
+        (buildIsBumpable && versionTargets.contains('build-number')) ||
+            (build.isEmpty && versionTargets.contains('build-number'));
 
     // If build is bumpable, bump it
     if (shouldBumpBuild) {
-      final buildToModify = buildFromVersion ?? 1;
+      // Get build number just incase
+      final buildFromVersion = buildIsBumpable
+          ? build.first as int
+          : build.isEmpty && shouldBumpBuild
+              ? 0
+              : null;
 
-      final buildNumber = buildToModify + 1;
+      final buildNumber = (buildFromVersion ?? 0) + 1;
 
-      modifiedVersion += '+${buildNumber < 0 ? 0 : buildNumber}';
-
-      //
+      modifiedVersion += '+$buildNumber';
     } else {
       // Just add build number as is.
       var buildNumber = build.isEmpty
