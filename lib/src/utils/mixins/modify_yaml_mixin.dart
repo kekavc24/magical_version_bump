@@ -5,7 +5,7 @@ import 'package:yaml_edit/yaml_edit.dart';
 
 /// This mixin modifies a yaml node to desired option
 mixin ModifyYaml {
-  /// Bump or dump version by 1. Used by the `Modify` command.
+  /// Bump version by 1. Used by the `Bump` subcommand.
   ///
   /// With absolute,
   /// each version number will be bumped independently.
@@ -17,7 +17,7 @@ mixin ModifyYaml {
   /// behaviour i.e
   ///
   /// 1.1.1 -> bump major version -> 2.0.0
-  Future<({bool buildBumpFailed, String version})> dynamicBump(
+  Future<({bool buildHadIssues, String version})> dynamicBump(
     String version, {
     required List<String> versionTargets,
     required ModifyStrategy strategy,

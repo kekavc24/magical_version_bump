@@ -92,8 +92,8 @@ final class HandleBumpCommand extends CommandHandler {
     );
 
     // If build failed silently, warn user
-    if (modifiedVersion.buildBumpFailed) {
-      logger.warn('Your custom build could not be modified');
+    if (modifiedVersion.buildHadIssues) {
+      logger.warn('Your build number had issues');
     }
 
     var versionToSave = modifiedVersion.version;
