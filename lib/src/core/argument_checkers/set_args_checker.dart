@@ -39,11 +39,11 @@ final class SetArgumentsChecker extends ArgumentsChecker {
     if (parsedNodes.isNotEmpty &&
         parsedNodeValues.isNotEmpty &&
         (parsedNodes.length == parsedNodeValues.length)) {
-      for (var i = 0; i < parsedNodes.length; i++) {
+      for (final (index, node) in parsedNodes.indexed) {
         preppedArgs.update(
-          parsedNodes[i],
-          (value) => parsedNodeValues[i],
-          ifAbsent: () => parsedNodeValues[i],
+          node,
+          (value) => parsedNodeValues[index],
+          ifAbsent: () => parsedNodeValues[index],
         );
       }
     }
