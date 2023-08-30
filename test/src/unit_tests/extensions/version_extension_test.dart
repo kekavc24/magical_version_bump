@@ -44,7 +44,7 @@ void main() {
     });
 
     test('bumps build number', () {
-      const expectedBumpedVersion = '10.10.10+22';
+      const expectedBumpedVersion = '10.10.10-prerelease+22';
 
       final bumpedVersion = Version.parse(version).modifyVersion(
         versionTargets: ['build-number'],

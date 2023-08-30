@@ -85,7 +85,7 @@ void main() {
     });
 
     test('appends and bumps up only build number', () async {
-      const bumpedVersion = '11.11.11+2';
+      const bumpedVersion = '11.11.11+1';
 
       // Bump up version by 1
       final dynamicBump = await modifier.dynamicBump(
