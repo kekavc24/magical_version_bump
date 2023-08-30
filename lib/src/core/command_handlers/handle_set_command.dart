@@ -112,7 +112,7 @@ class HandleSetCommand extends CommandHandler {
 
     /// Save file changes
     await saveFile(
-      data: editedFile,
+      file: editedFile,
       path: fileData.path,
       logger: logger,
       type: fileData.fileType,

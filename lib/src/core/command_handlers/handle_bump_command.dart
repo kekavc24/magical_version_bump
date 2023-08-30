@@ -121,7 +121,7 @@ final class HandleBumpCommand extends CommandHandler {
 
     /// Save file changes
     await saveFile(
-      data: modifiedFile,
+      file: modifiedFile,
       path: fileData.path,
       logger: logger,
       type: fileData.fileType,

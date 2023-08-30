@@ -49,7 +49,7 @@ mixin HandleFile {
 
   /// Save file changes
   Future<void> saveFile({
-    required String data,
+    required String file,
     required String path,
     required Logger logger,
     required FileType type,
@@ -57,14 +57,22 @@ mixin HandleFile {
     final saveProgress = logger.progress('Saving changes');
 
     if (type == FileType.json) {
-      data = json.encode(_convertToMap(data));
+      file = _convertToPrettyJson(file);
     }
 
-    await File(path).writeAsString(data);
+    await File(path).writeAsString(file);
 
     saveProgress.complete('Saved changes');
   }
 
   /// Convert read file to YAML map
   YamlMap _convertToMap(String file) => loadYaml(file) as YamlMap;
+
+  /// Convert to pretty json
+  String _convertToPrettyJson(String file) {
+    final indent = ' ' * 4;
+    final encoder = JsonEncoder.withIndent(indent);
+
+    return encoder.convert(_convertToMap(file));
+  }
 }
