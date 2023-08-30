@@ -7,15 +7,15 @@ enum SanitizerType {
 }
 
 /// Set up desired sanitizer type on demand
-ArgumentSanitizer setUpSanitizer(
+ArgumentsChecker setUpSanitizer(
   SanitizerType type, {
   required ArgParser argParser,
   required List<String> args,
 }) {
   return switch (type) {
-    SanitizerType.setter => SetArgumentSanitizer(
+    SanitizerType.setter => SetArgumentsChecker(
         argResults: argParser.parse(args),
       ),
-    _ => BumpArgumentSanitizer(argResults: argParser.parse(args))
+    _ => BumpArgumentsChecker(argResults: argParser.parse(args))
   };
 }

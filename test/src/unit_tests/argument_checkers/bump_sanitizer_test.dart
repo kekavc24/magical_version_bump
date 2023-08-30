@@ -1,12 +1,12 @@
 import 'package:args/args.dart';
-import 'package:magical_version_bump/src/core/arg_sanitizers/arg_sanitizer.dart';
+import 'package:magical_version_bump/src/core/argument_checkers/arg_checker.dart';
 import 'package:magical_version_bump/src/utils/enums/enums.dart';
 import 'package:test/test.dart';
 
 import '../../../helpers/helpers.dart';
 
 void main() {
-  late BumpArgumentSanitizer sanitizer;
+  late BumpArgumentsChecker sanitizer;
   late ArgParser argParser;
 
   setUp(() {
@@ -34,7 +34,7 @@ void main() {
         SanitizerType.bump,
         argParser: argParser,
         args: args,
-      ) as BumpArgumentSanitizer;
+      ) as BumpArgumentsChecker;
 
       final preppedArgs = sanitizer.prepArgs();
 
@@ -54,7 +54,7 @@ void main() {
         SanitizerType.bump,
         argParser: argParser,
         args: args,
-      ) as BumpArgumentSanitizer;
+      ) as BumpArgumentsChecker;
 
       final preppedArgs = sanitizer.prepArgs();
 
@@ -72,7 +72,7 @@ void main() {
         SanitizerType.bump,
         argParser: argParser,
         args: [],
-      ) as BumpArgumentSanitizer;
+      ) as BumpArgumentsChecker;
 
       final validatedArgs = sanitizer.customValidate();
 
@@ -89,7 +89,7 @@ void main() {
         SanitizerType.bump,
         argParser: argParser,
         args: args,
-      ) as BumpArgumentSanitizer;
+      ) as BumpArgumentsChecker;
 
       final validatedArgs = sanitizer.customValidate();
 

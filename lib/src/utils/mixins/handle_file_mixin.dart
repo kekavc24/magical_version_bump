@@ -12,8 +12,13 @@ mixin HandleFile {
   ///   * `requestPath` is true. The user will be prompted for the path-to-file
   ///   * `requestPath` is false. Uses default `setPath`
   ///
-  Future<({String file, FileType type, String path, YamlMap yamlMap})>
-      readFile({
+  Future<
+      ({
+        String file,
+        FileType fileType,
+        String path,
+        String? version,
+      })> readFile({
     required bool requestPath,
     required Logger logger,
     required String setPath,
@@ -28,19 +33,23 @@ mixin HandleFile {
 
     final readProgress = logger.progress('Reading file');
     final file = await File(setPath).readAsString();
+
+    // Convert file to map
+    final fileAsMap = _convertToMap(file);
+
     readProgress.complete('Read file');
 
     return (
       path: setPath,
-      type: setPath.split('.').last.toLowerCase().fileType,
+      fileType: setPath.split('.').last.toLowerCase().fileType,
       file: file,
-      yamlMap: _convertToMap(file),
+      version: fileAsMap['version'] as String?,
     );
   }
 
   /// Save file changes
   Future<void> saveFile({
-    required String data,
+    required String file,
     required String path,
     required Logger logger,
     required FileType type,
@@ -48,14 +57,22 @@ mixin HandleFile {
     final saveProgress = logger.progress('Saving changes');
 
     if (type == FileType.json) {
-      data = json.encode(_convertToMap(data));
+      file = _convertToPrettyJson(file);
     }
 
-    await File(path).writeAsString(data);
+    await File(path).writeAsString(file);
 
     saveProgress.complete('Saved changes');
   }
 
   /// Convert read file to YAML map
   YamlMap _convertToMap(String file) => loadYaml(file) as YamlMap;
+
+  /// Convert to pretty json
+  String _convertToPrettyJson(String file) {
+    final indent = ' ' * 4;
+    final encoder = JsonEncoder.withIndent(indent);
+
+    return encoder.convert(_convertToMap(file));
+  }
 }

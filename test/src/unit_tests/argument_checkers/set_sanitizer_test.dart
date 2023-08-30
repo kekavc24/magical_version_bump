@@ -1,11 +1,11 @@
 import 'package:args/args.dart';
-import 'package:magical_version_bump/src/core/arg_sanitizers/arg_sanitizer.dart';
+import 'package:magical_version_bump/src/core/argument_checkers/arg_checker.dart';
 import 'package:test/test.dart';
 
 import '../../../helpers/helpers.dart';
 
 void main() {
-  late SetArgumentSanitizer sanitizer;
+  late SetArgumentsChecker sanitizer;
   late ArgParser argParser;
 
   final nodesAndValues = <String, String>{
@@ -59,7 +59,7 @@ void main() {
         SanitizerType.setter,
         argParser: argParser,
         args: args,
-      ) as SetArgumentSanitizer;
+      ) as SetArgumentsChecker;
 
       final preppedArgs = sanitizer.prepArgs();
 
@@ -78,7 +78,7 @@ void main() {
         SanitizerType.setter,
         argParser: argParser,
         args: [],
-      ) as SetArgumentSanitizer;
+      ) as SetArgumentsChecker;
 
       final validatedArgs = sanitizer.customValidate(didSetVersion: false);
 
@@ -94,7 +94,7 @@ void main() {
         SanitizerType.setter,
         argParser: argParser,
         args: ['--key', 'gym key', '--value', 'open gym'],
-      ) as SetArgumentSanitizer;
+      ) as SetArgumentsChecker;
 
       final validatedArgs = sanitizer.customValidate(didSetVersion: false);
 

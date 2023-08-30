@@ -4,7 +4,7 @@ import 'package:pub_semver/pub_semver.dart';
 
 extension VersionExtension on Version {
   /// Bump up version
-  ({bool buildBumpFailed, String version}) modifyVersion({
+  ({bool buildHadIssues, String version}) modifyVersion({
     required List<String> versionTargets,
     required ModifyStrategy strategy,
   }) {
@@ -60,31 +60,31 @@ extension VersionExtension on Version {
       modifiedVersion = '$major.$minor.$patch';
 
       //
-      if (isPreRelease && strategy == ModifyStrategy.absolute) {
+      if (isPreRelease) {
         modifiedVersion += "-${preRelease.join('.')}";
       }
     }
 
     // Check if build is just one integer. This makes it "bump-able"
-    final canBumpBuild = buildIsNumber();
-    final canModifyBuild = versionTargets.contains('build-number');
+    final buildIsBumpable = buildIsNumber();
 
-    // Get build number just incase
-    final buildFromVersion = canBumpBuild
-        ? build.first as int
-        : build.isEmpty && canModifyBuild
-            ? 1
-            : null;
+    // Check whether we should bump the build.
+    final shouldBumpBuild =
+        (buildIsBumpable && versionTargets.contains('build-number')) ||
+            (build.isEmpty && versionTargets.contains('build-number'));
 
     // If build is bumpable, bump it
-    if (canModifyBuild) {
-      final buildToModify = buildFromVersion ?? 1;
+    if (shouldBumpBuild) {
+      // Get build number just incase
+      final buildFromVersion = buildIsBumpable
+          ? build.first as int
+          : build.isEmpty && shouldBumpBuild
+              ? 0
+              : null;
 
-      final buildNumber = buildToModify + 1;
+      final buildNumber = (buildFromVersion ?? 0) + 1;
 
-      modifiedVersion += '+${buildNumber < 0 ? 0 : buildNumber}';
-
-      //
+      modifiedVersion += '+$buildNumber';
     } else {
       // Just add build number as is.
       var buildNumber = build.isEmpty
@@ -102,10 +102,12 @@ extension VersionExtension on Version {
       modifiedVersion += buildNumber;
     }
 
-    // Check if build was bumped on user's request
-    final didFail = !canBumpBuild && versionTargets.contains('build-number');
+    // Check if build was bumped on user's request.
+    //
+    // Fails if build ended up being "un-bumpable" but user wanted it bumped!
+    final didFail = !buildIsBumpable && versionTargets.contains('build-number');
 
-    return (buildBumpFailed: didFail, version: modifiedVersion);
+    return (buildHadIssues: didFail, version: modifiedVersion);
   }
 
   /// Set prerelease and build-number

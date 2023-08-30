@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:args/args.dart';
-import 'package:magical_version_bump/src/core/arg_sanitizers/arg_sanitizer.dart';
+import 'package:magical_version_bump/src/core/argument_checkers/arg_checker.dart';
 import 'package:magical_version_bump/src/utils/exceptions/command_exceptions.dart';
 import 'package:test/test.dart';
 import 'package:yaml/yaml.dart';

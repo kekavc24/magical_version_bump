@@ -7,6 +7,7 @@ import '../../../helpers/helpers.dart';
 
 void main() {
   const version = '10.10.10-prerelease+21';
+  const versionWithCustomBuild = '8.8.8+MagicalVersionBump';
 
   group('relative versioning strategy', () {
     test('bumps major version', () {
@@ -43,7 +44,7 @@ void main() {
     });
 
     test('bumps build number', () {
-      const expectedBumpedVersion = '10.10.10+22';
+      const expectedBumpedVersion = '10.10.10-prerelease+22';
 
       final bumpedVersion = Version.parse(version).modifyVersion(
         versionTargets: ['build-number'],
@@ -51,6 +52,15 @@ void main() {
       );
 
       expect(bumpedVersion.version, expectedBumpedVersion);
+    });
+
+    test('ignores custom build numbers', () {
+      final bumpedVersion = Version.parse(versionWithCustomBuild).modifyVersion(
+        versionTargets: ['build-number'],
+        strategy: ModifyStrategy.relative,
+      );
+
+      expect(bumpedVersion.version, versionWithCustomBuild);
     });
 
     test('throws error if more than one target is passed in', () {
@@ -109,6 +119,15 @@ void main() {
       );
 
       expect(bumpedVersion.version, expectedBumpedVersion);
+    });
+
+    test('ignores custom build numbers', () {
+      final bumpedVersion = Version.parse(versionWithCustomBuild).modifyVersion(
+        versionTargets: ['build-number'],
+        strategy: ModifyStrategy.absolute,
+      );
+
+      expect(bumpedVersion.version, versionWithCustomBuild);
     });
   });
 
@@ -193,10 +212,7 @@ void main() {
     });
 
     test('checks if build number can be bumped', () {
-      const versionWithBuild = '8.8.8+21';
-      const versionWithCustomBuild = '8.8.8+MagicalVersionBump';
-
-      final isValidNumber = Version.parse(versionWithBuild).buildIsNumber();
+      final isValidNumber = Version.parse(version).buildIsNumber();
       final isCustom = !Version.parse(versionWithCustomBuild).buildIsNumber();
 
       expect(isValidNumber, true);
