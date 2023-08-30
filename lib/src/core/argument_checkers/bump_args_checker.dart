@@ -1,8 +1,8 @@
-part of 'arg_sanitizer.dart';
+part of 'arg_checker.dart';
 
 /// Preps and validates args for modify command
-final class BumpArgumentSanitizer extends ArgumentSanitizer {
-  BumpArgumentSanitizer({required super.argResults});
+final class BumpArgumentsChecker extends ArgumentsChecker {
+  BumpArgumentsChecker({required super.argResults});
 
   /// Validate modify args
   ({bool isValid, InvalidReason? reason}) customValidate() {

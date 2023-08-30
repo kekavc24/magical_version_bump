@@ -4,20 +4,14 @@ import 'package:magical_version_bump/src/utils/extensions/extensions.dart';
 import 'package:magical_version_bump/src/utils/mixins/command_mixins.dart';
 import 'package:magical_version_bump/src/utils/typedefs/typedefs.dart';
 
-part 'bump_args_sanitizer.dart';
-part 'set_args_sanitizer.dart';
+part 'bump_args_checker.dart';
+part 'set_args_checker.dart';
 
 /// Contains basic code implementations to
-///   * Normalize args
-///   * Validate args
-///
-/// Each command has a specific way to handle this in that :
-///   * Modify command - requires specific order for flag declaration
-///   * Change command - requires no order
-///
-/// They, however, share some code.
-base class ArgumentSanitizer with NormalizeArgs, ValidateArgs {
-  ArgumentSanitizer({required this.argResults});
+///   * Prep args to desired format for each command
+///   * Validate arguments
+base class ArgumentsChecker with NormalizeArgs, ValidateArgs {
+  ArgumentsChecker({required this.argResults});
 
   /// Argument results from command
   final ArgResults? argResults;

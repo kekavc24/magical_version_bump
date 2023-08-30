@@ -9,7 +9,7 @@ class HandleSetCommand extends CommandHandler {
     // Start progress
     final prepProgress = logger.progress('Checking arguments');
 
-    final sanitizer = SetArgumentSanitizer(argResults: argResults);
+    final sanitizer = SetArgumentsChecker(argResults: argResults);
 
     // Check for modifiers
     final checkedPath = sanitizer.pathInfo;
@@ -59,15 +59,13 @@ class HandleSetCommand extends CommandHandler {
         versionModifiers.prerelease != null ||
         versionModifiers.version != null) {
       var version = '';
-      final oldVersion = fileData.yamlMap['version'] as String?;
 
       logger.warn('Version flag detected. Must verify version is valid');
 
       // Check version that user want to change to or the current version
       version = await validateVersion(
         logger: logger,
-        useYamlVersion: false,
-        version: versionModifiers.version ?? oldVersion,
+        version: versionModifiers.version ?? fileData.version,
       );
 
       Version? parsedOldVersion;
@@ -79,13 +77,13 @@ class HandleSetCommand extends CommandHandler {
           versionModifiers.prerelease != null ||
           versionModifiers.build != null) {
         // Must not be null
-        if (oldVersion == null) {
+        if (fileData.version == null) {
           throw MagicalException(
             violation: 'Old version cannot be empty/null',
           );
         }
 
-        parsedOldVersion = Version.parse(oldVersion);
+        parsedOldVersion = Version.parse(fileData.version!);
 
         updatedVersion = Version.parse(
           version,
@@ -117,7 +115,7 @@ class HandleSetCommand extends CommandHandler {
       data: editedFile,
       path: fileData.path,
       logger: logger,
-      type: fileData.type,
+      type: fileData.fileType,
     );
 
     /// Show success

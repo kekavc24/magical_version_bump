@@ -2,9 +2,6 @@ import 'package:magical_version_bump/src/utils/mixins/command_mixins.dart';
 import 'package:mason_logger/mason_logger.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:test/test.dart';
-import 'package:yaml/yaml.dart';
-
-import '../../../helpers/helpers.dart';
 
 class _MockLogger extends Mock implements Logger {}
 
@@ -15,59 +12,22 @@ class _FakeVersionValidator with ValidateVersion {}
 void main() {
   late Logger logger;
   late _FakeVersionValidator validator;
-  late YamlMap yamlMap;
-  late YamlMap nullYamlMap;
-  late YamlMap invalidYamlMap;
 
   const version = '1.1.1';
+  const prerelease = 'test';
+  const build = 'jacked';
 
   setUp(() {
     logger = _MockLogger();
     validator = _FakeVersionValidator();
-    yamlMap = loadYaml('version: $version') as YamlMap;
-    invalidYamlMap = loadYaml('version: 1.') as YamlMap;
-    nullYamlMap = loadYaml('version: ') as YamlMap;
 
     when(() => logger.progress(any())).thenReturn(_MockProgress());
-
-    // Reject base version
-    when(
-      () => logger.confirm(
-        any(),
-        defaultValue: any(
-          named: 'defaultValue',
-        ),
-      ),
-    ).thenReturn(false);
-
-    // Add default version used for testing as version desired
-    when(
-      () => logger.prompt(
-        'Enter version number : ',
-        defaultValue: any(
-          named: 'defaultValue',
-        ),
-      ),
-    ).thenReturn(version);
   });
 
   group('validate versions', () {
-    test('validates version from yaml map as valid', () async {
+    test('returns version passed if valid', () async {
       final validatedVersion = await validator.validateVersion(
         logger: logger,
-        useYamlVersion: true,
-        yamlMap: yamlMap,
-      );
-
-      verify(() => logger.progress('Checking version number')).called(1);
-
-      expect(validatedVersion, version);
-    });
-
-    test('validates version passed as valid', () async {
-      final validatedVersion = await validator.validateVersion(
-        logger: logger,
-        useYamlVersion: false,
         version: version,
       );
 
@@ -75,25 +35,33 @@ void main() {
 
       expect(validatedVersion, version);
     });
-
-    test('throws error when yaml map is null', () async {
-      const violation = 'YAML Map cannot be null';
-
-      final validatedVersion = validator.validateVersion(
-        logger: logger,
-        useYamlVersion: true,
-      );
-
-      expect(() async => validatedVersion, throwsViolation(violation));
-    });
   });
 
   group('prompts for version', () {
-    test('prompts when yaml map version is null', () async {
+    test('returns custom version when version is null', () async {
+      // Reject base version
+      when(
+        () => logger.confirm(
+          any(),
+          defaultValue: any(
+            named: 'defaultValue',
+          ),
+        ),
+      ).thenReturn(false);
+
+      // Add default version used for testing as version desired
+      when(
+        () => logger.prompt(
+          'Enter version number : ',
+          defaultValue: any(
+            named: 'defaultValue',
+          ),
+        ),
+      ).thenReturn(version);
+
       final validatedVersion = await validator.validateVersion(
         logger: logger,
-        useYamlVersion: true,
-        yamlMap: nullYamlMap,
+        version: null,
       );
 
       verify(() => logger.progress('Checking version number')).called(1);
@@ -101,10 +69,30 @@ void main() {
       expect(validatedVersion, version);
     });
 
-    test('prompts when version passed is null', () async {
+    test('adds custom version when version is invalid', () async {
+      // Reject base version
+      when(
+        () => logger.confirm(
+          any(),
+          defaultValue: any(
+            named: 'defaultValue',
+          ),
+        ),
+      ).thenReturn(false);
+
+      // Add default version used for testing as version desired
+      when(
+        () => logger.prompt(
+          'Enter version number : ',
+          defaultValue: any(
+            named: 'defaultValue',
+          ),
+        ),
+      ).thenReturn(version);
+
       final validatedVersion = await validator.validateVersion(
         logger: logger,
-        useYamlVersion: false,
+        version: '1.1',
       );
 
       verify(() => logger.progress('Checking version number')).called(1);
@@ -112,28 +100,49 @@ void main() {
       expect(validatedVersion, version);
     });
 
-    test('prompts when yaml map version is invalid', () async {
-      final validatedVersion = await validator.validateVersion(
-        logger: logger,
-        useYamlVersion: true,
-        yamlMap: invalidYamlMap,
-      );
+    test(
+      'adds base version and adds custom prerelease & build info',
+      () async {
+        const expectedVersion = '0.0.0-$prerelease+$build';
 
-      verify(() => logger.progress('Checking version number')).called(1);
+        // Reject base version
+        when(
+          () => logger.confirm(
+            any(),
+            defaultValue: any(
+              named: 'defaultValue',
+            ),
+          ),
+        ).thenReturn(true);
 
-      expect(validatedVersion, version);
-    });
+        // Add default prerelease & build as desired
+        when(
+          () => logger.prompt(
+            'Enter prerelease info : ',
+            defaultValue: any(
+              named: 'defaultValue',
+            ),
+          ),
+        ).thenReturn(prerelease);
 
-    test('prompts when version passed is invalid', () async {
-      final validatedVersion = await validator.validateVersion(
-        logger: logger,
-        useYamlVersion: false,
-        version: '1.',
-      );
+        when(
+          () => logger.prompt(
+            'Enter build number : ',
+            defaultValue: any(
+              named: 'defaultValue',
+            ),
+          ),
+        ).thenReturn(build);
 
-      verify(() => logger.progress('Checking version number')).called(1);
+        final validatedVersion = await validator.validateVersion(
+          logger: logger,
+          version: null,
+        );
 
-      expect(validatedVersion, version);
-    });
+        verify(() => logger.progress('Checking version number')).called(1);
+
+        expect(validatedVersion, expectedVersion);
+      },
+    );
   });
 }

@@ -9,7 +9,7 @@ final class HandleBumpCommand extends CommandHandler {
     // Command progress
     final prepProgress = logger.progress('Checking arguments');
 
-    final sanitizer = BumpArgumentSanitizer(argResults: argResults);
+    final sanitizer = BumpArgumentsChecker(argResults: argResults);
 
     // Validate args
     final validatedArgs = sanitizer.customValidate();
@@ -19,18 +19,18 @@ final class HandleBumpCommand extends CommandHandler {
       throw MagicalException(violation: validatedArgs.reason!.value);
     }
 
-    // Final sanitization to desired format
+    // Required information to bump version
     final preppedArgs = sanitizer.prepArgs();
-    final checkedPath = sanitizer.pathInfo;
+    final pathInfo = sanitizer.pathInfo;
     final versionModifiers = sanitizer.modifiers(checkPreset: true);
 
     prepProgress.complete('Checked arguments');
 
     // Read pubspec.yaml file
     final fileData = await readFile(
-      requestPath: checkedPath.requestPath,
+      requestPath: pathInfo.requestPath,
       logger: logger,
-      setPath: checkedPath.path,
+      setPath: pathInfo.path,
     );
 
     var currentVersion = '';
@@ -38,22 +38,26 @@ final class HandleBumpCommand extends CommandHandler {
     // Preset any values before validating the version. When `--preset` flag is
     // used or `--set-version` option
     if (versionModifiers.preset || versionModifiers.presetOnlyVersion) {
-      // Parse old version
       Version? oldVersion;
 
-      if (fileData.yamlMap['version'] != null) {
-        oldVersion = Version.parse(fileData.yamlMap['version'].toString());
+      if (fileData.version != null) {
+        oldVersion = Version.parse(fileData.version!);
       }
 
-      // Throw error if both 'set-version' and old version are null
+      /// Throw error if both `set-version` and [oldVersion] are null
+      ///
       if (versionModifiers.version == null && oldVersion == null) {
         throw MagicalException(
           violation: 'At least one valid version is required.',
         );
       }
 
+      /// Fallback to old version if version from modifiers is null.
+      /// Since `set-prerelease` or `set-build` in `preset` may be used but not
+      /// `set-version`
+      ///
       currentVersion = Version.parse(
-        versionModifiers.version ?? oldVersion.toString(),
+        versionModifiers.version ?? fileData.version!,
       ).setPreAndBuild(
         updatedPre: versionModifiers.keepPre
             ? (oldVersion!.preRelease.isEmpty
@@ -66,14 +70,15 @@ final class HandleBumpCommand extends CommandHandler {
       );
     }
 
-    // Validate version and get correct version if invalid. Only use the local
-    // version if the version was never preset
+    /// Validate version and get correct version if invalid. Only use the local
+    /// version if the version was never preset using `set-version`
+    ///
+    /// When preset, the [currentVersion] will no be empty.
     currentVersion = await validateVersion(
       logger: logger,
-      useYamlVersion:
-          !versionModifiers.preset && !versionModifiers.presetOnlyVersion,
-      yamlMap: fileData.yamlMap,
-      version: currentVersion,
+      version: !versionModifiers.preset && !versionModifiers.presetOnlyVersion
+          ? fileData.version
+          : currentVersion,
     );
 
     // Modify the version
@@ -119,7 +124,7 @@ final class HandleBumpCommand extends CommandHandler {
       data: modifiedFile,
       path: fileData.path,
       logger: logger,
-      type: fileData.type,
+      type: fileData.fileType,
     );
 
     /// Show success

@@ -1,7 +1,5 @@
-import 'package:magical_version_bump/src/utils/exceptions/command_exceptions.dart';
 import 'package:mason_logger/mason_logger.dart';
 import 'package:pub_semver/pub_semver.dart';
-import 'package:yaml/yaml.dart';
 
 /// This mixin validates and prompts for correct version to be set if invalid
 mixin ValidateVersion {
@@ -15,39 +13,20 @@ mixin ValidateVersion {
   /// * `version` - only passed in by `Change` command
   Future<String> validateVersion({
     required Logger logger,
-    required bool useYamlVersion,
-    YamlMap? yamlMap,
-    String? version,
+    required String? version,
   }) async {
     final checkProgress = logger.progress('Checking version number');
 
-    var validVersion = '';
-
-    // Modify command uses version in yaml.
-    if (useYamlVersion) {
-      if (yamlMap == null) {
-        throw MagicalException(violation: 'YAML Map cannot be null');
-      }
-
-      if (yamlMap.containsKey('version')) {
-        validVersion = yamlMap['version']?.toString() ?? '';
-      }
-    } else {
-      validVersion = version ?? '';
-    }
-
-    if (validVersion.isEmpty) {
+    if (version == null) {
       checkProgress.fail('Missing version number');
 
       return _promptForVersion(logger);
     }
 
-    final isValid = _versionIsValid(validVersion);
-
-    if (isValid) {
+    if (_versionIsValid(version)) {
       checkProgress.complete('Validated version number');
 
-      return validVersion;
+      return version;
     }
 
     checkProgress.fail('Invalid version number');

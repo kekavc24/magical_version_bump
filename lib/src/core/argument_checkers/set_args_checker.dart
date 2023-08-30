@@ -1,7 +1,7 @@
-part of 'arg_sanitizer.dart';
+part of 'arg_checker.dart';
 
-final class SetArgumentSanitizer extends ArgumentSanitizer {
-  SetArgumentSanitizer({required super.argResults});
+final class SetArgumentsChecker extends ArgumentsChecker {
+  SetArgumentsChecker({required super.argResults});
 
   /// Prep arguments and values as Map<String, String>
   @override
