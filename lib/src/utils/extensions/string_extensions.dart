@@ -1,6 +1,6 @@
 import 'package:magical_version_bump/src/utils/enums/enums.dart';
 
-extension Versioning on String {
+extension StringExtension on String {
   /// Get file type
   FileType get fileType => switch (this) {
         'yaml' => FileType.yaml,
@@ -13,4 +13,8 @@ extension Versioning on String {
         'absolute' => ModifyStrategy.absolute,
         _ => ModifyStrategy.relative
       };
+
+  /// Split and trim
+  Iterable<String> splitAndTrim(String pattern) =>
+      split(pattern).map((e) => e.trim());
 }
