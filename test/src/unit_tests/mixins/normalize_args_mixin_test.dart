@@ -2,6 +2,8 @@ import 'package:args/args.dart';
 import 'package:magical_version_bump/src/utils/mixins/command_mixins.dart';
 import 'package:test/test.dart';
 
+import '../../../helpers/helpers.dart';
+
 class _FakeNormalizer with NormalizeArgs {}
 
 void main() {
@@ -125,6 +127,151 @@ void main() {
         expect(versionModifiers.keepPre, false);
         expect(versionModifiers.keepBuild, false);
       },
+    );
+  });
+
+  group('dictionary', () {
+    test('extracts key and value', () {
+      final dictionary = normalizer.extractDictionary(
+        'testKey=testValue',
+        append: false,
+      );
+
+      expect(dictionary.rootKeys, equals(['testKey']));
+      expect(dictionary.data is String, true);
+      expect(dictionary.data, 'testValue');
+    });
+
+    test('extracts multiple keys and value', () {
+      final dictionary = normalizer.extractDictionary(
+        'testKey|anotherKey=testValue',
+        append: false,
+      );
+
+      expect(dictionary.rootKeys, equals(['testKey', 'anotherKey']));
+      expect(dictionary.data is String, true);
+      expect(dictionary.data, 'testValue');
+    });
+
+    test('extracts key and multiple values', () {
+      final dictionary = normalizer.extractDictionary(
+        'testKey=testValue,anotherValue',
+        append: false,
+      );
+
+      expect(dictionary.rootKeys, equals(['testKey']));
+      expect(dictionary.data is List<String>, true);
+      expect(dictionary.data, equals(['testValue', 'anotherValue']));
+    });
+
+    test('extracts key and multiple values, retains non-empty', () {
+      final dictionary = normalizer.extractDictionary(
+        'testKey=testValue,anotherValue,',
+        append: false,
+      );
+
+      expect(dictionary.rootKeys, equals(['testKey']));
+      expect(dictionary.data is List<String>, true);
+      expect(dictionary.data, equals(['testValue', 'anotherValue']));
+    });
+
+    test('extracts multiple keys and values', () {
+      final dictionary = normalizer.extractDictionary(
+        'testKey|anotherKey=testValue,anotherValue',
+        append: false,
+      );
+
+      expect(dictionary.rootKeys, equals(['testKey', 'anotherKey']));
+      expect(dictionary.data is List<String>, true);
+      expect(dictionary.data, equals(['testValue', 'anotherValue']));
+    });
+
+    test('extracts key and mapped values', () {
+      final dictionary = normalizer.extractDictionary(
+        'testKey=testMapKey:testMapValue',
+        append: false,
+      );
+
+      expect(dictionary.rootKeys, equals(['testKey']));
+      expect(dictionary.data is Map<String, String>, true);
+      expect(
+        dictionary.data,
+        equals({'testMapKey': 'testMapValue'}),
+      );
+    });
+
+    test('extracts key and mapped values, sets empty pairs to null', () {
+      final dictionary = normalizer.extractDictionary(
+        'testKey=testMapKey:',
+        append: false,
+      );
+
+      expect(dictionary.rootKeys, equals(['testKey']));
+      expect(dictionary.data is Map<String, String>, true);
+      expect(
+        dictionary.data,
+        equals({'testMapKey': 'null'}),
+      );
+    });
+
+    test('extracts multiple keys and mapped values', () {
+      final dictionary = normalizer.extractDictionary(
+        'testKey|anotherKey=testMapKey:testMapValue,otherMapKey:otherMapValue',
+        append: false,
+      );
+
+      final expectedMappedValues = <String, String>{
+        'testMapKey': 'testMapValue',
+        'otherMapKey': 'otherMapValue',
+      };
+
+      expect(dictionary.rootKeys, equals(['testKey', 'anotherKey']));
+      expect(dictionary.data is Map<String, String>, true);
+      expect(dictionary.data, equals(expectedMappedValues));
+    });
+  });
+
+  test('throws error when parsed value is empty', () {
+    expect(
+      () => normalizer.extractDictionary('', append: false),
+      throwsViolation('The root key cannot be empty/null'),
+    );
+  });
+
+  test('throws error when parsed value has no key-value pair', () {
+    const valueWithOnePair = 'key=';
+    const valueWithBlanks = '=';
+
+    expect(
+      () => normalizer.extractDictionary(
+        valueWithBlanks,
+        append: false,
+      ),
+      throwsViolation(
+        'Invalid keys and value pair at "$valueWithBlanks"',
+      ),
+    );
+
+    expect(
+      () => normalizer.extractDictionary(
+        valueWithOnePair,
+        append: false,
+      ),
+      throwsViolation(
+        'Invalid keys and value pair at "$valueWithOnePair"',
+      ),
+    );
+  });
+
+  test('throws error when parsed value has non-uniform formats', () {
+    const nonUniformValue = 'key=value,mapKey:mapValue';
+
+    expect(
+      () => normalizer.extractDictionary(
+        nonUniformValue,
+        append: false,
+      ),
+      throwsViolation('Mixed format at $nonUniformValue'),
     );
   });
 }
