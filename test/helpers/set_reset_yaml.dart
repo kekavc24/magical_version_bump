@@ -4,12 +4,12 @@ part of 'helpers.dart';
 String getTestFile() => 'fake.yaml';
 
 /// Get version from fake.yaml before test starts
-Future<String> readFileNode(String node) async {
+Future<dynamic> readFileNode(String node) async {
   final path = getTestFile();
 
   final file = await File(path).readAsString();
 
-  return getNodeValue(file, node);
+  return readNestedNodes(file, [node]);
 }
 
 /// Reset file to initial version
