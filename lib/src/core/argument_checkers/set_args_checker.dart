@@ -37,7 +37,7 @@ final class SetArgumentsChecker extends ArgumentsChecker {
   ({
     bool isValid,
     InvalidReason? reason,
-    List<Dictionary>? dictionaries,
+    List<Dictionary> dictionaries,
   }) customValidate({required bool didSetVersion}) {
     // Check if arguments results are empty
     final checkedArgs = validateArgs();
@@ -46,7 +46,7 @@ final class SetArgumentsChecker extends ArgumentsChecker {
       return (
         isValid: checkedArgs.isValid,
         reason: checkedArgs.reason,
-        dictionaries: null,
+        dictionaries: [],
       );
     }
 
@@ -58,7 +58,7 @@ final class SetArgumentsChecker extends ArgumentsChecker {
       reason: preppedArgs.isNotEmpty || didSetVersion
           ? null
           : const InvalidReason('Missing arguments', 'No arguments found'),
-      dictionaries: preppedArgs.isNotEmpty ? preppedArgs : null,
+      dictionaries: preppedArgs.isNotEmpty ? preppedArgs : [],
     );
   }
 }
