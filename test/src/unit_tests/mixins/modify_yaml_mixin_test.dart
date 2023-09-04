@@ -1,6 +1,5 @@
 import 'package:magical_version_bump/src/utils/enums/enums.dart';
 import 'package:magical_version_bump/src/utils/mixins/command_mixins.dart';
-import 'package:magical_version_bump/src/utils/typedefs/typedefs.dart';
 import 'package:test/test.dart';
 import 'package:yaml/yaml.dart';
 
@@ -174,7 +173,7 @@ void main() {
     });
   });
 
-  group('recursive function appends', () {
+  group('nested update appends', () {
     test(
       'string to deepest key/value pair and converts value to list',
       () {
@@ -182,8 +181,7 @@ void main() {
         const targetKey = 'deeper deepest key';
         const update = 'another value';
 
-        final updatedValue = modifier.recursiveUpdate(
-          depth: keys.length,
+        final updatedValue = modifier.updateNestedTarget(
           keys: keys,
           yamlMap: testYamlMap,
           targetKey: targetKey,
@@ -209,8 +207,7 @@ void main() {
         const targetKey = 'deeper deepest key';
         const update = ['another value', 'double other value'];
 
-        final updatedValue = modifier.recursiveUpdate(
-          depth: keys.length,
+        final updatedValue = modifier.updateNestedTarget(
           keys: keys,
           yamlMap: testYamlMap,
           targetKey: targetKey,
@@ -236,8 +233,7 @@ void main() {
         const targetKey = 'another deepest key';
         const update = 'another value';
 
-        final updatedValue = modifier.recursiveUpdate(
-          depth: keys.length,
+        final updatedValue = modifier.updateNestedTarget(
           keys: keys,
           yamlMap: testYamlMap,
           targetKey: targetKey,
@@ -263,8 +259,7 @@ void main() {
         const targetKey = 'another deepest key';
         const update = ['another value', 'double other value'];
 
-        final updatedValue = modifier.recursiveUpdate(
-          depth: keys.length,
+        final updatedValue = modifier.updateNestedTarget(
           keys: keys,
           yamlMap: testYamlMap,
           targetKey: targetKey,
@@ -290,8 +285,7 @@ void main() {
         const targetKey = 'other depeest key';
         const update = {'another value': 'double other value'};
 
-        final updatedValue = modifier.recursiveUpdate(
-          depth: keys.length,
+        final updatedValue = modifier.updateNestedTarget(
           keys: keys,
           yamlMap: testYamlMap,
           targetKey: targetKey,
@@ -314,7 +308,7 @@ void main() {
     );
   });
 
-  group('recursive function overwrites', () {
+  group('nested update overwrites', () {
     test(
       'deepest key/value pair and converts value to string',
       () {
@@ -322,8 +316,7 @@ void main() {
         const targetKey = 'deeper deepest key';
         const update = 'another value';
 
-        final updatedValue = modifier.recursiveUpdate(
-          depth: keys.length,
+        final updatedValue = modifier.updateNestedTarget(
           keys: keys,
           yamlMap: testYamlMap,
           targetKey: targetKey,
@@ -349,8 +342,7 @@ void main() {
         const targetKey = 'deeper deepest key';
         const update = ['another value', 'double other value'];
 
-        final updatedValue = modifier.recursiveUpdate(
-          depth: keys.length,
+        final updatedValue = modifier.updateNestedTarget(
           keys: keys,
           yamlMap: testYamlMap,
           targetKey: targetKey,
@@ -376,8 +368,7 @@ void main() {
         const targetKey = 'deeper deepest key';
         const update = {'another value': 'double other value'};
 
-        final updatedValue = modifier.recursiveUpdate(
-          depth: keys.length,
+        final updatedValue = modifier.updateNestedTarget(
           keys: keys,
           yamlMap: testYamlMap,
           targetKey: targetKey,
@@ -397,14 +388,13 @@ void main() {
     );
   });
 
-  group('recursive function terminates', () {
+  group('nested update terminates', () {
     test('when key is missing at root', () {
       final keys = ['missing root key', 'deeper key'];
       const targetKey = 'deeper deepest key';
       const update = 'another value';
 
-      final updatedValue = modifier.recursiveUpdate(
-        depth: keys.length,
+      final updatedValue = modifier.updateNestedTarget(
         keys: keys,
         yamlMap: testYamlMap,
         targetKey: targetKey,
@@ -423,8 +413,7 @@ void main() {
       const targetKey = 'deeper deepest key';
       const update = 'another value';
 
-      final updatedValue = modifier.recursiveUpdate(
-        depth: keys.length,
+      final updatedValue = modifier.updateNestedTarget(
         keys: keys,
         yamlMap: testYamlMap,
         targetKey: targetKey,
@@ -434,7 +423,7 @@ void main() {
 
       expect(updatedValue.failed, false);
       expect(updatedValue.failedReason, null);
-      expect(updatedValue.finalDepth, 1);
+      expect(updatedValue.finalDepth, 2);
       expect(updatedValue.updatedValue, null);
     });
 
@@ -443,8 +432,7 @@ void main() {
       const targetKey = 'missing key';
       const update = 'another value';
 
-      final updatedValue = modifier.recursiveUpdate(
-        depth: keys.length,
+      final updatedValue = modifier.updateNestedTarget(
         keys: keys,
         yamlMap: testYamlMap,
         targetKey: targetKey,
@@ -465,8 +453,7 @@ void main() {
         const targetKey = 'missing key';
         const update = 'another value';
 
-        final updatedValue = modifier.recursiveUpdate(
-          depth: keys.length,
+        final updatedValue = modifier.updateNestedTarget(
           keys: keys,
           yamlMap: testYamlMap,
           targetKey: targetKey,
@@ -488,8 +475,7 @@ void main() {
         const targetKey = 'missing key';
         const update = 'another value';
 
-        final updatedValue = modifier.recursiveUpdate(
-          depth: keys.length,
+        final updatedValue = modifier.updateNestedTarget(
           keys: keys,
           yamlMap: testYamlMap,
           targetKey: targetKey,
@@ -509,8 +495,7 @@ void main() {
       const targetKey = 'deeper deepest key';
       const update = {'another value': 'double other value'};
 
-      final updatedValue = modifier.recursiveUpdate(
-        depth: keys.length,
+      final updatedValue = modifier.updateNestedTarget(
         keys: keys,
         yamlMap: testYamlMap,
         targetKey: targetKey,
@@ -532,8 +517,7 @@ void main() {
       const targetKey = 'other depeest key';
       const update = 'append value';
 
-      final updatedValue = modifier.recursiveUpdate(
-        depth: keys.length,
+      final updatedValue = modifier.updateNestedTarget(
         keys: keys,
         yamlMap: testYamlMap,
         targetKey: targetKey,
@@ -555,8 +539,7 @@ void main() {
       const targetKey = 'other depeest key';
       const update = ['append value'];
 
-      final updatedValue = modifier.recursiveUpdate(
-        depth: keys.length,
+      final updatedValue = modifier.updateNestedTarget(
         keys: keys,
         yamlMap: testYamlMap,
         targetKey: targetKey,
@@ -577,7 +560,10 @@ void main() {
   group('converts unused keys to dart map', () {
     test('for one key', () {
       final map = modifier.convertToDartMap(
-        otherKeys: ['one key'],
+        YamlMap.wrap({}),
+        append: false,
+        pathKeys: [],
+        missingKeys: ['one key'],
         targetKey: 'targetKey',
         data: 'data',
       );
@@ -593,7 +579,10 @@ void main() {
 
     test('for multiple keys', () {
       final map = modifier.convertToDartMap(
-        otherKeys: ['one key', 'two key', 'three key'],
+        YamlMap.wrap({}),
+        append: false,
+        pathKeys: [],
+        missingKeys: ['one key', 'two key', 'three key'],
         targetKey: 'targetKey',
         data: 'data',
       );
@@ -624,6 +613,8 @@ void main() {
       );
 
       final formattedOutput = modifier.formatOutput(
+        YamlMap.wrap({}),
+        append: false,
         rootKeys: ['test'],
         targetKey: 'target',
         data: 'data',
@@ -645,6 +636,8 @@ void main() {
       );
 
       final formattedOutput = modifier.formatOutput(
+        YamlMap.wrap({}),
+        append: false,
         rootKeys: ['test'],
         targetKey: 'target',
         data: 'data',
@@ -666,6 +659,8 @@ void main() {
       );
 
       final formattedOutput = modifier.formatOutput(
+        YamlMap.wrap({}),
+        append: false,
         rootKeys: ['test'],
         targetKey: 'target',
         data: 'data',
@@ -687,6 +682,8 @@ void main() {
       );
 
       final formattedOutput = modifier.formatOutput(
+        YamlMap.wrap({}),
+        append: false,
         rootKeys: ['test', 'other test key'],
         targetKey: 'target',
         data: 'data',
@@ -710,6 +707,8 @@ void main() {
       );
 
       final formattedOutput = modifier.formatOutput(
+        YamlMap.wrap({}),
+        append: false,
         rootKeys: [
           'test',
           'other test key',
@@ -722,15 +721,14 @@ void main() {
       );
 
       final expectedDataToSave = {
-        'another key': {
-          'another test key': {'target': 'data'},
+        'other test key': {
+          'another key': {
+            'another test key': {'target': 'data'},
+          },
         },
       };
 
-      expect(
-        formattedOutput.path,
-        equals(['test', 'other test key']),
-      );
+      expect(formattedOutput.path, equals(['test']));
       expect(formattedOutput.dataToSave, expectedDataToSave);
     });
   });

@@ -1,6 +1,7 @@
 import 'package:magical_version_bump/src/utils/enums/enums.dart';
 import 'package:magical_version_bump/src/utils/exceptions/command_exceptions.dart';
 import 'package:magical_version_bump/src/utils/extensions/extensions.dart';
+import 'package:magical_version_bump/src/utils/extensions/map_extensions.dart';
 import 'package:magical_version_bump/src/utils/typedefs/typedefs.dart';
 import 'package:pub_semver/pub_semver.dart';
 import 'package:yaml/yaml.dart';
@@ -75,8 +76,7 @@ mixin ModifyYaml {
     /// * `targetKey` is the last element removed
     final targetKey = rootKeys.removeAt(depth);
 
-    final recursiveOutput = recursiveUpdate(
-      depth: depth,
+    final recursiveOutput = updateNestedTarget(
       keys: rootKeys,
       yamlMap: fileAsYamlMap,
       targetKey: targetKey,
@@ -92,6 +92,8 @@ mixin ModifyYaml {
     }
 
     final formattedOutput = formatOutput(
+      fileAsYamlMap,
+      append: dictionary.append,
       rootKeys: rootKeys,
       targetKey: targetKey,
       data: dictionary.data,
@@ -105,199 +107,160 @@ mixin ModifyYaml {
     return editor.toString();
   }
 
-  /// Read & update yaml map recursively
-  RecursiveOutput recursiveUpdate({
-    required int depth,
+  ///
+  NestedUpdate updateNestedTarget({
     required List<String> keys,
     required YamlMap yamlMap,
     required String targetKey,
     required dynamic update,
     required bool append,
   }) {
-    /// Base condition
-    if (depth == 0) {
-      // Must be in map
-      if (!yamlMap.containsKey(targetKey)) {
+    final output = <String, dynamic>{targetKey: null};
+
+    // Value to add to target
+    dynamic valueToAppend;
+
+    var tempOutput = <dynamic, dynamic>{}..addAll(yamlMap);
+
+    /// Loop all keys reading values associated with them
+    for (final (index, key) in keys.indexed) {
+      final depth = keys.length - index;
+
+      // Must have key
+      if (!tempOutput.containsKey(key)) {
         return (
           failed: false,
           failedReason: null,
-          finalDepth: depth,
+          finalDepth: depth == keys.length ? depth : depth + 1,
           updatedValue: null,
         );
       }
 
-      final recursiveOutput = <String, dynamic>{targetKey: null};
-      dynamic valueToAppend;
+      final valueFromMap = tempOutput[key];
 
-      final targetKeyValue = yamlMap[targetKey];
-      final targetValIsNull = targetKeyValue.runtimeType.toString() == 'null';
-
-      if (append && targetValIsNull || !append) {
-        valueToAppend = update is String && !append
-            ? update
-            : update is String && append
-                ? <String>[update]
-                : update is List<String>
-                    ? <String>[...update]
-                    : update as Map<String, String>;
-
-        recursiveOutput.update(targetKey, (value) => valueToAppend);
-
+      /// Only return a failed status if user wanted to append and current
+      /// value is not a map of other values.
+      ///
+      /// If append is false, indicates we need to overwrite any existing value
+      if (valueFromMap is! Map<dynamic, dynamic>) {
         return (
-          failed: false,
-          failedReason: null,
-          finalDepth: 0,
-          updatedValue: recursiveOutput,
-        );
-      }
+          failed: valueFromMap != null && append,
+          failedReason:
+              valueFromMap != null && append ? 'Cannot append at $key' : null,
+          finalDepth: valueFromMap != null && append && depth != keys.length
+              ? (depth + 1)
 
-      // Check for mismatch when target value is not null
-      if ((targetKeyValue is String || targetKeyValue is YamlList) &&
-          (update is! String && update is! List<String>)) {
-        return (
-          failed: true,
-          failedReason: 'Cannot append new values at $targetKey',
-          finalDepth: 0,
-          updatedValue: null,
-        );
-      } else if (targetKeyValue is YamlMap && update is! Map<String, String>) {
-        return (
-          failed: true,
-          failedReason: 'Cannot append new mapped values at $targetKey',
-          finalDepth: 0,
+              // If maybe value was null or not but we are not appending
+              : !append
+                  ? depth - 1
+                  : depth,
           updatedValue: null,
         );
       }
 
-      // Convert all strings to list of strings
-      if (targetKeyValue is String) {
-        valueToAppend = update is String
-            ? <String>[targetKeyValue, update]
-            : <String>[targetKeyValue, ...update as List<String>];
+      tempOutput = valueFromMap;
+    }
 
-        recursiveOutput.update(targetKey, (value) => valueToAppend);
-      } else if (targetKeyValue is YamlList) {
-        valueToAppend = update is String
-            ? [...targetKeyValue, update]
-            : [...targetKeyValue, ...update as List<String>];
+    // Target must be in map
+    if (!tempOutput.containsKey(targetKey)) {
+      return (
+        failed: false,
+        failedReason: null,
+        finalDepth: 0,
+        updatedValue: null,
+      );
+    }
 
-        recursiveOutput.update(targetKey, (value) => valueToAppend);
-      } else {
-        valueToAppend = <dynamic, dynamic>{}
-          ..addAll(targetKeyValue as YamlMap)
-          ..addAll(update as Map<String, String>);
+    final targetKeyValue = tempOutput[targetKey];
+    final targetValIsNull = targetKeyValue == null;
 
-        recursiveOutput.update(targetKey, (value) => valueToAppend);
-      }
+    if (append && targetValIsNull || !append) {
+      valueToAppend = update is String && !append
+          ? update
+          : update is String && append
+              ? <String>[update]
+              : update is List<String>
+                  ? <String>[...update]
+                  : update as Map<String, String>;
+
+      output.update(targetKey, (value) => valueToAppend);
 
       return (
         failed: false,
         failedReason: null,
         finalDepth: 0,
-        updatedValue: recursiveOutput,
+        updatedValue: output,
       );
     }
 
-    /// Another base condition that terminates at current stage if no such key
-    /// is present
-    final currentKey = keys.first;
-
-    if (!yamlMap.containsKey(currentKey)) {
+    // Check for mismatch when target value is not null
+    if ((targetKeyValue is String || targetKeyValue is YamlList) &&
+        (update is! String && update is! List<String>)) {
       return (
-        failed: false,
-        failedReason: null,
-        finalDepth: depth,
+        failed: true,
+        failedReason: 'Cannot append new values at $targetKey',
+        finalDepth: 0,
+        updatedValue: null,
+      );
+    } else if (targetKeyValue is YamlMap && update is! Map<String, String>) {
+      return (
+        failed: true,
+        failedReason: 'Cannot append new mapped values at $targetKey',
+        finalDepth: 0,
         updatedValue: null,
       );
     }
 
-    // Reduce depth, as the current is present
-    final currentDepth = depth - 1;
+    // Convert all strings to list of strings
+    if (targetKeyValue is String) {
+      valueToAppend = update is String
+          ? <String>[targetKeyValue, update]
+          : <String>[targetKeyValue, ...update as List<String>];
 
-    // Check if value is a yaml map
-    final currentValue = yamlMap[currentKey];
+      output.update(targetKey, (value) => valueToAppend);
+    } else if (targetKeyValue is YamlList) {
+      valueToAppend = update is String
+          ? [...targetKeyValue, update]
+          : [...targetKeyValue, ...update as List<String>];
 
-    if (currentValue is YamlMap) {
-      final retainedKeys = [...keys]..removeAt(0);
+      output.update(targetKey, (value) => valueToAppend);
+    } else {
+      valueToAppend = <dynamic, dynamic>{}
+        ..addAll(targetKeyValue as YamlMap)
+        ..addAll(update as Map<String, String>);
 
-      return recursiveUpdate(
-        depth: currentDepth,
-        keys: retainedKeys,
-        yamlMap: currentValue,
-        targetKey: targetKey,
-        update: update,
-        append: append,
-      );
+      output.update(targetKey, (value) => valueToAppend);
     }
 
-    final didFail = currentValue.runtimeType.toString() != 'null';
-
-    /// Only return a failed status if user wanted to append and current
-    /// value is not a map of other values.
-    ///
-    /// If append is false, indicates we need to overwrite any existing value
     return (
-      failed: didFail && append,
-      failedReason: didFail && append ? 'Cannot append at $currentKey' : null,
-      finalDepth: didFail && append ? depth : currentDepth,
-      updatedValue: null,
+      failed: false,
+      failedReason: null,
+      finalDepth: 0,
+      updatedValue: output,
     );
   }
 
   /// Format recursive output
-  ({List<String> path, Map<String, dynamic> dataToSave}) formatOutput({
+  ({List<String> path, Map<dynamic, dynamic> dataToSave}) formatOutput(
+    YamlMap fileAsMap, {
+    required bool append,
     required List<String> rootKeys,
     required String targetKey,
     required dynamic data,
-    required RecursiveOutput output,
+    required NestedUpdate output,
   }) {
-    final terminalDepth = output.finalDepth;
-
     /// In case recursive function managed to reach the end.
     ///
     /// * If data is null, means the final key doesn't exist and needs to be
     /// created.
     /// * Recursive function will update and return the target key with all
     /// its data if successful
-    if (terminalDepth == 0) {
-      return (
-        path: rootKeys,
-        dataToSave: output.updatedValue == null
-            ? {targetKey: data}
-            : output.updatedValue!,
-      );
-    }
-
-    /// Data will always be null if the recursive function never reached the
+    ///
+    /// * Data will always be null if the recursive function never reached the
     /// end.
     final depthDifference = rootKeys.length - output.finalDepth;
 
     final modifiableKeys = [...rootKeys];
-
-    /// Means the root key is absent and we need to create the whole
-    /// "tree" of values
-    if (depthDifference == 0) {
-      final anchorKey = modifiableKeys.removeAt(0);
-
-      // In case no more keys are left, means target key is just 1 level deep
-      if (modifiableKeys.isEmpty) {
-        return (
-          path: [anchorKey],
-          dataToSave: {targetKey: data},
-        );
-      }
-
-      final convertedMap = convertToDartMap(
-        otherKeys: modifiableKeys,
-        targetKey: targetKey,
-        data: data,
-      );
-
-      return (
-        path: [anchorKey],
-        dataToSave: convertedMap,
-      );
-    }
 
     /// Account for the stopping point. Why?
     /// Consider, array [6 ,5 , 4] with decreaseing order where:
@@ -313,7 +276,7 @@ mixin ModifyYaml {
     /// stopping point,
     ///
     /// `Number of elements = (Start order - Order of stop) + 1`
-    /// 
+    ///
     /// In our case, [depthDifference + 1]
     final unBiasedDiff = depthDifference + 1;
 
@@ -327,42 +290,84 @@ mixin ModifyYaml {
     final otherKeys = modifiableKeys.skip(unBiasedDiff).toList();
 
     final pathData = convertToDartMap(
-      otherKeys: otherKeys,
+      fileAsMap,
+      append: append,
+      pathKeys: pathKeys,
+      missingKeys: otherKeys,
       targetKey: targetKey,
       data: data,
     );
 
+    /// We "overwrite" old data with new. Why quotes? Since old data may be
+    /// retained when append is true!
     return (
-      path: pathKeys,
-      dataToSave: pathData,
+      path: [pathKeys.first],
+      dataToSave: pathData[pathKeys.first],
     );
   }
 
   /// Convert to map
-  Map<String, dynamic> convertToDartMap({
-    required List<String> otherKeys,
+  Map<dynamic, dynamic> convertToDartMap(
+    YamlMap fileAsMap, {
+    required bool append,
+    required List<String> pathKeys,
+    required List<String> missingKeys,
     required String targetKey,
     required dynamic data,
   }) {
-    var map = <String, dynamic>{};
+    var dataAsMap = <dynamic, dynamic>{};
 
-    if (otherKeys.isEmpty) {
-      map.addAll({targetKey: data});
-      return map;
-    }
-
-    for (final (index, value) in otherKeys.reversed.indexed) {
-      if (index == 0) {
-        map.addAll({
-          value: {targetKey: data},
-        });
-      } else {
-        map = {
-          value: {...map},
-        };
+    // Missing keys are not in map currently, need to be created
+    if (missingKeys.isEmpty) {
+      dataAsMap.addAll({targetKey: data});
+    } else {
+      for (final (index, value) in missingKeys.reversed.indexed) {
+        if (index == 0) {
+          dataAsMap.addAll({
+            value: {targetKey: data},
+          });
+        } else {
+          dataAsMap = {
+            value: {...dataAsMap},
+          };
+        }
       }
     }
 
-    return map;
+    /// Path keys exist and we need to get all data. This prevents any data
+    /// from being overwritten. Only the target key changes.
+
+    if (pathKeys.isNotEmpty) {
+      final pathsInReverse = pathKeys.reversed;
+
+      // Loop all keys in reverse. Appending or adding data
+      for (final (index, currentKey) in pathsInReverse.indexed) {
+        ///
+        /// The current index indicated number of elements to skip. Add 1 since
+        /// we have to include the target key
+        final numOfSkippable = index + 1;
+
+        final pathsToTarget = pathsInReverse.skip(numOfSkippable);
+
+        final keyData = fileAsMap.recursiveRead(
+          path: pathsToTarget.toList(),
+          target: currentKey,
+        ) as Map<dynamic, dynamic>?;
+
+        // Data to add
+        final existingData = keyData == null || !append
+            ? {currentKey: dataAsMap}
+            : {
+                currentKey: {
+                  ...keyData,
+                  ...dataAsMap,
+                },
+              };
+
+        dataAsMap = {...existingData};
+      }
+    }
+
+    return dataAsMap;
   }
 }

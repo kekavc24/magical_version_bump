@@ -17,7 +17,7 @@ typedef Dictionary = ({List<String> rootKeys, bool append, dynamic data});
 /// * `updatedValue` - final value updated. Will be null when `finalDepth` is  
 /// not 0 and when operation failed
 /// 
-typedef RecursiveOutput = ({
+typedef NestedUpdate = ({
   bool failed,
   String? failedReason,
   int finalDepth,
