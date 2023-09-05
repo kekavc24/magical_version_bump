@@ -13,7 +13,7 @@ jobs:
         target: ${{ steps.extract-target.outputs.target }}
 
       steps: 
-        - uses: actions/checkout@v3
+        - uses: actions/checkout@v4
 
         - name: 🛂 Ensure pull request was merged
           if: ${{ github.event.pull_request.merged != true }}
@@ -35,7 +35,7 @@ jobs:
       runs-on: ubuntu-latest
 
       steps:
-        - uses: actions/checkout@v3
+        - uses: actions/checkout@v4
           with:
             ref: ${{ github.ref }}
             fetch-depth: 0
