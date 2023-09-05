@@ -1,8 +1,10 @@
 part of 'helpers.dart';
 
 /// Read nested nodes
-dynamic readNestedNodes(String file, List<String> path) {
-  final yamlMap = loadYaml(file) as YamlMap;
+Future<dynamic> readNestedNodes(String? file, List<String> path) async {
+  final yamlMap = loadYaml(
+    file ?? await File(getTestFile()).readAsString(),
+  ) as YamlMap;
 
   final depth = path.length - 1;
   final modifiedPath = [...path];

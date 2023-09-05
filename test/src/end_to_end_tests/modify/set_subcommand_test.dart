@@ -20,9 +20,6 @@ void main() {
   const name = 'Test File';
   const description = 'This is a test';
   const homepage = 'https://url.to.homepage';
-  const repo = 'https://url.to.repository-on-github';
-  const issue = 'https://url.to.issue-tracker';
-  const docs = '=https://url.to.documentation';
   const preleaseArg = '--set-prerelease=test';
   const buildArg = '--set-build=100';
   const version = '8.8.8+8';
@@ -50,34 +47,50 @@ void main() {
 
       expect(result, equals(ExitCode.usage.code));
     });
+
+    test(
+      'when appending a new nested node to node with non-map nodes',
+      () async {
+        final args = [...defaultArgs, '--add', 'name|newNode=value'];
+
+        final result = await commandRunner.run(args);
+
+        expect(result, equals(ExitCode.usage.code));
+        verify(() => logger.err('Cannot append at name')).called(1);
+      },
+    );
   });
 
-  group('change command test', () {
+  group('set command modifies nodes', () {
     test('changes name in yaml', () async {
-      final args = [...defaultArgs, '--name', name];
+      final args = [...defaultArgs, '--dictionary', 'name=$name'];
 
       final result = await commandRunner.run(args);
 
-      final current = await readFileNode('name');
-      await resetFile(node: 'name', nodeValue: 'magical_version_bump');
+      final currentValue = await readFileNode('name');
+      await resetFile(node: 'name', nodeValue: 'Fake');
 
       expect(result, equals(ExitCode.success.code));
-      expect(current, name);
+      expect(currentValue, name);
     });
 
     test('changes description in yaml', () async {
-      final args = [...defaultArgs, '--description', description];
+      final args = [
+        ...defaultArgs,
+        '--dictionary',
+        'description=$description',
+      ];
 
       final result = await commandRunner.run(args);
 
-      final current = await readFileNode('description');
+      final currentValue = await readFileNode('description');
       await resetFile(
         node: 'description',
         nodeValue: 'A Very Good description',
       );
 
       expect(result, equals(ExitCode.success.code));
-      expect(current, description);
+      expect(currentValue, description);
     });
 
     test('changes version in yaml', () async {
@@ -91,59 +104,60 @@ void main() {
         ),
       ).called(1);
 
-      final current = await readFileNode('version');
+      final currentValue = await readFileNode('version');
       await resetFile();
 
       expect(result, equals(ExitCode.success.code));
-      expect(current, version);
+      expect(currentValue, version);
     });
 
     test('changes homepage url in yaml', () async {
-      final args = [...defaultArgs, '--homepage', homepage];
+      final args = [...defaultArgs, '--dictionary', 'homepage=$homepage'];
 
       final result = await commandRunner.run(args);
 
-      final current = await readFileNode('homepage');
+      final currentValue = await readFileNode('homepage');
       await resetFile(node: 'homepage', remove: true);
 
       expect(result, equals(ExitCode.success.code));
-      expect(current, homepage);
+      expect(currentValue, homepage);
     });
 
-    test('changes repository url in yaml', () async {
-      final args = [...defaultArgs, '--repository', repo];
+    test('creates new node with values and appends new ones', () async {
+      final args = [
+        ...defaultArgs,
+        '--dictionary',
+        'nested|value=string',
+        '--add',
+        'nested|list=string,list',
+        '--add',
+        'nested|map=string->list',
+      ];
 
       final result = await commandRunner.run(args);
 
-      final current = await readFileNode('repository');
-      await resetFile(node: 'repository', remove: true);
+      const expectedValue = 'string';
+      final expectedList = ['string', 'list'];
+      final expectedMap = {'string': 'list'};
+
+      final defaultStart = ['nested'];
+
+      final createdValue = await readNestedNodes(
+        null,
+        [...defaultStart, 'value'],
+      );
+      final createdList = await readNestedNodes(
+        null,
+        [...defaultStart, 'list'],
+      );
+      final createdMap = await readNestedNodes(null, [...defaultStart, 'map']);
+
+      await resetFile(node: 'nested', remove: true);
 
       expect(result, equals(ExitCode.success.code));
-      expect(current, repo);
-    });
-
-    test('changes issue-tracker url in yaml', () async {
-      final args = [...defaultArgs, '--issue_tracker', issue];
-
-      final result = await commandRunner.run(args);
-
-      final current = await readFileNode('issue_tracker');
-      await resetFile(node: 'issue_tracker', remove: true);
-
-      expect(result, equals(ExitCode.success.code));
-      expect(current, issue);
-    });
-
-    test('changes documentation url in yaml', () async {
-      final args = [...defaultArgs, '--documentation', docs];
-
-      final result = await commandRunner.run(args);
-
-      final current = await readFileNode('documentation');
-      await resetFile(node: 'documentation', remove: true);
-
-      expect(result, equals(ExitCode.success.code));
-      expect(current, docs);
+      expect(createdValue, expectedValue);
+      expect(createdList, equals(expectedList));
+      expect(createdMap, equals(expectedMap));
     });
 
     test('changes the prerelease in version and removes build info', () async {
@@ -154,11 +168,11 @@ void main() {
 
       const expectedChange = '10.10.10-test';
 
-      final current = await readFileNode('version');
+      final currentValue = await readFileNode('version');
       await resetFile();
 
       expect(result, equals(ExitCode.success.code));
-      expect(current, expectedChange);
+      expect(currentValue, expectedChange);
     });
 
     test('changes the prerelease in version and keeps build info', () async {
@@ -168,11 +182,11 @@ void main() {
 
       const expectedChange = '10.10.10-test+10';
 
-      final current = await readFileNode('version');
+      final currentValue = await readFileNode('version');
       await resetFile();
 
       expect(result, equals(ExitCode.success.code));
-      expect(current, expectedChange);
+      expect(currentValue, expectedChange);
     });
 
     test('changes the build and removes prerelease info', () async {
@@ -182,11 +196,11 @@ void main() {
 
       const expectedChange = '10.10.10+100';
 
-      final current = await readFileNode('version');
+      final currentValue = await readFileNode('version');
       await resetFile();
 
       expect(result, equals(ExitCode.success.code));
-      expect(current, expectedChange);
+      expect(currentValue, expectedChange);
     });
 
     test('changes the build and sets prerelease info', () async {
@@ -196,11 +210,11 @@ void main() {
 
       const expectedChange = '10.10.10-test+100';
 
-      final current = await readFileNode('version');
+      final currentValue = await readFileNode('version');
       await resetFile();
 
       expect(result, equals(ExitCode.success.code));
-      expect(current, expectedChange);
+      expect(currentValue, expectedChange);
     });
   });
 }
