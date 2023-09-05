@@ -8,52 +8,27 @@ void main() {
   late SetArgumentsChecker sanitizer;
   late ArgParser argParser;
 
-  final nodesAndValues = <String, String>{
-    'name': 'Gym Bro',
-    'description': 'No cramps no gain',
-    'homepage': 'Local gym',
-    'repository': 'atp-chains.net',
-    'issue_tracker': 'muscles.net',
-    'documentation': 'fellow gym bro',
-  };
-
   setUp(() {
     argParser = ArgParser()
-      ..addOption(
-        'name',
-      )
-      ..addOption(
-        'description',
-      )
-      ..addOption(
-        'homepage',
-      )
-      ..addOption(
-        'repository',
-      )
-      ..addOption(
-        'issue_tracker',
-      )
-      ..addOption(
-        'documentation',
+      ..addMultiOption(
+        'dictionary',
+        splitCommas: false,
       )
       ..addMultiOption(
-        'key',
-      )
-      ..addMultiOption(
-        'value',
+        'add',
+        splitCommas: false,
       );
   });
 
-  group('preps args', () {
-    test('when valid args are parsed', () {
-      final args = nodesAndValues.entries.fold(
-        <String>[],
-        (previousValue, element) {
-          previousValue.addAll(['--${element.key}', element.value]);
-          return previousValue;
-        },
-      )..addAll(['--key', 'gym key', '--value', 'open gym']);
+  group('parses dictionaries to be overwritten', () {
+    test('when single key and value are passed in', () {
+      final args = ['--dictionary', 'test=1'];
+
+      final expectedDictionary = (
+        rootKeys: ['test'],
+        append: false,
+        data: '1',
+      );
 
       sanitizer = setUpSanitizer(
         SanitizerType.setter,
@@ -63,12 +38,127 @@ void main() {
 
       final preppedArgs = sanitizer.prepArgs();
 
-      final matcher = <String, String>{
-        ...nodesAndValues,
-        'gym key': 'open gym',
-      };
+      expect(preppedArgs.length, 1);
+      expect(preppedArgs.first.append, expectedDictionary.append);
+      expect(preppedArgs.first.rootKeys, equals(expectedDictionary.rootKeys));
+      expect(preppedArgs.first.data, expectedDictionary.data);
+    });
 
-      expect(preppedArgs, equals(matcher));
+    test('when multiple keys and list of values are passed in', () {
+      final args = ['--dictionary', 'test|test2=1,2'];
+
+      final expectedDictionary = (
+        rootKeys: ['test', 'test2'],
+        append: false,
+        data: ['1', '2'],
+      );
+
+      sanitizer = setUpSanitizer(
+        SanitizerType.setter,
+        argParser: argParser,
+        args: args,
+      ) as SetArgumentsChecker;
+
+      final preppedArgs = sanitizer.prepArgs();
+
+      expect(preppedArgs.length, 1);
+      expect(preppedArgs.first.append, expectedDictionary.append);
+      expect(preppedArgs.first.rootKeys, equals(expectedDictionary.rootKeys));
+      expect(preppedArgs.first.data, equals(expectedDictionary.data));
+    });
+
+    test('when multiple keys and map of values are passed in', () {
+      final args = ['--dictionary', 'test|test2=1:2'];
+
+      final expectedDictionary = (
+        rootKeys: ['test', 'test2'],
+        append: false,
+        data: {'1' : '2'},
+      );
+
+      sanitizer = setUpSanitizer(
+        SanitizerType.setter,
+        argParser: argParser,
+        args: args,
+      ) as SetArgumentsChecker;
+
+      final preppedArgs = sanitizer.prepArgs();
+
+      expect(preppedArgs.length, 1);
+      expect(preppedArgs.first.append, expectedDictionary.append);
+      expect(preppedArgs.first.rootKeys, equals(expectedDictionary.rootKeys));
+      expect(preppedArgs.first.data, equals(expectedDictionary.data));
+    });
+  });
+
+  group('parses dictionaries to be append to', () {
+    test('when single key and value are passed in', () {
+      final args = ['--add', 'test=1'];
+
+      final expectedDictionary = (
+        rootKeys: ['test'],
+        append: true,
+        data: '1',
+      );
+
+      sanitizer = setUpSanitizer(
+        SanitizerType.setter,
+        argParser: argParser,
+        args: args,
+      ) as SetArgumentsChecker;
+
+      final preppedArgs = sanitizer.prepArgs();
+
+      expect(preppedArgs.length, 1);
+      expect(preppedArgs.first.append, expectedDictionary.append);
+      expect(preppedArgs.first.rootKeys, equals(expectedDictionary.rootKeys));
+      expect(preppedArgs.first.data, expectedDictionary.data);
+    });
+
+    test('when multiple keys and list of values are passed in', () {
+      final args = ['--add', 'test|test2=1,2'];
+
+      final expectedDictionary = (
+        rootKeys: ['test', 'test2'],
+        append: true,
+        data: ['1', '2'],
+      );
+
+      sanitizer = setUpSanitizer(
+        SanitizerType.setter,
+        argParser: argParser,
+        args: args,
+      ) as SetArgumentsChecker;
+
+      final preppedArgs = sanitizer.prepArgs();
+
+      expect(preppedArgs.length, 1);
+      expect(preppedArgs.first.append, expectedDictionary.append);
+      expect(preppedArgs.first.rootKeys, equals(expectedDictionary.rootKeys));
+      expect(preppedArgs.first.data, equals(expectedDictionary.data));
+    });
+
+    test('when multiple keys and map of values are passed in', () {
+      final args = ['--add', 'test|test2=1:2'];
+
+      final expectedDictionary = (
+        rootKeys: ['test', 'test2'],
+        append: true,
+        data: {'1' : '2'},
+      );
+
+      sanitizer = setUpSanitizer(
+        SanitizerType.setter,
+        argParser: argParser,
+        args: args,
+      ) as SetArgumentsChecker;
+
+      final preppedArgs = sanitizer.prepArgs();
+
+      expect(preppedArgs.length, 1);
+      expect(preppedArgs.first.append, expectedDictionary.append);
+      expect(preppedArgs.first.rootKeys, equals(expectedDictionary.rootKeys));
+      expect(preppedArgs.first.data, equals(expectedDictionary.data));
     });
   });
 
@@ -86,22 +176,21 @@ void main() {
       expect(validatedArgs.reason, isNotNull);
       expect(validatedArgs.reason!.key, 'Missing arguments');
       expect(validatedArgs.reason!.value, 'Arguments cannot be empty or null');
-      expect(validatedArgs.nodesAndValues, isNull);
+      expect(validatedArgs.dictionaries, equals([]));
     });
 
     test('returns prepped args with valid args parsed', () {
       sanitizer = setUpSanitizer(
         SanitizerType.setter,
         argParser: argParser,
-        args: ['--key', 'gym key', '--value', 'open gym'],
+        args: [],
       ) as SetArgumentsChecker;
 
-      final validatedArgs = sanitizer.customValidate(didSetVersion: false);
+      final validatedArgs = sanitizer.customValidate(didSetVersion: true);
 
       expect(validatedArgs.isValid, true);
       expect(validatedArgs.reason, isNull);
-      expect(validatedArgs.nodesAndValues, isNotNull);
-      expect(validatedArgs.nodesAndValues, equals({'gym key': 'open gym'}));
+      expect(validatedArgs.dictionaries, equals([]));
     });
   });
 }
