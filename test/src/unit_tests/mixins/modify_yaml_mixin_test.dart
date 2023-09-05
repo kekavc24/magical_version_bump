@@ -728,8 +728,8 @@ void main() {
     });
   });
 
-  group('updates yaml file', () {
-    test('updates key at root', () async {
+  group('updates', () {
+    test('key at root', () async {
       final dictionary = (
         append: false,
         rootKeys: ['version'],
@@ -738,7 +738,7 @@ void main() {
 
       final updatedFile = await modifier.updateYamlFile(fakeYaml, dictionary);
 
-      final updateValue = readNestedNodes(updatedFile, ['version']);
+      final updateValue = await readNestedNodes(updatedFile, ['version']);
 
       expect(updateValue, '10.10.10+10');
     });
@@ -752,7 +752,7 @@ void main() {
 
       final updatedFile = await modifier.updateYamlFile(fakeYaml, dictionary);
 
-      final updateValue = readNestedNodes(
+      final updateValue = await readNestedNodes(
         updatedFile,
         ['name', 'test name'],
       );
@@ -769,7 +769,7 @@ void main() {
 
       final updatedFile = await modifier.updateYamlFile(fakeYaml, dictionary);
 
-      final updateValue = readNestedNodes(
+      final updateValue = await readNestedNodes(
         updatedFile,
         ['test', 'nested-test'],
       );
@@ -786,7 +786,7 @@ void main() {
 
       final updatedFile = await modifier.updateYamlFile(fakeYaml, dictionary);
 
-      final updateValue = readNestedNodes(
+      final updateValue = await readNestedNodes(
         updatedFile,
         ['test', 'nested-test', 'nested-value'],
       );
@@ -803,7 +803,7 @@ void main() {
 
       final updatedFile = await modifier.updateYamlFile(fakeYaml, dictionary);
 
-      final updateValue = readNestedNodes(
+      final updateValue = await readNestedNodes(
         updatedFile,
         ['test', 'nested-test', 'nested-list'],
       );
@@ -826,7 +826,7 @@ void main() {
 
       final updatedFile = await modifier.updateYamlFile(fakeYaml, dictionary);
 
-      final updateValue = readNestedNodes(
+      final updateValue = await readNestedNodes(
         updatedFile,
         ['test', 'nested-test', 'nested-map'],
       );
