@@ -76,13 +76,9 @@ extension VersionExtension on Version {
     // If build is bumpable, bump it
     if (shouldBumpBuild) {
       // Get build number just incase
-      final buildFromVersion = buildIsBumpable
-          ? build.first as int
-          : build.isEmpty && shouldBumpBuild
-              ? 0
-              : null;
+      final buildFromVersion = build.firstOrNull as int? ?? 0;
 
-      final buildNumber = (buildFromVersion ?? 0) + 1;
+      final buildNumber = buildFromVersion + 1;
 
       modifiedVersion += '+$buildNumber';
     } else {

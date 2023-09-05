@@ -34,4 +34,12 @@ extension Operations on Iterable<String> {
 
     return targets;
   }
+
+  /// Retain non-empty values
+  List<String> retainNonEmpty() {
+    final retainedList = [...this]..retainWhere(
+        (element) => element.isNotEmpty,
+      );
+    return retainedList;
+  }
 }

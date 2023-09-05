@@ -5,57 +5,39 @@ final class SetArgumentsChecker extends ArgumentsChecker {
 
   /// Prep arguments and values as Map<String, String>
   @override
-  NodesAndValues prepArgs() {
-    final preppedArgs = <String, String>{};
+  List<Dictionary> prepArgs() {
+    final dictionaries = <Dictionary>[];
 
-    // Get all values for default nodes supported
-    final supportedNodeValues = nodesSupported.fold(
-      <String, String>{},
-      (previousValue, element) {
-        final nodeValue = argResults![element] as String?;
+    // Get dictionaries to add/overwrite first
+    final dictsToAdd = argResults!['dictionary'] as List<String>;
 
-        if (nodeValue == null) return previousValue;
+    if (dictsToAdd.isNotEmpty) {
+      for (final result in dictsToAdd) {
+        final dict = extractDictionary(result, append: false);
 
-        previousValue.update(
-          element,
-          (value) => nodeValue,
-          ifAbsent: () => nodeValue,
-        );
-
-        return previousValue;
-      },
-    );
-
-    if (supportedNodeValues.isNotEmpty) {
-      preppedArgs.addAll(supportedNodeValues);
-    }
-
-    // Add any specified "new/existing" nodes
-    final parsedNodes = argResults!['key'] as List<String>;
-    final parsedNodeValues = argResults!['value'] as List<String>;
-
-    // Since ArgParser parses in sequence, we ASSUME that is the order in which
-    // the user wanted them. Also, The length must m-a[RGH]-tch. Haha!
-    if (parsedNodes.isNotEmpty &&
-        parsedNodeValues.isNotEmpty &&
-        (parsedNodes.length == parsedNodeValues.length)) {
-      for (var i = 0; i < parsedNodes.length; i++) {
-        preppedArgs.update(
-          parsedNodes[i],
-          (value) => parsedNodeValues[i],
-          ifAbsent: () => parsedNodeValues[i],
-        );
+        dictionaries.add(dict);
       }
     }
 
-    return preppedArgs;
+    // Get dictionaries to append to
+    final dictsToAppendTo = argResults!['add'] as List<String>;
+
+    if (dictsToAppendTo.isNotEmpty) {
+      for (final result in dictsToAppendTo) {
+        final dict = extractDictionary(result, append: true);
+
+        dictionaries.add(dict);
+      }
+    }
+
+    return dictionaries;
   }
 
   /// Validate and return prepped args
   ({
     bool isValid,
     InvalidReason? reason,
-    NodesAndValues? nodesAndValues,
+    List<Dictionary> dictionaries,
   }) customValidate({required bool didSetVersion}) {
     // Check if arguments results are empty
     final checkedArgs = validateArgs();
@@ -64,7 +46,7 @@ final class SetArgumentsChecker extends ArgumentsChecker {
       return (
         isValid: checkedArgs.isValid,
         reason: checkedArgs.reason,
-        nodesAndValues: null,
+        dictionaries: [],
       );
     }
 
@@ -76,7 +58,7 @@ final class SetArgumentsChecker extends ArgumentsChecker {
       reason: preppedArgs.isNotEmpty || didSetVersion
           ? null
           : const InvalidReason('Missing arguments', 'No arguments found'),
-      nodesAndValues: preppedArgs.isNotEmpty ? preppedArgs : null,
+      dictionaries: preppedArgs.isNotEmpty ? preppedArgs : [],
     );
   }
 }

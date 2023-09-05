@@ -41,17 +41,9 @@ class HandleSetCommand extends CommandHandler {
 
     final changeProgress = logger.progress('Updating nodes');
 
-    final nodesAndValues = preppedArgs.nodesAndValues;
-
-    if (nodesAndValues != null) {
-      final entries = nodesAndValues.entries;
-
-      for (final node in entries) {
-        editedFile = await editYamlFile(
-          editedFile,
-          node.key,
-          node.value,
-        );
+    if (preppedArgs.dictionaries.isNotEmpty) {
+      for (final dictionary in preppedArgs.dictionaries) {
+        editedFile = await updateYamlFile(editedFile, dictionary);
       }
     }
     // Set any version updated
@@ -101,10 +93,13 @@ class HandleSetCommand extends CommandHandler {
         );
       }
 
-      editedFile = await editYamlFile(
+      editedFile = await updateYamlFile(
         editedFile,
-        'version',
-        updatedVersion ?? version,
+        (
+          append: false,
+          rootKeys: ['version'],
+          data: updatedVersion ?? version,
+        ),
       );
     }
 
