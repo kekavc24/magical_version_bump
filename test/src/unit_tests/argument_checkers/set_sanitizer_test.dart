@@ -73,7 +73,7 @@ void main() {
       final expectedDictionary = (
         rootKeys: ['test', 'test2'],
         append: false,
-        data: {'1' : '2'},
+        data: {'1': '2'},
       );
 
       sanitizer = setUpSanitizer(
@@ -144,7 +144,7 @@ void main() {
       final expectedDictionary = (
         rootKeys: ['test', 'test2'],
         append: true,
-        data: {'1' : '2'},
+        data: {'1': '2'},
       );
 
       sanitizer = setUpSanitizer(

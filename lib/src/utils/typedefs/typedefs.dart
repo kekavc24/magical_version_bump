@@ -10,13 +10,13 @@ typedef InvalidReason = MapEntry<String, String>;
 typedef Dictionary = ({List<String> rootKeys, bool append, dynamic data});
 
 /// Recursive return value
-/// 
+///
 /// * `failed` - whether operation to add value failed
 /// * `reason` - what key caused the recursive update to fail
 /// * `finalDepth` - how far deep the recursive function managed to reach
-/// * `updatedValue` - final value updated. Will be null when `finalDepth` is  
+/// * `updatedValue` - final value updated. Will be null when `finalDepth` is
 /// not 0 and when operation failed
-/// 
+///
 typedef NestedUpdate = ({
   bool failed,
   String? failedReason,

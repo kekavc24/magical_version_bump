@@ -17,7 +17,7 @@ extension MapUtility on Map<dynamic, dynamic> {
     if (currentValue is! Map<dynamic, dynamic>) return null;
 
     final modifiedPath = [...path]..removeAt(0);
-    
+
     return currentValue.recursiveRead(
       path: modifiedPath,
       target: target,
