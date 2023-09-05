@@ -564,8 +564,8 @@ void main() {
         append: false,
         pathKeys: [],
         missingKeys: ['one key'],
-        targetKey: 'targetKey',
-        data: 'data',
+        fallbackData: {},
+        updatedData: {'targetKey': 'data'},
       );
 
       final expectedMap = {
@@ -583,8 +583,8 @@ void main() {
         append: false,
         pathKeys: [],
         missingKeys: ['one key', 'two key', 'three key'],
-        targetKey: 'targetKey',
-        data: 'data',
+        fallbackData: {},
+        updatedData: {'targetKey': 'data'},
       );
 
       final expectedMap = {
@@ -616,8 +616,7 @@ void main() {
         YamlMap.wrap({}),
         append: false,
         rootKeys: ['test'],
-        targetKey: 'target',
-        data: 'data',
+        fallbackData: {'target': 'data'},
         output: output,
       );
 
@@ -639,8 +638,7 @@ void main() {
         YamlMap.wrap({}),
         append: false,
         rootKeys: ['test'],
-        targetKey: 'target',
-        data: 'data',
+        fallbackData: {'target': 'data'},
         output: output,
       );
 
@@ -662,8 +660,7 @@ void main() {
         YamlMap.wrap({}),
         append: false,
         rootKeys: ['test'],
-        targetKey: 'target',
-        data: 'data',
+        fallbackData: {'target': 'data'},
         output: output,
       );
 
@@ -685,8 +682,7 @@ void main() {
         YamlMap.wrap({}),
         append: false,
         rootKeys: ['test', 'other test key'],
-        targetKey: 'target',
-        data: 'data',
+        fallbackData: {'target': 'data'},
         output: output,
       );
 
@@ -715,8 +711,7 @@ void main() {
           'another key',
           'another test key',
         ],
-        targetKey: 'target',
-        data: 'data',
+        fallbackData: {'target': 'data'},
         output: output,
       );
 

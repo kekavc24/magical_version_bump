@@ -95,15 +95,15 @@ mixin ModifyYaml {
       fileAsYamlMap,
       append: dictionary.append,
       rootKeys: rootKeys,
-      targetKey: targetKey,
-      data: dictionary.data,
       output: recursiveOutput,
+      fallbackData: {targetKey: dictionary.data},
     );
 
     editor.update(
       formattedOutput.path,
       formattedOutput.dataToSave,
     );
+
     return editor.toString();
   }
 
@@ -245,9 +245,8 @@ mixin ModifyYaml {
     YamlMap fileAsMap, {
     required bool append,
     required List<String> rootKeys,
-    required String targetKey,
-    required dynamic data,
     required NestedUpdate output,
+    required Map<String, dynamic> fallbackData,
   }) {
     /// In case recursive function managed to reach the end.
     ///
@@ -294,8 +293,8 @@ mixin ModifyYaml {
       append: append,
       pathKeys: pathKeys,
       missingKeys: otherKeys,
-      targetKey: targetKey,
-      data: data,
+      updatedData: output.updatedValue,
+      fallbackData: fallbackData,
     );
 
     /// We "overwrite" old data with new. Why quotes? Since old data may be
@@ -312,19 +311,19 @@ mixin ModifyYaml {
     required bool append,
     required List<String> pathKeys,
     required List<String> missingKeys,
-    required String targetKey,
-    required dynamic data,
+    required Map<String, dynamic>? updatedData,
+    required Map<String, dynamic> fallbackData,
   }) {
     var dataAsMap = <dynamic, dynamic>{};
 
     // Missing keys are not in map currently, need to be created
     if (missingKeys.isEmpty) {
-      dataAsMap.addAll({targetKey: data});
+      dataAsMap.addAll(updatedData ?? fallbackData);
     } else {
       for (final (index, value) in missingKeys.reversed.indexed) {
         if (index == 0) {
           dataAsMap.addAll({
-            value: {targetKey: data},
+            value: updatedData ?? fallbackData,
           });
         } else {
           dataAsMap = {
