@@ -241,7 +241,7 @@ mixin ModifyYaml {
   }
 
   /// Format recursive output
-  ({List<String> path, Map<dynamic, dynamic> dataToSave}) formatOutput(
+  ({List<String> path, dynamic dataToSave}) formatOutput(
     YamlMap fileAsMap, {
     required bool append,
     required List<String> rootKeys,
@@ -299,9 +299,20 @@ mixin ModifyYaml {
 
     /// We "overwrite" old data with new. Why quotes? Since old data may be
     /// retained when append is true!
+    ///
+    /// If the anchor is the target, no pathkeys will be available. Get the key
+    /// and data from the fallback data
+    ///
+    final anchorKey =
+        pathKeys.isEmpty ? fallbackData.keys.first : pathKeys.first;
+
     return (
-      path: [pathKeys.first],
-      dataToSave: pathData[pathKeys.first],
+      path: [anchorKey],
+      dataToSave: pathKeys.isNotEmpty
+          ? pathData[anchorKey]
+          : output.updatedValue == null
+              ? fallbackData[anchorKey]
+              : output.updatedValue![anchorKey],
     );
   }
 
