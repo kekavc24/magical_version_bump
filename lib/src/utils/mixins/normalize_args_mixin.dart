@@ -86,7 +86,7 @@ mixin NormalizeArgs {
     /// i.e `value`,`nextValue`,`otherValue`
     final values = keysAndValue.last.splitAndTrim(',').retainNonEmpty();
 
-    final isMappy = values.first.contains(':');
+    final isMappy = values.first.contains('->');
 
     /// If more than one value is passed in, we have to check all follow
     /// the same format.
@@ -94,7 +94,7 @@ mixin NormalizeArgs {
     /// The first value determines the format the rest should follow!
     if (values.length > 1) {
       final allFollowFormat = values.every(
-        (element) => isMappy ? element.contains(':') : !element.contains(':'),
+        (element) => isMappy ? element.contains('->') : !element.contains('->'),
       );
 
       if (!allFollowFormat) {
@@ -108,7 +108,7 @@ mixin NormalizeArgs {
       final valueMap = values.fold(
         <String, String>{},
         (previousValue, element) {
-          final mappedValues = element.splitAndTrim(':');
+          final mappedValues = element.splitAndTrim('->');
           previousValue.update(
             mappedValues.first,
             (value) => mappedValues.last.isEmpty ? 'null' : mappedValues.last,

@@ -188,7 +188,7 @@ void main() {
 
     test('extracts key and mapped values', () {
       final dictionary = normalizer.extractDictionary(
-        'testKey=testMapKey:testMapValue',
+        'testKey=testMapKey->testMapValue',
         append: false,
       );
 
@@ -202,7 +202,7 @@ void main() {
 
     test('extracts key and mapped values, sets empty pairs to null', () {
       final dictionary = normalizer.extractDictionary(
-        'testKey=testMapKey:',
+        'testKey=testMapKey->',
         append: false,
       );
 
@@ -216,7 +216,7 @@ void main() {
 
     test('extracts multiple keys and mapped values', () {
       final dictionary = normalizer.extractDictionary(
-        'testKey|anotherKey=testMapKey:testMapValue,otherMapKey:otherMapValue',
+        '''testKey|anotherKey=testMapKey->testMapValue,otherMapKey->otherMapValue''',
         append: false,
       );
 
@@ -229,49 +229,49 @@ void main() {
       expect(dictionary.data is Map<String, String>, true);
       expect(dictionary.data, equals(expectedMappedValues));
     });
-  });
 
-  test('throws error when parsed value is empty', () {
-    expect(
-      () => normalizer.extractDictionary('', append: false),
-      throwsViolation('The root key cannot be empty/null'),
-    );
-  });
+    test('throws error when parsed value is empty', () {
+      expect(
+        () => normalizer.extractDictionary('', append: false),
+        throwsViolation('The root key cannot be empty/null'),
+      );
+    });
 
-  test('throws error when parsed value has no key-value pair', () {
-    const valueWithOnePair = 'key=';
-    const valueWithBlanks = '=';
+    test('throws error when parsed value has no key-value pair', () {
+      const valueWithOnePair = 'key=';
+      const valueWithBlanks = '=';
 
-    expect(
-      () => normalizer.extractDictionary(
-        valueWithBlanks,
-        append: false,
-      ),
-      throwsViolation(
-        'Invalid keys and value pair at "$valueWithBlanks"',
-      ),
-    );
+      expect(
+        () => normalizer.extractDictionary(
+          valueWithBlanks,
+          append: false,
+        ),
+        throwsViolation(
+          'Invalid keys and value pair at "$valueWithBlanks"',
+        ),
+      );
 
-    expect(
-      () => normalizer.extractDictionary(
-        valueWithOnePair,
-        append: false,
-      ),
-      throwsViolation(
-        'Invalid keys and value pair at "$valueWithOnePair"',
-      ),
-    );
-  });
+      expect(
+        () => normalizer.extractDictionary(
+          valueWithOnePair,
+          append: false,
+        ),
+        throwsViolation(
+          'Invalid keys and value pair at "$valueWithOnePair"',
+        ),
+      );
+    });
 
-  test('throws error when parsed value has non-uniform formats', () {
-    const nonUniformValue = 'key=value,mapKey:mapValue';
+    test('throws error when parsed value has non-uniform formats', () {
+      const nonUniformValue = 'key=value,mapKey->mapValue';
 
-    expect(
-      () => normalizer.extractDictionary(
-        nonUniformValue,
-        append: false,
-      ),
-      throwsViolation('Mixed format at $nonUniformValue'),
-    );
+      expect(
+        () => normalizer.extractDictionary(
+          nonUniformValue,
+          append: false,
+        ),
+        throwsViolation('Mixed format at $nonUniformValue'),
+      );
+    });
   });
 }

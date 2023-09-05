@@ -68,7 +68,7 @@ void main() {
     });
 
     test('when multiple keys and map of values are passed in', () {
-      final args = ['--dictionary', 'test|test2=1:2'];
+      final args = ['--dictionary', 'test|test2=1->2'];
 
       final expectedDictionary = (
         rootKeys: ['test', 'test2'],
@@ -139,7 +139,7 @@ void main() {
     });
 
     test('when multiple keys and map of values are passed in', () {
-      final args = ['--add', 'test|test2=1:2'];
+      final args = ['--add', 'test|test2=1->2'];
 
       final expectedDictionary = (
         rootKeys: ['test', 'test2'],
