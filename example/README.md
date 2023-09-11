@@ -1,7 +1,7 @@
 # Basic Syntax
 
 ```bash
-mag <command> [<subcomand>]? [<flag> | <option> | <multiOption>]+
+mag <command> [<subcommand>]? [<flag> | <option> | <multiOption>]+
 ```
 
 ## Modify Command

@@ -50,7 +50,7 @@ CLI tool will always get the highest relative version based on all flags provide
 
 ## 0.1.2
 
-* `refactor` : minor perfomance improvements
+* `refactor` : minor performance improvements
 
 ## 0.1.1
 
