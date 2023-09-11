@@ -61,7 +61,7 @@ jobs:
         - name: 📰 Set up test file
           run: |
             touch fake.yaml
-            echo -e "Name: Fake\ndescription: A Very Good description\nversion: 10.10.10+10" >> fake.yaml
+            echo -e "name: Fake\ndescription: A Very Good description\nversion: 10.10.10+10" >> fake.yaml
         
         - name: 🧪 Run unit tests
           run: dart test -j, --concurrency=1 test/src/unit_tests
