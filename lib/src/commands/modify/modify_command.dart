@@ -1,11 +1,10 @@
-import 'package:args/command_runner.dart';
-import 'package:magical_version_bump/src/commands/modify/subcommands/modify_subcommands.dart';
-import 'package:mason_logger/mason_logger.dart';
+import 'package:magical_version_bump/src/commands/base_command.dart';
+import 'package:magical_version_bump/src/commands/modify/modify_base_subcommand.dart';
 
 /// This command is the base command for all sub-commands that modify 1 or more
 /// nodes in the yaml/json file
-class ModifyCommand extends Command<int> {
-  ModifyCommand({required Logger logger}) {
+class ModifyCommand extends MagicalCommand {
+  ModifyCommand({required super.logger}) {
     addSubcommand(BumpSubcommand(logger: logger));
     addSubcommand(SetSubcommand(logger: logger));
   }

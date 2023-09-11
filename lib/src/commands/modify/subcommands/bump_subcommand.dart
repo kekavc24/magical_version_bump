@@ -1,4 +1,4 @@
-part of 'modify_subcommands.dart';
+part of '../modify_base_subcommand.dart';
 
 /// This command only modifies one node, bumps the version.
 class BumpSubcommand extends ModifySubCommand {

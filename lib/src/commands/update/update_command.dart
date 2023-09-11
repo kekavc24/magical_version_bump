@@ -1,7 +1,7 @@
 import 'dart:io';
 
-import 'package:args/command_runner.dart';
 import 'package:magical_version_bump/src/command_runner.dart';
+import 'package:magical_version_bump/src/commands/base_command.dart';
 import 'package:magical_version_bump/src/version.dart';
 import 'package:mason_logger/mason_logger.dart';
 import 'package:pub_updater/pub_updater.dart';
@@ -9,10 +9,10 @@ import 'package:pub_updater/pub_updater.dart';
 /// {@template update_command}
 /// A command which updates the CLI.
 /// {@endtemplate}
-class UpdateCommand extends Command<int> {
+class UpdateCommand extends MagicalCommand {
   /// {@macro update_command}
   UpdateCommand({
-    required Logger logger,
+    required super.logger,
     PubUpdater? pubUpdater,
   })  : _logger = logger,
         _pubUpdater = pubUpdater ?? PubUpdater();

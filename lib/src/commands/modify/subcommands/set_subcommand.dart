@@ -1,4 +1,4 @@
-part of 'modify_subcommands.dart';
+part of '../modify_base_subcommand.dart';
 
 /// This command modifies several nodes of yaml file
 class SetSubcommand extends ModifySubCommand {
