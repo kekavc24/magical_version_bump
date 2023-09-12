@@ -129,39 +129,39 @@ my pubspec.yaml's major/minor/patch/build-number version - TARGET
 - By default, the tool uses the versioning strategy specified [here](https://semver.org/).
 
 ```bash
-mag modify bump --target "major"
+mag modify bump --targets "major"
 # Version 1.1.3 becomes 2.0.0
 
-mag modify bump --target "minor" 
+mag modify bump --targets "minor" 
 # Version 1.1.3 becomes 1.2.0
 
-mag modify bump --target "patch" 
+mag modify bump --targets "patch" 
 # Version 1.1.3 becomes 1.1.4
 
-mag modify bump --target "build-number" 
+mag modify bump --targets "build-number" 
 # Version 1.1.3+2 becomes 1.1.3+3
 ```
 
 - If no build number is passed in, the tool will append 0 and bump it.
 
 ```bash
-mag modify bump --target "build-number"  
+mag modify bump --targets "build-number"  
 # Version 1.1.3 becomes 1.1.3+1
 ```
 
 - If you want each version to be bumped independently, pass in the `--absolute` flag.
 
 ```bash
-mag modify bump --target "major" --strategy "absolute"
+mag modify bump --targets "major" --strategy "absolute"
 # Version 1.1.3 becomes 2.1.3
 
-mag modify bump --target "minor" --strategy "absolute"
+mag modify bump --targets "minor" --strategy "absolute"
 # Version 1.1.3 becomes 1.2.3
 
-mag modify bump --target "patch" --strategy "absolute"
+mag modify bump --targets "patch" --strategy "absolute"
 # Version 1.1.3 becomes 1.1.4
 
-mag modify bump --target "build-number" --strategy "absolute"
+mag modify bump --targets "build-number" --strategy "absolute"
 # Version 1.1.3+2 becomes 1.1.3+3
 
 ```
@@ -172,12 +172,12 @@ mag modify bump --target "build-number" --strategy "absolute"
 
 ```bash
 
-mag modify bump --target "major,minor,patch" 
+mag modify bump --targets "major,minor,patch" 
 # Version 1.8.9 becomes 2.0.0 
 # major version has the highest weight
 # major -> minor -> patch -> build-number
 
-mag modify --target "major,minor,patch" --strategy "absolute" 
+mag modify --targets "major,minor,patch" --strategy "absolute" 
 # Version 1.8.9 becomes 2.9.10
 # Each version is bumped independently.
 
@@ -187,10 +187,10 @@ mag modify --target "major,minor,patch" --strategy "absolute"
 
 ```bash
 
-mag modify bump --target "major" --request-path
+mag modify bump --targets "major" --request-path
 # Will request path from you in an interactive way in the console
 
-mag modify bump --target "major" --directory="my-path/pubspec.yaml" 
+mag modify bump --targets "major" --directory="my-path/pubspec.yaml" 
 # Automatically checks directory specified
 
 ```
@@ -201,13 +201,13 @@ mag modify bump --target "major" --directory="my-path/pubspec.yaml"
 
 # Initial version 1.8.9
 
-mag modify bump --set-version="2.8.4" --target "major"
+mag modify bump --set-version="2.8.4" --targets "major"
 # Version changed to 2.8.4 first
 # Version then bumped to 3.0.0
 
 # It also works with absolute
 
-mag modify bump --set-version="2.8.4" --target "major" --strategy "absolute"
+mag modify bump --set-version="2.8.4" --targets "major" --strategy "absolute"
 # Version changed to 2.8.4 first
 # Version then bumped to 3.8.4
 
@@ -219,17 +219,17 @@ mag modify bump --set-version="2.8.4" --target "major" --strategy "absolute"
 
 # Initial version 1.8.9-alpha+22
 
-mag modify bump --set-version="2.8.4" --target "major" --keep-build 
+mag modify bump --set-version="2.8.4" --targets "major" --keep-build 
 # Version changed to 2.8.4 first
 # Version then bumped to 3.0.0+22. Old build metadata is appended & prerelease info removed
 
 
-mag modify bump --set-version="2.8.4" --target "major" --keep-pre
+mag modify bump --set-version="2.8.4" --targets "major" --keep-pre
 # Version changed to 2.8.4 first
 # Version then bumped to 3.0.0-alpha. Prerelease info is appended & old build metadata is removed
 
 
-mag modify bump --set-version="2.8.4" --target "major" --keep-build --keep-pre
+mag modify bump --set-version="2.8.4" --targets "major" --keep-build --keep-pre
 # Version changed to 2.8.4 first
 # Version then bumped to 3.0.0-alpha+22. Both the old build metadata & prerelease info are appended
 
@@ -241,7 +241,7 @@ mag modify bump --set-version="2.8.4" --target "major" --keep-build --keep-pre
 
 # Initial version 1.8.9
 
-mag modify bump --preset --set-version="2.8.4" --set-prerelease="dev.2" --set-build=10 --target "major,build-number"
+mag modify bump --preset --set-version="2.8.4" --set-prerelease="dev.2" --set-build=10 --targets "major,build-number"
 # Version changed to 2.8.4-dev.2+10
 # Version then bumped to 3.0.0+11
 # Prerelease info is removed since we are bumping up to a major version
@@ -254,7 +254,7 @@ mag modify bump --preset --set-version="2.8.4" --set-prerelease="dev.2" --set-bu
 
 # Initial version 1.8.9
 
-mag modify bump --set-version="2.8.4" --set-prerelease="dev.2" --set-build=10 --target "major"
+mag modify bump --set-version="2.8.4" --set-prerelease="dev.2" --set-build=10 --targets "major"
 # Version changed to 2.8.4
 # Version then bumped to 3.0.0
 # Prerelease info & build metadata appended after

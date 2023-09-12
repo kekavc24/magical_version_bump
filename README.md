@@ -60,8 +60,8 @@ This command manipulates the contents of an existing yaml/json file.
 
 Available subcommands include :
 
-- `set` - overwrites/appends to nodes in your yaml/json files. Read more <a href="SET_COMMAND.md" target = "blank">here</a>
-- `bump` - bumps the version in your yaml/json file. Read more <a href="BUMP_COMMAND.md" target = "blank">here</a>
+- `set` - overwrites/appends to nodes in your yaml/json files. Read more <a href="./example/SET_COMMAND.md" target = "blank">here</a>
+- `bump` - bumps the version in your yaml/json file. Read more <a href="./example/BUMP_COMMAND.md" target = "blank">here</a>
 
 ## Default
 
@@ -69,10 +69,10 @@ Available subcommands include :
 
 ```bash
 
-mag modify bump --target "major" --request-path
+mag modify bump --targets "major" --request-path
 # Will request path from you in an interactive way in the console
 
-mag modify bump --target "major" --directory="my-path/pubspec.yaml" 
+mag modify bump --targets "major" --directory="my-path/pubspec.yaml" 
 # Automatically checks directory specified
 
 ```
@@ -80,11 +80,11 @@ mag modify bump --target "major" --directory="my-path/pubspec.yaml"
 - The tool will always do a relative versioning strategy. The collective version will be bumped up/down based on the position of the version passed in. This is the default versioning recommended by `Dart` & [SemVer](https://semver.org/).
 
 ```sh
-mag modify bump --target "major" # Bumps version 1.1.1 to 2.0.0
+mag modify bump --targets "major" # Bumps version 1.1.1 to 2.0.0
 
-mag modify bump --target 'minor' # Bumps version 1.1.1 to 1.2.0
+mag modify bump --targets 'minor' # Bumps version 1.1.1 to 1.2.0
 
-mag modify bump --target 'patch' # Bumps version 1.1.1 to 1.1.2
+mag modify bump --targets 'patch' # Bumps version 1.1.1 to 1.1.2
 ```
 
 - The tool allows for various versions to be modified simultaneously. If more than one version target is passed in, version with the highest weight will be used to relatively bump up the collective version.
@@ -94,7 +94,7 @@ mag modify bump --target 'patch' # Bumps version 1.1.1 to 1.1.2
   - `build-number` - 0
 
 ```bash
-mag modify bump --target "major,minor,patch"
+mag modify bump --targets "major,minor,patch"
 
 # Bumps version 1.1.1 to 2.0.0
 # major version has the highest weight
@@ -104,7 +104,7 @@ mag modify bump --target "major,minor,patch"
 - If you need each version to be bumped independently, just pass in the `--absolute` flag.
 
 ```bash
-mag modify bump --target "major,minor,patch" --strategy "absolute"
+mag modify bump --targets "major,minor,patch" --strategy "absolute"
 
 # Bumps version 1.1.1 to 2.2.2
 
