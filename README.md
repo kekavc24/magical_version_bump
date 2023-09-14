@@ -60,8 +60,8 @@ This command manipulates the contents of an existing yaml/json file.
 
 Available subcommands include :
 
-- `set` - overwrites/appends to nodes in your yaml/json files. Read more <a href="./example/SET_COMMAND.md" target = "blank">here</a>
-- `bump` - bumps the version in your yaml/json file. Read more <a href="./example/BUMP_COMMAND.md" target = "blank">here</a>
+- `set` - overwrites/appends to nodes in your yaml/json files. Read more <a href="./example/SET_COMMAND.md" target = "_blank">here</a>
+- `bump` - bumps the version in your yaml/json file. Read more <a href="./example/BUMP_COMMAND.md" target = "_blank">here</a>
 
 ## Default
 

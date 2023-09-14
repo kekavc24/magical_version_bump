@@ -1,4 +1,19 @@
-# 0.5.2
+# 1.0.0
+
+Hurray 🎊🥳🎉🎊. Package is now stable. Changes include:
+
+* `breaking` : new syntax for running commands
+  * `breaking` : end support for dumping version by 1.
+  * `breaking` : end support for `change` command in favour of `set` subcommand.
+  * `refactor` : add new <a href = "https://github.com/kekavc24/magical_version_bump/blob/master/example/BUMP_COMMAND.md" target = "_blank">bump</a> and <a href = "https://github.com/kekavc24/magical_version_bump/blob/master/example/SET_COMMAND.md" target = "_blank">set</a> subcommand to `modify` command.
+  * `breaking` : rename `set-path` to `directory`.
+  * `breaking` : rename `with-path` to `request-path`.
+  * `breaking` : replace `major`, `minor`, `patch` & `build-number` flags with `targets` multi-option
+  * `breaking` : remove `yaml-version` flag.
+* `test` : update and add new tests for the above changes.
+* `docs` : update and add documentation for the above changes.
+
+## 0.5.2
 
 * `feat` : add json support. Just checks file extension for now.
 
@@ -73,6 +88,6 @@ CLI tool will always get the highest relative version based on all flags provide
 ## 0.0.1-dev.1
 
 * `chore` : initial package release
-* feat: added basic bump/dump for common dart/flutter versioning in pubspec.yaml
+* `feat` : added basic bump/dump for common dart/flutter versioning in pubspec.yaml
 
 **NOTE** : Currently package has no tests yet (working progress). Still works great though. (source: `Dude Trust Me`) ;)
