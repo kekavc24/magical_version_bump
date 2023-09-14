@@ -1,6 +1,7 @@
-import 'package:magical_version_bump/src/core/enums/enums.dart';
-import 'package:magical_version_bump/src/core/mixins/command_mixins.dart';
+import 'package:magical_version_bump/src/utils/enums/enums.dart';
+import 'package:magical_version_bump/src/utils/mixins/command_mixins.dart';
 import 'package:test/test.dart';
+import 'package:yaml/yaml.dart';
 
 import '../../../helpers/helpers.dart';
 
@@ -8,6 +9,7 @@ class _FakeYamlModifier with ModifyYaml {}
 
 void main() {
   late _FakeYamlModifier modifier;
+  late YamlMap testYamlMap;
 
   const version = '11.11.11';
   const versionWithBuild = '$version+11';
@@ -18,148 +20,114 @@ void main() {
   final buildTarget = <String>['build-number'];
 
   const fakeYaml = '''
-  name: Test File
-  description: This is a test
   version: $version
-  homepage: https://url.to.homepage
-  repository: https://url.to.repository-on-github
-  issue_tracker: https://url.to.issue-tracker
-  documentation: https://url.to.documentation
+  test:
+    nested-test:
+      nested-value: value
+      nested-list:
+        - value
+        - another value
+
+      nested-map:
+        value: another value
 ''';
+
+  // Map with test values
+  final mappy = <String, dynamic>{
+    'key': 'value',
+    'deep key': {
+      'deeper key': {
+        'deepest key': {
+          'deeper deepest key': 'value',
+          'another deepest key': ['value'],
+          'other depeest key': {
+            'absolute deep key': 'value',
+          },
+        },
+      },
+    },
+  };
 
   setUp(() {
     modifier = _FakeYamlModifier();
+    testYamlMap = YamlMap.wrap(mappy);
   });
 
   group('independent versioning (absolute)', () {
-    test('bumps up/down only major version', () async {
+    test('bumps up only major version', () async {
       const bumpedVersion = '12.11.11';
-      const dumpedVersion = '10.11.11';
 
       // Bump up version by 1
       final dynamicBump = await modifier.dynamicBump(
         version,
-        action: 'bump',
-        versionTargets: majorTarget,
-        strategy: ModifyStrategy.absolute,
-      );
-
-      // Bump down version by 1
-      final dynamicDump = await modifier.dynamicBump(
-        version,
-        action: 'dump',
         versionTargets: majorTarget,
         strategy: ModifyStrategy.absolute,
       );
 
       expect(dynamicBump.version, bumpedVersion);
-      expect(dynamicDump.version, dumpedVersion);
     });
 
-    test('bumps up/down only minor version', () async {
+    test('bumps up only minor version', () async {
       const bumpedVersion = '11.12.11';
-      const dumpedVersion = '11.10.11';
 
       // Bump up version by 1
       final dynamicBump = await modifier.dynamicBump(
         version,
-        action: 'bump',
-        versionTargets: minorTarget,
-        strategy: ModifyStrategy.absolute,
-      );
-
-      // Bump down version by 1
-      final dynamicDump = await modifier.dynamicBump(
-        version,
-        action: 'dump',
         versionTargets: minorTarget,
         strategy: ModifyStrategy.absolute,
       );
 
       expect(dynamicBump.version, bumpedVersion);
-      expect(dynamicDump.version, dumpedVersion);
     });
 
-    test('bumps up/down only patch version', () async {
+    test('bumps up only patch version', () async {
       const bumpedVersion = '11.11.12';
-      const dumpedVersion = '11.11.10';
 
       // Bump up version by 1
       final dynamicBump = await modifier.dynamicBump(
         version,
-        action: 'bump',
-        versionTargets: patchTarget,
-        strategy: ModifyStrategy.absolute,
-      );
-
-      // Bump down version by 1
-      final dynamicDump = await modifier.dynamicBump(
-        version,
-        action: 'dump',
         versionTargets: patchTarget,
         strategy: ModifyStrategy.absolute,
       );
 
       expect(dynamicBump.version, bumpedVersion);
-      expect(dynamicDump.version, dumpedVersion);
     });
 
-    test('bumps up/down only build number', () async {
+    test('bumps up only build number', () async {
       const bumpedVersion = '11.11.11+12';
-      const dumpedVersion = '11.11.11+10';
 
       // Bump up version by 1
       final dynamicBump = await modifier.dynamicBump(
         versionWithBuild,
-        action: 'bump',
         versionTargets: buildTarget,
         strategy: ModifyStrategy.absolute,
       );
 
-      // Bump down version by 1
-      final dynamicDump = await modifier.dynamicBump(
-        versionWithBuild,
-        action: 'dump',
-        versionTargets: buildTarget,
-        strategy: ModifyStrategy.absolute,
-      );
       expect(dynamicBump.version, bumpedVersion);
-      expect(dynamicDump.version, dumpedVersion);
     });
 
-    test('appends and bumps up/down only build number', () async {
-      const bumpedVersion = '11.11.11+2';
-      const dumpedVersion = '11.11.11+0';
+    test('appends and bumps up only build number', () async {
+      const bumpedVersion = '11.11.11+1';
 
       // Bump up version by 1
       final dynamicBump = await modifier.dynamicBump(
         version,
-        action: 'bump',
-        versionTargets: buildTarget,
-        strategy: ModifyStrategy.absolute,
-      );
-
-      // Bump down version by 1
-      final dynamicDump = await modifier.dynamicBump(
-        version,
-        action: 'dump',
         versionTargets: buildTarget,
         strategy: ModifyStrategy.absolute,
       );
 
       expect(dynamicBump.version, bumpedVersion);
-      expect(dynamicDump.version, dumpedVersion);
     });
   });
 
   group('collective versioning (relative)', () {
-    test('collectively bumps up/down major version', () async {
+    test('collectively bumps up major version', () async {
       const bumpedVersion = '12.0.0';
 
       final dynamicBump = await modifier.dynamicBump(
         version,
-        action: 'bump',
         versionTargets: majorTarget,
+        strategy: ModifyStrategy.relative,
       );
 
       expect(dynamicBump.version, bumpedVersion);
@@ -170,8 +138,8 @@ void main() {
 
       final dynamicBump = await modifier.dynamicBump(
         version,
-        action: 'bump',
         versionTargets: minorTarget,
+        strategy: ModifyStrategy.relative,
       );
 
       expect(dynamicBump.version, bumpedVersion);
@@ -182,8 +150,8 @@ void main() {
 
       final dynamicBump = await modifier.dynamicBump(
         version,
-        action: 'bump',
         versionTargets: patchTarget,
+        strategy: ModifyStrategy.relative,
       );
 
       expect(dynamicBump.version, bumpedVersion);
@@ -192,8 +160,8 @@ void main() {
     test('throws error when more than one targets are added', () async {
       final future = modifier.dynamicBump(
         version,
-        action: 'bump',
         versionTargets: [...majorTarget, ...patchTarget, ...buildTarget],
+        strategy: ModifyStrategy.relative,
       );
 
       expect(
@@ -203,99 +171,675 @@ void main() {
         ),
       );
     });
+  });
 
-    test('throws error when dumping versions', () async {
-      final future = modifier.dynamicBump(
-        version,
-        action: 'dump',
-        versionTargets: [...majorTarget, ...buildTarget],
+  group('nested update appends', () {
+    test(
+      'string to deepest key/value pair and converts value to list',
+      () {
+        final keys = ['deep key', 'deeper key', 'deepest key'];
+        const targetKey = 'deeper deepest key';
+        const update = 'another value';
+
+        final updatedValue = modifier.updateNestedTarget(
+          keys: keys,
+          yamlMap: testYamlMap,
+          targetKey: targetKey,
+          update: update,
+          append: true,
+        );
+
+        final expectedValue = {
+          targetKey: ['value', update],
+        };
+
+        expect(updatedValue.failed, false);
+        expect(updatedValue.failedReason, isNull);
+        expect(updatedValue.finalDepth, 0);
+        expect(updatedValue.updatedValue, equals(expectedValue));
+      },
+    );
+
+    test(
+      'list of values to deepest key/value pair and converts value to list',
+      () {
+        final keys = ['deep key', 'deeper key', 'deepest key'];
+        const targetKey = 'deeper deepest key';
+        const update = ['another value', 'double other value'];
+
+        final updatedValue = modifier.updateNestedTarget(
+          keys: keys,
+          yamlMap: testYamlMap,
+          targetKey: targetKey,
+          update: update,
+          append: true,
+        );
+
+        final expectedValue = {
+          targetKey: ['value', ...update],
+        };
+
+        expect(updatedValue.failed, false);
+        expect(updatedValue.failedReason, isNull);
+        expect(updatedValue.finalDepth, 0);
+        expect(updatedValue.updatedValue, equals(expectedValue));
+      },
+    );
+
+    test(
+      'adds string to deepest key whose value is a list',
+      () {
+        final keys = ['deep key', 'deeper key', 'deepest key'];
+        const targetKey = 'another deepest key';
+        const update = 'another value';
+
+        final updatedValue = modifier.updateNestedTarget(
+          keys: keys,
+          yamlMap: testYamlMap,
+          targetKey: targetKey,
+          update: update,
+          append: true,
+        );
+
+        final expectedValue = {
+          targetKey: ['value', update],
+        };
+
+        expect(updatedValue.failed, false);
+        expect(updatedValue.failedReason, isNull);
+        expect(updatedValue.finalDepth, 0);
+        expect(updatedValue.updatedValue, equals(expectedValue));
+      },
+    );
+
+    test(
+      'adds list of values to deepest key whose value is a list',
+      () {
+        final keys = ['deep key', 'deeper key', 'deepest key'];
+        const targetKey = 'another deepest key';
+        const update = ['another value', 'double other value'];
+
+        final updatedValue = modifier.updateNestedTarget(
+          keys: keys,
+          yamlMap: testYamlMap,
+          targetKey: targetKey,
+          update: update,
+          append: true,
+        );
+
+        final expectedValue = {
+          targetKey: ['value', ...update],
+        };
+
+        expect(updatedValue.failed, false);
+        expect(updatedValue.failedReason, isNull);
+        expect(updatedValue.finalDepth, 0);
+        expect(updatedValue.updatedValue, equals(expectedValue));
+      },
+    );
+
+    test(
+      'adds map of values to deepest key whose value is a map',
+      () {
+        final keys = ['deep key', 'deeper key', 'deepest key'];
+        const targetKey = 'other depeest key';
+        const update = {'another value': 'double other value'};
+
+        final updatedValue = modifier.updateNestedTarget(
+          keys: keys,
+          yamlMap: testYamlMap,
+          targetKey: targetKey,
+          update: update,
+          append: true,
+        );
+
+        final expectedValue = {
+          targetKey: {
+            'absolute deep key': 'value',
+            ...update,
+          },
+        };
+
+        expect(updatedValue.failed, false);
+        expect(updatedValue.failedReason, isNull);
+        expect(updatedValue.finalDepth, 0);
+        expect(updatedValue.updatedValue, equals(expectedValue));
+      },
+    );
+  });
+
+  group('nested update overwrites', () {
+    test(
+      'deepest key/value pair and converts value to string',
+      () {
+        final keys = ['deep key', 'deeper key', 'deepest key'];
+        const targetKey = 'deeper deepest key';
+        const update = 'another value';
+
+        final updatedValue = modifier.updateNestedTarget(
+          keys: keys,
+          yamlMap: testYamlMap,
+          targetKey: targetKey,
+          update: update,
+          append: false,
+        );
+
+        final expectedValue = {
+          targetKey: 'another value',
+        };
+
+        expect(updatedValue.failed, false);
+        expect(updatedValue.failedReason, isNull);
+        expect(updatedValue.finalDepth, 0);
+        expect(updatedValue.updatedValue, equals(expectedValue));
+      },
+    );
+
+    test(
+      'deepest key/value pair and converts value to list of values',
+      () {
+        final keys = ['deep key', 'deeper key', 'deepest key'];
+        const targetKey = 'deeper deepest key';
+        const update = ['another value', 'double other value'];
+
+        final updatedValue = modifier.updateNestedTarget(
+          keys: keys,
+          yamlMap: testYamlMap,
+          targetKey: targetKey,
+          update: update,
+          append: false,
+        );
+
+        final expectedValue = {
+          targetKey: update,
+        };
+
+        expect(updatedValue.failed, false);
+        expect(updatedValue.failedReason, isNull);
+        expect(updatedValue.finalDepth, 0);
+        expect(updatedValue.updatedValue, equals(expectedValue));
+      },
+    );
+
+    test(
+      'deepest key/value pair and converts value to map of values',
+      () {
+        final keys = ['deep key', 'deeper key', 'deepest key'];
+        const targetKey = 'deeper deepest key';
+        const update = {'another value': 'double other value'};
+
+        final updatedValue = modifier.updateNestedTarget(
+          keys: keys,
+          yamlMap: testYamlMap,
+          targetKey: targetKey,
+          update: update,
+          append: false,
+        );
+
+        final expectedValue = {
+          targetKey: update,
+        };
+
+        expect(updatedValue.failed, false);
+        expect(updatedValue.failedReason, isNull);
+        expect(updatedValue.finalDepth, 0);
+        expect(updatedValue.updatedValue, equals(expectedValue));
+      },
+    );
+  });
+
+  group('nested update terminates', () {
+    test('when key is missing at root', () {
+      final keys = ['missing root key', 'deeper key'];
+      const targetKey = 'deeper deepest key';
+      const update = 'another value';
+
+      final updatedValue = modifier.updateNestedTarget(
+        keys: keys,
+        yamlMap: testYamlMap,
+        targetKey: targetKey,
+        update: update,
+        append: true,
       );
 
+      expect(updatedValue.failed, false);
+      expect(updatedValue.failedReason, null);
+      expect(updatedValue.finalDepth, 2);
+      expect(updatedValue.updatedValue, null);
+    });
+
+    test('when nested key is missing', () {
+      final keys = ['deep key', 'missing root key'];
+      const targetKey = 'deeper deepest key';
+      const update = 'another value';
+
+      final updatedValue = modifier.updateNestedTarget(
+        keys: keys,
+        yamlMap: testYamlMap,
+        targetKey: targetKey,
+        update: update,
+        append: true,
+      );
+
+      expect(updatedValue.failed, false);
+      expect(updatedValue.failedReason, null);
+      expect(updatedValue.finalDepth, 2);
+      expect(updatedValue.updatedValue, null);
+    });
+
+    test('when target key is missing', () {
+      final keys = ['deep key', 'deeper key'];
+      const targetKey = 'missing key';
+      const update = 'another value';
+
+      final updatedValue = modifier.updateNestedTarget(
+        keys: keys,
+        yamlMap: testYamlMap,
+        targetKey: targetKey,
+        update: update,
+        append: true,
+      );
+
+      expect(updatedValue.failed, false);
+      expect(updatedValue.failedReason, null);
+      expect(updatedValue.finalDepth, 0);
+      expect(updatedValue.updatedValue, null);
+    });
+
+    test(
+      'when target key is missing but current root key will be overwritten',
+      () {
+        final keys = ['key'];
+        const targetKey = 'missing key';
+        const update = 'another value';
+
+        final updatedValue = modifier.updateNestedTarget(
+          keys: keys,
+          yamlMap: testYamlMap,
+          targetKey: targetKey,
+          update: update,
+          append: false,
+        );
+
+        expect(updatedValue.failed, false);
+        expect(updatedValue.failedReason, isNull);
+        expect(updatedValue.finalDepth, 0);
+        expect(updatedValue.updatedValue, null);
+      },
+    );
+
+    test(
+      'and fails to append to a nested target key if root key is not a map',
+      () {
+        final keys = ['key'];
+        const targetKey = 'missing key';
+        const update = 'another value';
+
+        final updatedValue = modifier.updateNestedTarget(
+          keys: keys,
+          yamlMap: testYamlMap,
+          targetKey: targetKey,
+          update: update,
+          append: true,
+        );
+
+        expect(updatedValue.failed, true);
+        expect(updatedValue.failedReason, 'Cannot append at ${keys.first}');
+        expect(updatedValue.finalDepth, 1);
+        expect(updatedValue.updatedValue, null);
+      },
+    );
+
+    test('and fails to append map to string/list of values', () {
+      final keys = ['deep key', 'deeper key', 'deepest key'];
+      const targetKey = 'deeper deepest key';
+      const update = {'another value': 'double other value'};
+
+      final updatedValue = modifier.updateNestedTarget(
+        keys: keys,
+        yamlMap: testYamlMap,
+        targetKey: targetKey,
+        update: update,
+        append: true,
+      );
+
+      expect(updatedValue.failed, true);
       expect(
-        () async => future,
-        throwsViolation(
-          'This versioning strategy does not allow bumping down versions',
-        ),
+        updatedValue.failedReason,
+        'Cannot append new values at $targetKey',
       );
+      expect(updatedValue.finalDepth, 0);
+      expect(updatedValue.updatedValue, isNull);
+    });
+
+    test('and fails to append string to map', () {
+      final keys = ['deep key', 'deeper key', 'deepest key'];
+      const targetKey = 'other depeest key';
+      const update = 'append value';
+
+      final updatedValue = modifier.updateNestedTarget(
+        keys: keys,
+        yamlMap: testYamlMap,
+        targetKey: targetKey,
+        update: update,
+        append: true,
+      );
+
+      expect(updatedValue.failed, true);
+      expect(
+        updatedValue.failedReason,
+        'Cannot append new mapped values at $targetKey',
+      );
+      expect(updatedValue.finalDepth, 0);
+      expect(updatedValue.updatedValue, isNull);
+    });
+
+    test('and fails to append list of values to map', () {
+      final keys = ['deep key', 'deeper key', 'deepest key'];
+      const targetKey = 'other depeest key';
+      const update = ['append value'];
+
+      final updatedValue = modifier.updateNestedTarget(
+        keys: keys,
+        yamlMap: testYamlMap,
+        targetKey: targetKey,
+        update: update,
+        append: true,
+      );
+
+      expect(updatedValue.failed, true);
+      expect(
+        updatedValue.failedReason,
+        'Cannot append new mapped values at $targetKey',
+      );
+      expect(updatedValue.finalDepth, 0);
+      expect(updatedValue.updatedValue, isNull);
     });
   });
 
-  group('modifies yaml nodes correctly', () {
-    test('modifies name correctly', () async {
-      const node = 'name';
-      const changes = 'Test File Passed';
+  group('converts unused keys to dart map', () {
+    test('for one key', () {
+      final map = modifier.convertToDartMap(
+        YamlMap.wrap({}),
+        append: false,
+        pathKeys: [],
+        missingKeys: ['one key'],
+        fallbackData: {},
+        updatedData: {'targetKey': 'data'},
+      );
 
-      final moddedFile = await modifier.editYamlFile(fakeYaml, node, changes);
+      final expectedMap = {
+        'one key': {
+          'targetKey': 'data',
+        },
+      };
 
-      final nodeValue = getYamlValue(moddedFile, node);
-
-      expect(nodeValue, changes);
+      expect(map, equals(expectedMap));
     });
 
-    test('modifies description correctly', () async {
-      const node = 'description';
-      const changes = 'This is a test that passed';
+    test('for multiple keys', () {
+      final map = modifier.convertToDartMap(
+        YamlMap.wrap({}),
+        append: false,
+        pathKeys: [],
+        missingKeys: ['one key', 'two key', 'three key'],
+        fallbackData: {},
+        updatedData: {'targetKey': 'data'},
+      );
 
-      final moddedFile = await modifier.editYamlFile(fakeYaml, node, changes);
+      final expectedMap = {
+        'one key': {
+          'two key': {
+            'three key': {
+              'targetKey': 'data',
+            },
+          },
+        },
+      };
 
-      final nodeValue = getYamlValue(moddedFile, node);
+      expect(map, equals(expectedMap));
+    });
+  });
 
-      expect(nodeValue, changes);
+  group('formats output correctly', () {
+    test('when recursive function reached 0 depth', () {
+      final output = (
+        failed: false,
+        failedReason: null,
+        finalDepth: 0,
+        updatedValue: {
+          'value': 'updated',
+        },
+      );
+
+      final formattedOutput = modifier.formatOutput(
+        YamlMap.wrap({}),
+        append: false,
+        rootKeys: ['test'],
+        fallbackData: {'target': 'data'},
+        output: output,
+      );
+
+      final expectedDataToSave = output.updatedValue;
+
+      expect(formattedOutput.path, equals(['test']));
+      expect(formattedOutput.dataToSave, expectedDataToSave);
     });
 
-    test('modifies version correctly', () async {
-      const node = 'version';
-      const changes = '12.12.12';
+    test('when recursive function reached 0 depth but key was missing', () {
+      const output = (
+        failed: false,
+        failedReason: null,
+        finalDepth: 0,
+        updatedValue: null,
+      );
 
-      final moddedFile = await modifier.editYamlFile(fakeYaml, node, changes);
+      final formattedOutput = modifier.formatOutput(
+        YamlMap.wrap({}),
+        append: false,
+        rootKeys: ['test'],
+        fallbackData: {'target': 'data'},
+        output: output,
+      );
 
-      final nodeValue = getYamlValue(moddedFile, node);
+      final expectedDataToSave = {'target': 'data'};
 
-      expect(nodeValue, changes);
+      expect(formattedOutput.path, equals(['test']));
+      expect(formattedOutput.dataToSave, expectedDataToSave);
     });
 
-    test('modifies homepage url correctly', () async {
-      const node = 'homepage';
-      const changes = 'https://url.to.passed-test-for-homepage';
+    test('when the first and only root key was missing', () {
+      const output = (
+        failed: false,
+        failedReason: null,
+        finalDepth: 1,
+        updatedValue: null,
+      );
 
-      final moddedFile = await modifier.editYamlFile(fakeYaml, node, changes);
+      final formattedOutput = modifier.formatOutput(
+        YamlMap.wrap({}),
+        append: false,
+        rootKeys: ['test'],
+        fallbackData: {'target': 'data'},
+        output: output,
+      );
 
-      final nodeValue = getYamlValue(moddedFile, node);
+      final expectedDataToSave = {'target': 'data'};
 
-      expect(nodeValue, changes);
+      expect(formattedOutput.path, equals(['test']));
+      expect(formattedOutput.dataToSave, expectedDataToSave);
     });
 
-    test('modifies repository url correctly', () async {
-      const node = 'repository';
-      const changes = 'https://url.to.passed-test-for-repository';
+    test('when the first root key was missing in a list of keys', () {
+      const output = (
+        failed: false,
+        failedReason: null,
+        finalDepth: 1,
+        updatedValue: null,
+      );
 
-      final moddedFile = await modifier.editYamlFile(fakeYaml, node, changes);
+      final formattedOutput = modifier.formatOutput(
+        YamlMap.wrap({}),
+        append: false,
+        rootKeys: ['test', 'other test key'],
+        fallbackData: {'target': 'data'},
+        output: output,
+      );
 
-      final nodeValue = getYamlValue(moddedFile, node);
+      final expectedDataToSave = {
+        'other test key': {'target': 'data'},
+      };
 
-      expect(nodeValue, changes);
+      expect(formattedOutput.path, equals(['test']));
+      expect(formattedOutput.dataToSave, expectedDataToSave);
     });
 
-    test('modifies issue_tracker url correctly', () async {
-      const node = 'issue_tracker';
-      const changes = 'https://url.to.passed-test-for-issue-tracker';
+    test('when the missing root key is not at index 0', () {
+      const output = (
+        failed: false,
+        failedReason: null,
+        finalDepth: 3,
+        updatedValue: null,
+      );
 
-      final moddedFile = await modifier.editYamlFile(fakeYaml, node, changes);
+      final formattedOutput = modifier.formatOutput(
+        YamlMap.wrap({}),
+        append: false,
+        rootKeys: [
+          'test',
+          'other test key',
+          'another key',
+          'another test key',
+        ],
+        fallbackData: {'target': 'data'},
+        output: output,
+      );
 
-      final nodeValue = getYamlValue(moddedFile, node);
+      final expectedDataToSave = {
+        'other test key': {
+          'another key': {
+            'another test key': {'target': 'data'},
+          },
+        },
+      };
 
-      expect(nodeValue, changes);
+      expect(formattedOutput.path, equals(['test']));
+      expect(formattedOutput.dataToSave, expectedDataToSave);
+    });
+  });
+
+  group('updates', () {
+    test('key at root', () async {
+      final dictionary = (
+        append: false,
+        rootKeys: ['version'],
+        data: '10.10.10+10',
+      );
+
+      final updatedFile = await modifier.updateYamlFile(fakeYaml, dictionary);
+
+      final updateValue = await readNestedNodes(updatedFile, ['version']);
+
+      expect(updateValue, '10.10.10+10');
     });
 
-    test('modifies documentation correctly', () async {
-      const node = 'documentation';
-      const changes = 'https://url.to.passed-test-for-documentation';
+    test('creates missing root key', () async {
+      final dictionary = (
+        append: false,
+        rootKeys: ['name', 'test name'],
+        data: 'Test One, Two, Three',
+      );
 
-      final moddedFile = await modifier.editYamlFile(fakeYaml, node, changes);
+      final updatedFile = await modifier.updateYamlFile(fakeYaml, dictionary);
 
-      final nodeValue = getYamlValue(moddedFile, node);
+      final updateValue = await readNestedNodes(
+        updatedFile,
+        ['name', 'test name'],
+      );
 
-      expect(nodeValue, changes);
+      expect(updateValue, 'Test One, Two, Three');
+    });
+
+    test('overwrites existing key with new values', () async {
+      final dictionary = (
+        append: false,
+        rootKeys: ['test', 'nested-test'],
+        data: 'Test One, Two, Three',
+      );
+
+      final updatedFile = await modifier.updateYamlFile(fakeYaml, dictionary);
+
+      final updateValue = await readNestedNodes(
+        updatedFile,
+        ['test', 'nested-test'],
+      );
+
+      expect(updateValue, 'Test One, Two, Three');
+    });
+
+    test('appends value to existing key with one value', () async {
+      final dictionary = (
+        append: true,
+        rootKeys: ['test', 'nested-test', 'nested-value'],
+        data: 'Test One, Two, Three',
+      );
+
+      final updatedFile = await modifier.updateYamlFile(fakeYaml, dictionary);
+
+      final updateValue = await readNestedNodes(
+        updatedFile,
+        ['test', 'nested-test', 'nested-value'],
+      );
+
+      expect(updateValue, equals(['value', 'Test One, Two, Three']));
+    });
+
+    test('appends value to existing key with list of values', () async {
+      final dictionary = (
+        append: true,
+        rootKeys: ['test', 'nested-test', 'nested-list'],
+        data: 'Test One, Two, Three',
+      );
+
+      final updatedFile = await modifier.updateYamlFile(fakeYaml, dictionary);
+
+      final updateValue = await readNestedNodes(
+        updatedFile,
+        ['test', 'nested-test', 'nested-list'],
+      );
+
+      expect(
+        updateValue,
+        equals(['value', 'another value', 'Test One, Two, Three']),
+      );
+    });
+
+    test('appends map to existing key with map of values', () async {
+      final dictionary = (
+        append: true,
+        rootKeys: ['test', 'nested-test', 'nested-map'],
+        data: {
+          'value': 'another value',
+          'test map': 'Test One, Two, Three',
+        },
+      );
+
+      final updatedFile = await modifier.updateYamlFile(fakeYaml, dictionary);
+
+      final updateValue = await readNestedNodes(
+        updatedFile,
+        ['test', 'nested-test', 'nested-map'],
+      );
+
+      expect(
+        updateValue,
+        equals(
+          {
+            'value': 'another value',
+            'test map': 'Test One, Two, Three',
+          },
+        ),
+      );
     });
   });
 }

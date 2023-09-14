@@ -1,93 +1,93 @@
-# 0.5.2
-**Features**
-* add json support. Just checks file extension for now.
+# 1.0.0
 
-**Improvements**
-* code maintainability and testability
+Hurray 🎊🥳🎉🎊. Package is now stable. Changes include:
 
-# 0.5.1
-**Fixes**
-* tool now keeps custom `build number` by default. Warns the user in console
+* `breaking` : new syntax for running commands
+  * `breaking` : end support for dumping version by 1.
+  * `breaking` : end support for `change` command in favour of `set` subcommand.
+  * `refactor` : add new <a href = "https://github.com/kekavc24/magical_version_bump/blob/master/example/BUMP_COMMAND.md" target = "_blank">bump</a> and <a href = "https://github.com/kekavc24/magical_version_bump/blob/master/example/SET_COMMAND.md" target = "_blank">set</a> subcommand to `modify` command.
+  * `breaking` : rename `set-path` to `directory`.
+  * `breaking` : rename `with-path` to `request-path`.
+  * `breaking` : replace `major`, `minor`, `patch` & `build-number` flags with `targets` multi-option
+  * `breaking` : remove `yaml-version` flag.
+* `test` : update and add new tests for the above changes.
+* `docs` : update and add documentation for the above changes.
 
-**Improvements**
-* updated wrong example in README
-* added & updated tests
+## 0.5.2
 
-# 0.5.0
-**Features**
-* added new `set-version` option to both commands. `yaml-version` will be deprecated in future versions.
-* added new `preset` flag to `modify` command.
-* added `keep-pre` & `keep-build` flags to `modify` command.
-* added `set-build` & `set-prerelease` options to `modify` command.
+* `feat` : add json support. Just checks file extension for now.
 
-Check README & example for more info.
+## 0.5.1
 
-**Improvements**
-* updated README & examples to be more clear and concise.
-* added new tests for new flags & options.
+* `fix` : tool now keeps custom `build number` by default. Warns the user in console
+* `docs` : updated wrong example in README
+* `test` : added & updated tests
 
-# 0.4.0
-**Features**
-* added new `flags` and `options` to `change` command
-    * `keep-pre` & `keep-build` flags to nudge the tool to preserve prerelease & build metadata
-    * `set-build` & `set-prerelease` options for changing the prerelease & build metadata
-* build & prerelease info will be removed when using the new options.
+## 0.5.0
 
-**Improvements**
-* updated changelog readability to show latest versions first
-* added tests to match new functionality
-* updated README with new flags & options
+* `feat` : add new `set-version` option to both commands. `yaml-version` will be deprecated in future versions.
+* `feat` : add new `preset` flag to `modify` command.
+* `feat` : add `keep-pre` & `keep-build` flags to `modify` command.
+* `feat` : add `set-build` & `set-prerelease` options to `modify` command.
+* `docs` : updated README & examples to be more clear and concise.
+* `test` : added new tests for new flags & options.
 
-# 0.3.0
+## 0.4.0
 
-**Features**
-* add `--set-path` flag to both commands. Check README for more info.
+* `feat` : add new `flags` and `options` to `change` command
+  * `keep-pre` & `keep-build` flags to nudge the tool to preserve prerelease & build metadata
+  * `set-build` & `set-prerelease` options for changing the prerelease & build metadata.
 
-**Improvements**
-* update to `Dart 3.0.0`
-* improve tests
+**NOTE** : build & prerelease info will be removed when using the new options.
 
-# 0.2.0
+* `test` : add tests to match new functionality
+* `docs` : updated README with new flags & options
 
-**Minor Changes**
-* Default versioning is relative where :
-    * incrementing major - defaults minor & patch to zero
-    * incrementing minor - defaults only patch to zero
-* CLI tool will always get the highest relative version based on all flags provided.
+## 0.3.0
 
-**Features**
-* Added `--absolute` flag for absolute versioning. Each version will be treated as an absolute number.
-* Added new flags/options to `change` command. Check README for more info.
+* `feat` : add `--set-path` flag to both commands. Check README for more info.
+* `chore` : update to `Dart 3.0.0`
+* `test` : add tests
 
-**Fixes & Improvements**
-* Updated README and example docs.
-* Improved code readability and testability
-* Added improved tests.
+## 0.2.0
 
-# 0.1.2
+* `refactor` : Default versioning is relative where :
+  * incrementing major - defaults minor & patch to zero
+  * incrementing minor - defaults only patch to zero
 
-* Minor improvements.
+CLI tool will always get the highest relative version based on all flags provided.
 
-# 0.1.1
+* `feat` : add `--absolute` flag for absolute versioning. Each version will be treated as an absolute number.
+* `feat` : add new flags/options to `change` command. Check README for more info.
+* `docs` : update README and example docs.
+* `chore` : improve code readability and testability
+* `feat` : add improved tests.
 
-* Routine pub upgrade
-* Bump up dart sdk minimum version to 2.19
+## 0.1.2
 
-# 0.1.0
+* `refactor` : minor performance improvements
 
-* Added tests
+## 0.1.1
 
-# 0.0.1-dev.3
+* `chore` : update dependencies
+* `chore` : bump dart sdk minimum version to 2.19
 
-* Removed reference from inspiration project.
-* Added dart docs
+## 0.1.0
 
-# 0.0.1-dev.2
+* `test` : add tests
 
-* Added valid license
+## 0.0.1-dev.3
 
-# 0.0.1-dev.1
+* `chore` : remove reference from inspiration project (Local proof of concept).
+* `docs` : add dart docs
 
-* Initial package release
-* feat: added basic bump/dump for common dart/flutter versioning in pubspec.yaml
-* Currently package has no tests yet (working progress). Still works great though. (source: Dude Trust Me) ;)
+## 0.0.1-dev.2
+
+* add valid license
+
+## 0.0.1-dev.1
+
+* `chore` : initial package release
+* `feat` : added basic bump/dump for common dart/flutter versioning in pubspec.yaml
+
+**NOTE** : Currently package has no tests yet (working progress). Still works great though. (source: `Dude Trust Me`) ;)

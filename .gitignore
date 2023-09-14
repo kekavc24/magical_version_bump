@@ -11,8 +11,10 @@ doc/api/
 .test_coverage.dart
 coverage/
 .test_runner.dart
+fake.dart
 fake.yaml
 fake.json
+.markdownlint.yaml
 
 # Android studio and IntelliJ
 .idea

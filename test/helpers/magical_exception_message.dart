@@ -1,5 +1,4 @@
-import 'package:magical_version_bump/src/core/exceptions/command_exceptions.dart';
-import 'package:test/test.dart';
+part of 'helpers.dart';
 
 Matcher throwsViolation(String message) {
   return throwsA(

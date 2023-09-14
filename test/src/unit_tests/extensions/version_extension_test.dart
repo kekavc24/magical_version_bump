@@ -1,6 +1,5 @@
-import 'package:collection/collection.dart';
-import 'package:magical_version_bump/src/core/enums/enums.dart';
-import 'package:magical_version_bump/src/core/extensions/extensions.dart';
+import 'package:magical_version_bump/src/utils/enums/enums.dart';
+import 'package:magical_version_bump/src/utils/extensions/extensions.dart';
 import 'package:pub_semver/pub_semver.dart';
 import 'package:test/test.dart';
 
@@ -8,14 +7,15 @@ import '../../../helpers/helpers.dart';
 
 void main() {
   const version = '10.10.10-prerelease+21';
+  const versionWithCustomBuild = '8.8.8+MagicalVersionBump';
 
   group('relative versioning strategy', () {
     test('bumps major version', () {
       const expectedBumpedVersion = '11.0.0+21';
 
       final bumpedVersion = Version.parse(version).modifyVersion(
-        BumpType.up,
         versionTargets: ['major'],
+        strategy: ModifyStrategy.relative,
       );
 
       expect(bumpedVersion.version, expectedBumpedVersion);
@@ -25,8 +25,8 @@ void main() {
       const expectedBumpedVersion = '10.11.0+21';
 
       final bumpedVersion = Version.parse(version).modifyVersion(
-        BumpType.up,
         versionTargets: ['minor'],
+        strategy: ModifyStrategy.relative,
       );
 
       expect(bumpedVersion.version, expectedBumpedVersion);
@@ -36,128 +36,98 @@ void main() {
       const expectedBumpedVersion = '10.10.10+21';
 
       final bumpedVersion = Version.parse(version).modifyVersion(
-        BumpType.up,
         versionTargets: ['patch'],
+        strategy: ModifyStrategy.relative,
       );
 
       expect(bumpedVersion.version, expectedBumpedVersion);
     });
 
     test('bumps build number', () {
-      const expectedBumpedVersion = '10.10.10+22';
+      const expectedBumpedVersion = '10.10.10-prerelease+22';
 
       final bumpedVersion = Version.parse(version).modifyVersion(
-        BumpType.up,
         versionTargets: ['build-number'],
+        strategy: ModifyStrategy.relative,
       );
 
       expect(bumpedVersion.version, expectedBumpedVersion);
     });
 
+    test('ignores custom build numbers', () {
+      final bumpedVersion = Version.parse(versionWithCustomBuild).modifyVersion(
+        versionTargets: ['build-number'],
+        strategy: ModifyStrategy.relative,
+      );
+
+      expect(bumpedVersion.version, versionWithCustomBuild);
+    });
+
     test('throws error if more than one target is passed in', () {
       expect(
         () => Version.parse(version).modifyVersion(
-          BumpType.up,
           versionTargets: ['major', 'minor'],
+          strategy: ModifyStrategy.relative,
         ),
         throwsViolation(
           'Expected only one target for this versioning strategy',
         ),
       );
     });
-
-    test('throws error when version is bumped down', () {
-      expect(
-        () => Version.parse(version).modifyVersion(
-          BumpType.down,
-          versionTargets: ['major'],
-        ),
-        throwsViolation(
-          'This versioning strategy does not allow bumping down versions',
-        ),
-      );
-    });
   });
 
   group('absolute versioning strategy', () {
-    test('bumps up/down the major version', () {
+    test('bumps up the major version', () {
       const expectedBumpedVersion = '11.10.10-prerelease+21';
-      const expectedDumpedVersion = '9.10.10-prerelease+21';
 
       final bumpedVersion = Version.parse(version).modifyVersion(
-        BumpType.up,
-        versionTargets: ['major'],
-        strategy: ModifyStrategy.absolute,
-      );
-
-      final dumpedVersion = Version.parse(version).modifyVersion(
-        BumpType.down,
         versionTargets: ['major'],
         strategy: ModifyStrategy.absolute,
       );
 
       expect(bumpedVersion.version, expectedBumpedVersion);
-      expect(dumpedVersion.version, expectedDumpedVersion);
     });
 
-    test('bumps up/down minor version', () {
+    test('bumps up minor version', () {
       const expectedBumpedVersion = '10.11.10-prerelease+21';
-      const expectedDumpedVersion = '10.9.10-prerelease+21';
 
       final bumpedVersion = Version.parse(version).modifyVersion(
-        BumpType.up,
-        versionTargets: ['minor'],
-        strategy: ModifyStrategy.absolute,
-      );
-
-      final dumpedVersion = Version.parse(version).modifyVersion(
-        BumpType.down,
         versionTargets: ['minor'],
         strategy: ModifyStrategy.absolute,
       );
 
       expect(bumpedVersion.version, expectedBumpedVersion);
-      expect(dumpedVersion.version, expectedDumpedVersion);
     });
 
-    test('bumps up/down patch version', () {
+    test('bumps up patch version', () {
       const expectedBumpedVersion = '10.10.11-prerelease+21';
-      const expectedDumpedVersion = '10.10.9-prerelease+21';
 
       final bumpedVersion = Version.parse(version).modifyVersion(
-        BumpType.up,
-        versionTargets: ['patch'],
-        strategy: ModifyStrategy.absolute,
-      );
-
-      final dumpedVersion = Version.parse(version).modifyVersion(
-        BumpType.down,
         versionTargets: ['patch'],
         strategy: ModifyStrategy.absolute,
       );
 
       expect(bumpedVersion.version, expectedBumpedVersion);
-      expect(dumpedVersion.version, expectedDumpedVersion);
     });
 
-    test('bumps up/down build number', () {
+    test('bumps up build number', () {
       const expectedBumpedVersion = '10.10.10-prerelease+22';
-      const expectedDumpedVersion = '10.10.10-prerelease+20';
 
       final bumpedVersion = Version.parse(version).modifyVersion(
-        BumpType.up,
-        versionTargets: ['build-number'],
-        strategy: ModifyStrategy.absolute,
-      );
-
-      final dumpedVersion = Version.parse(version).modifyVersion(
-        BumpType.down,
         versionTargets: ['build-number'],
         strategy: ModifyStrategy.absolute,
       );
 
       expect(bumpedVersion.version, expectedBumpedVersion);
-      expect(dumpedVersion.version, expectedDumpedVersion);
+    });
+
+    test('ignores custom build numbers', () {
+      final bumpedVersion = Version.parse(versionWithCustomBuild).modifyVersion(
+        versionTargets: ['build-number'],
+        strategy: ModifyStrategy.absolute,
+      );
+
+      expect(bumpedVersion.version, versionWithCustomBuild);
     });
   });
 
@@ -189,12 +159,7 @@ void main() {
     test('returns valid map of versions', () {
       final map = Version.parse(version).getVersionAsMap();
 
-      final isSame = const MapEquality<String, int>().equals(
-        map,
-        {'major': 10, 'minor': 10, 'patch': 10},
-      );
-
-      expect(isSame, true);
+      expect(map, equals({'major': 10, 'minor': 10, 'patch': 10}));
     });
 
     test('sets new prerelease and removes build-number', () {
@@ -246,11 +211,8 @@ void main() {
       expect(setPre, updatedVersion);
     });
 
-    test('checks if build number can be bumped/dumped', () {
-      const versionWithBuild = '8.8.8+21';
-      const versionWithCustomBuild = '8.8.8+MagicalVersionBump';
-
-      final isValidNumber = Version.parse(versionWithBuild).buildIsNumber();
+    test('checks if build number can be bumped', () {
+      final isValidNumber = Version.parse(version).buildIsNumber();
       final isCustom = !Version.parse(versionWithCustomBuild).buildIsNumber();
 
       expect(isValidNumber, true);

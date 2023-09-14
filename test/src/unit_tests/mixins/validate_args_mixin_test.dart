@@ -1,62 +1,32 @@
-import 'package:collection/collection.dart';
-import 'package:magical_version_bump/src/core/mixins/command_mixins.dart';
+import 'package:magical_version_bump/src/utils/mixins/command_mixins.dart';
 import 'package:test/test.dart';
 
-class _FakeArgsValidator with ValidatePreppedArgs {}
+class _FakeArgsValidator with ValidateArgs {}
 
 void main() {
   late _FakeArgsValidator validator;
-  late ListEquality<String> listEquality;
+
+  const missingTargetsError = 'No targets found';
+  var invalidTargetsError = '';
 
   setUp(() {
     validator = _FakeArgsValidator();
-    listEquality = const ListEquality<String>();
+
+    invalidTargetsError =
+        """Command should have at least one of ${validator.versionTargets.join(', ')} flags""";
   });
 
   group('validates and returns base error', () {
-    test('returns undefined flags', () {
-      final args = ['bump', 'undefined'];
+    test('when no targets are present', () {
+      final error = validator.checkTargets([]);
 
-      final undefinedFlags = validator.checkForUndefinedFlags(args);
-
-      expect(listEquality.equals(['undefined'], undefinedFlags), true);
+      expect(error, missingTargetsError);
     });
 
-    test('returns error when action flag is not first', () {
-      const args = ['major', 'bump'];
-      final error = "${validator.actions.join(', ')} flags should come first";
+    test('when invalid targets are present', () {
+      final error = validator.checkTargets(['undefined']);
 
-      final returnedError = validator.checkModifyFlags(args);
-
-      expect(returnedError, error);
-    });
-
-    test('returns error when bump and dump are used together', () {
-      const args = ['dump', 'bump'];
-      const error = 'bump and dump flags cannot be used together';
-
-      final returnedError = validator.checkModifyFlags(args);
-
-      expect(returnedError, error);
-    });
-
-    test('returns error when no target flag is passed in', () {
-      const args = ['bump'];
-      final error =
-          """Command should have at least one of ${validator.targets.take(4).join(', ')} flags""";
-
-      final returnedError = validator.checkModifyFlags(args);
-
-      expect(returnedError, error);
-    });
-
-    test('returns error when flags are duplicated', () {
-      const args = ['major', 'major', 'name', 'yaml-version'];
-      const error = 'Found repeated flags:\nmajor -> 2\n';
-
-      final returnedError = validator.checkForDuplicates(args);
-
-      expect(returnedError, error);
+      expect(error, invalidTargetsError);
     });
   });
 }
