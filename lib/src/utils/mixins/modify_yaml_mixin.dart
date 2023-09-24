@@ -33,7 +33,10 @@ mixin ModifyYaml {
   }
 
   /// Edit yaml file
-  Future<String> updateYamlFile(String file, Dictionary dictionary) async {
+  Future<String> updateYamlFile(
+    String file, {
+    required Dictionary dictionary,
+  }) async {
     // Setup editor
     final editor = YamlEditor(file);
 
@@ -353,7 +356,7 @@ mixin ModifyYaml {
       // Loop all keys in reverse. Appending or adding data
       for (final (index, currentKey) in pathsInReverse.indexed) {
         ///
-        /// The current index indicated number of elements to skip. Add 1 since
+        /// The current index indicates number of elements to skip. Add 1 since
         /// we have to include the target key
         final numOfSkippable = index + 1;
 

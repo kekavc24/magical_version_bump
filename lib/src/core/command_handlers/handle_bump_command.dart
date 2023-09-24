@@ -12,7 +12,7 @@ final class HandleBumpCommand extends CommandHandler {
     final sanitizer = BumpArgumentsChecker(argResults: argResults);
 
     // Validate args
-    final validatedArgs = sanitizer.customValidate();
+    final validatedArgs = sanitizer.validateArgs();
 
     if (!validatedArgs.isValid) {
       prepProgress.fail(validatedArgs.reason!.key);
@@ -21,8 +21,8 @@ final class HandleBumpCommand extends CommandHandler {
 
     // Required information to bump version
     final preppedArgs = sanitizer.prepArgs();
-    final pathInfo = sanitizer.pathInfo;
-    final versionModifiers = sanitizer.modifiers(checkPreset: true);
+    final pathInfo = argResults!.pathInfo;
+    final versionModifiers = preppedArgs.modifiers;
 
     prepProgress.complete('Checked arguments');
 
@@ -37,7 +37,8 @@ final class HandleBumpCommand extends CommandHandler {
 
     // Preset any values before validating the version. When `--preset` flag is
     // used or `--set-version` option
-    if (versionModifiers.preset || versionModifiers.presetOnlyVersion) {
+    if (versionModifiers.presetType == PresetType.all ||
+        versionModifiers.presetType == PresetType.version) {
       Version? oldVersion;
 
       if (fileData.version != null) {
@@ -73,12 +74,12 @@ final class HandleBumpCommand extends CommandHandler {
     /// Validate version and get correct version if invalid. Only use the local
     /// version if the version was never preset using `set-version`
     ///
-    /// When preset, the [currentVersion] will no be empty.
+    /// When preset, the [currentVersion] will not be empty.
     currentVersion = await validateVersion(
-      logger: logger,
-      version: !versionModifiers.preset && !versionModifiers.presetOnlyVersion
+      versionModifiers.presetType == PresetType.none
           ? fileData.version
           : currentVersion,
+      logger: logger,
     );
 
     // Modify the version
@@ -88,7 +89,7 @@ final class HandleBumpCommand extends CommandHandler {
     final modifiedVersion = await dynamicBump(
       currentVersion,
       versionTargets: preppedArgs.targets,
-      strategy: preppedArgs.strategy,
+      strategy: versionModifiers.strategy,
     );
 
     // If build failed silently, warn user
@@ -100,7 +101,8 @@ final class HandleBumpCommand extends CommandHandler {
 
     // If preset is false, but user passed in prerelease & build info.
     // Update it.
-    if ((!versionModifiers.preset || versionModifiers.presetOnlyVersion) &&
+    if ((versionModifiers.presetType == PresetType.none ||
+            versionModifiers.presetType == PresetType.version) &&
         (versionModifiers.prerelease != null ||
             versionModifiers.build != null)) {
       versionToSave = Version.parse(versionToSave).setPreAndBuild(
@@ -113,7 +115,7 @@ final class HandleBumpCommand extends CommandHandler {
 
     final modifiedFile = await updateYamlFile(
       fileData.file,
-      (append: false, rootKeys: ['version'], data: versionToSave),
+      dictionary: (append: false, rootKeys: ['version'], data: versionToSave),
     );
 
     modProgress.complete('Modified version');

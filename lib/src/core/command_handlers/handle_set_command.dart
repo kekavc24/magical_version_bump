@@ -11,21 +11,20 @@ class HandleSetCommand extends CommandHandler {
 
     final sanitizer = SetArgumentsChecker(argResults: argResults);
 
-    // Check for modifiers
-    final checkedPath = sanitizer.pathInfo;
-    final versionModifiers = sanitizer.modifiers(checkPreset: false);
+    /// Use default validation.
+    final validatedArgs = sanitizer.defaultValidation();
 
-    // Validate and prep args simultaneously
-    final preppedArgs = sanitizer.customValidate(
-      didSetVersion: versionModifiers.version != null ||
-          versionModifiers.prerelease != null ||
-          versionModifiers.build != null,
-    );
-
-    if (!preppedArgs.isValid && versionModifiers.version == null) {
-      prepProgress.fail(preppedArgs.reason!.key);
-      throw MagicalException(violation: preppedArgs.reason!.value);
+    if (!validatedArgs.isValid) {
+      prepProgress.fail(validatedArgs.reason!.key);
+      throw MagicalException(
+        violation: validatedArgs.reason!.value,
+      );
     }
+
+    final checkedPath = argResults!.pathInfo;
+    final preppedArgs = sanitizer.prepArgs();
+
+    final versionModifiers = preppedArgs.modifiers;
 
     prepProgress.complete('Checked arguments');
 
@@ -43,9 +42,10 @@ class HandleSetCommand extends CommandHandler {
 
     if (preppedArgs.dictionaries.isNotEmpty) {
       for (final dictionary in preppedArgs.dictionaries) {
-        editedFile = await updateYamlFile(editedFile, dictionary);
+        editedFile = await updateYamlFile(editedFile, dictionary: dictionary);
       }
     }
+
     // Set any version updated
     if (versionModifiers.build != null ||
         versionModifiers.prerelease != null ||
@@ -56,8 +56,8 @@ class HandleSetCommand extends CommandHandler {
 
       // Check version that user want to change to or the current version
       version = await validateVersion(
+        versionModifiers.version ?? fileData.version,
         logger: logger,
-        version: versionModifiers.version ?? fileData.version,
       );
 
       Version? parsedOldVersion;
@@ -95,7 +95,7 @@ class HandleSetCommand extends CommandHandler {
 
       editedFile = await updateYamlFile(
         editedFile,
-        (
+        dictionary: (
           append: false,
           rootKeys: ['version'],
           data: updatedVersion ?? version,

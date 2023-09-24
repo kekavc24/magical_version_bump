@@ -4,16 +4,8 @@ import 'package:pub_semver/pub_semver.dart';
 /// This mixin validates and prompts for correct version to be set if invalid
 mixin ValidateVersion {
   /// Check if version is valid and return the correct version.
-  ///
-  /// * `useYamlVersion` - check whether to use version in yaml.
-  /// `Modify` command uses the version in yaml wherease `Change` command passes
-  /// in a preferred version to change to.
-  ///
-  /// * `yamlMap` - only passed in by `Modify` command
-  /// * `version` - only passed in by `Change` command
-  Future<String> validateVersion({
+  Future<String> validateVersion(String? version, {
     required Logger logger,
-    required String? version,
   }) async {
     final checkProgress = logger.progress('Checking version number');
 

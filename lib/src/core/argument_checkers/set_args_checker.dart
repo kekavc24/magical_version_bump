@@ -3,9 +3,12 @@ part of 'arg_checker.dart';
 final class SetArgumentsChecker extends ArgumentsChecker {
   SetArgumentsChecker({required super.argResults});
 
-  /// Prep arguments and values as Map<String, String>
+  /// Prep dictionaries
   @override
-  List<Dictionary> prepArgs() {
+  ({
+    DefaultVersionModifiers modifiers,
+    List<Dictionary> dictionaries,
+  }) prepArgs() {
     final dictionaries = <Dictionary>[];
 
     // Get dictionaries to add/overwrite first
@@ -30,35 +33,84 @@ final class SetArgumentsChecker extends ArgumentsChecker {
       }
     }
 
-    return dictionaries;
+    return (
+      modifiers: DefaultVersionModifiers.fromArgResults(argResults!),
+      dictionaries: dictionaries,
+    );
   }
 
-  /// Validate and return prepped args
-  ({
-    bool isValid,
-    InvalidReason? reason,
-    List<Dictionary> dictionaries,
-  }) customValidate({required bool didSetVersion}) {
-    // Check if arguments results are empty
-    final checkedArgs = validateArgs();
-
-    if (!checkedArgs.isValid && !didSetVersion) {
-      return (
-        isValid: checkedArgs.isValid,
-        reason: checkedArgs.reason,
-        dictionaries: [],
+  /// Extract dictionaries/lists
+  Dictionary extractDictionary(String parsedValue, {required bool append}) {
+    ///
+    /// Format is "key=value,value" or "key=value:value"
+    ///
+    /// Should never be empty
+    if (parsedValue.isEmpty) {
+      throw MagicalException(
+        violation: 'The root key cannot be empty/null',
       );
     }
 
-    // Prep args
-    final preppedArgs = prepArgs();
+    // Must have 2 values, the keys & value(s)
+    final keysAndValue = parsedValue.splitAndTrim('=');
+    final hasNoBlanks = keysAndValue.every((element) => element.isNotEmpty);
+
+    if (keysAndValue.length != 2 || !hasNoBlanks) {
+      throw MagicalException(
+        violation: 'Invalid keys and value pair at "$parsedValue"',
+      );
+    }
+
+    /// Format for specifying more than 1 key is using "|" as a separator
+    ///
+    /// i.e. `rootKey`|`nextKey`|`otherKey`
+    final keys = keysAndValue.first.splitAndTrim('|').retainNonEmpty();
+
+    /// Format for specifying more than 1 value is ","
+    ///
+    /// i.e `value`,`nextValue`,`otherValue`
+    final values = keysAndValue.last.splitAndTrim(',').retainNonEmpty();
+
+    final isMappy = values.first.contains('->');
+
+    /// If more than one value is passed in, we have to check all follow
+    /// the same format.
+    ///
+    /// The first value determines the format the rest should follow!
+    if (values.length > 1) {
+      final allFollowFormat = values.every(
+        (element) => isMappy ? element.contains('->') : !element.contains('->'),
+      );
+
+      if (!allFollowFormat) {
+        throw MagicalException(
+          violation: 'Mixed format at $parsedValue',
+        );
+      }
+    }
+
+    if (isMappy) {
+      final valueMap = values.fold(
+        <String, String>{},
+        (previousValue, element) {
+          final mappedValues = element.splitAndTrim('->');
+          previousValue.update(
+            mappedValues.first,
+            (value) => mappedValues.last.isEmpty ? 'null' : mappedValues.last,
+            ifAbsent: () =>
+                mappedValues.last.isEmpty ? 'null' : mappedValues.last,
+          );
+          return previousValue;
+        },
+      );
+
+      return (rootKeys: keys.toList(), append: append, data: valueMap);
+    }
 
     return (
-      isValid: preppedArgs.isNotEmpty || didSetVersion,
-      reason: preppedArgs.isNotEmpty || didSetVersion
-          ? null
-          : const InvalidReason('Missing arguments', 'No arguments found'),
-      dictionaries: preppedArgs.isNotEmpty ? preppedArgs : [],
+      rootKeys: keys.toList(),
+      append: append,
+      data: values.length == 1 ? values.first : values.toList(),
     );
   }
 }

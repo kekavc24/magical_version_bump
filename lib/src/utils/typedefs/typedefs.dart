@@ -9,6 +9,9 @@ typedef InvalidReason = MapEntry<String, String>;
 /// * `List<String>` - all roots keys preceding data
 typedef Dictionary = ({List<String> rootKeys, bool append, dynamic data});
 
+/// Path info from commands
+typedef PathInfo = ({bool requestPath, String path});
+
 /// Recursive return value
 ///
 /// * `failed` - whether operation to add value failed
