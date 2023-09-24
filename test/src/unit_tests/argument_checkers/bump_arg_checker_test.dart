@@ -6,19 +6,14 @@ import 'package:test/test.dart';
 import '../../../helpers/helpers.dart';
 
 void main() {
-  late BumpArgumentsChecker sanitizer;
+  late BumpArgumentsChecker argsChecker;
   late ArgParser argParser;
 
+  const error =
+      '''You need to pass in a target i.e. major, minor, patch or build-number''';
+
   setUp(() {
-    argParser = ArgParser()
-      ..addMultiOption(
-        'targets',
-        allowed: ['major', 'minor', 'patch', 'build-number'],
-      )
-      ..addOption(
-        'strategy',
-        allowed: ['relative', 'absolute'],
-      );
+    argParser = setUpArgParser();
   });
 
   group('preps args', () {
@@ -30,15 +25,15 @@ void main() {
         'relative',
       ];
 
-      sanitizer = setUpSanitizer(
-        SanitizerType.bump,
+      argsChecker = setUpSanitizer(
+        ArgCheckerType.bump,
         argParser: argParser,
         args: args,
       ) as BumpArgumentsChecker;
 
-      final preppedArgs = sanitizer.prepArgs();
+      final preppedArgs = argsChecker.prepArgs();
 
-      expect(preppedArgs.strategy, ModifyStrategy.relative);
+      expect(preppedArgs.modifiers.strategy, ModifyStrategy.relative);
       expect(preppedArgs.targets, equals(['major', 'build-number']));
     });
 
@@ -50,15 +45,15 @@ void main() {
         'absolute',
       ];
 
-      sanitizer = setUpSanitizer(
-        SanitizerType.bump,
+      argsChecker = setUpSanitizer(
+        ArgCheckerType.bump,
         argParser: argParser,
         args: args,
       ) as BumpArgumentsChecker;
 
-      final preppedArgs = sanitizer.prepArgs();
+      final preppedArgs = argsChecker.prepArgs();
 
-      expect(preppedArgs.strategy, ModifyStrategy.absolute);
+      expect(preppedArgs.modifiers.strategy, ModifyStrategy.absolute);
       expect(
         preppedArgs.targets,
         equals(['major', 'minor', 'patch', 'build-number']),
@@ -68,13 +63,13 @@ void main() {
 
   group('validate args', () {
     test('returns error when args are not present', () {
-      sanitizer = setUpSanitizer(
-        SanitizerType.bump,
+      argsChecker = setUpSanitizer(
+        ArgCheckerType.bump,
         argParser: argParser,
         args: [],
       ) as BumpArgumentsChecker;
 
-      final validatedArgs = sanitizer.customValidate();
+      final validatedArgs = argsChecker.validateArgs();
 
       expect(validatedArgs.isValid, false);
       expect(validatedArgs.reason, isNotNull);
@@ -85,18 +80,18 @@ void main() {
     test('returns error when targets are empty', () {
       final args = <String>['--strategy', 'relative'];
 
-      sanitizer = setUpSanitizer(
-        SanitizerType.bump,
+      argsChecker = setUpSanitizer(
+        ArgCheckerType.bump,
         argParser: argParser,
         args: args,
       ) as BumpArgumentsChecker;
 
-      final validatedArgs = sanitizer.customValidate();
+      final validatedArgs = argsChecker.validateArgs();
 
       expect(validatedArgs.isValid, false);
       expect(validatedArgs.reason, isNotNull);
       expect(validatedArgs.reason!.key, 'Invalid targets');
-      expect(validatedArgs.reason!.value, 'No targets found');
+      expect(validatedArgs.reason!.value, error);
     });
   });
 }

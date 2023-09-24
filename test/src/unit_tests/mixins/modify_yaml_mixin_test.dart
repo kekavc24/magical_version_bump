@@ -736,7 +736,10 @@ void main() {
         data: '10.10.10+10',
       );
 
-      final updatedFile = await modifier.updateYamlFile(fakeYaml, dictionary);
+      final updatedFile = await modifier.updateYamlFile(
+        fakeYaml,
+        dictionary: dictionary,
+      );
 
       final updateValue = await readNestedNodes(updatedFile, ['version']);
 
@@ -750,7 +753,10 @@ void main() {
         data: 'Test One, Two, Three',
       );
 
-      final updatedFile = await modifier.updateYamlFile(fakeYaml, dictionary);
+      final updatedFile = await modifier.updateYamlFile(
+        fakeYaml,
+        dictionary: dictionary,
+      );
 
       final updateValue = await readNestedNodes(
         updatedFile,
@@ -767,7 +773,10 @@ void main() {
         data: 'Test One, Two, Three',
       );
 
-      final updatedFile = await modifier.updateYamlFile(fakeYaml, dictionary);
+      final updatedFile = await modifier.updateYamlFile(
+        fakeYaml,
+        dictionary: dictionary,
+      );
 
       final updateValue = await readNestedNodes(
         updatedFile,
@@ -784,7 +793,10 @@ void main() {
         data: 'Test One, Two, Three',
       );
 
-      final updatedFile = await modifier.updateYamlFile(fakeYaml, dictionary);
+      final updatedFile = await modifier.updateYamlFile(
+        fakeYaml,
+        dictionary: dictionary,
+      );
 
       final updateValue = await readNestedNodes(
         updatedFile,
@@ -801,7 +813,10 @@ void main() {
         data: 'Test One, Two, Three',
       );
 
-      final updatedFile = await modifier.updateYamlFile(fakeYaml, dictionary);
+      final updatedFile = await modifier.updateYamlFile(
+        fakeYaml,
+        dictionary: dictionary,
+      );
 
       final updateValue = await readNestedNodes(
         updatedFile,
@@ -824,7 +839,10 @@ void main() {
         },
       );
 
-      final updatedFile = await modifier.updateYamlFile(fakeYaml, dictionary);
+      final updatedFile = await modifier.updateYamlFile(
+        fakeYaml,
+        dictionary: dictionary,
+      );
 
       final updateValue = await readNestedNodes(
         updatedFile,

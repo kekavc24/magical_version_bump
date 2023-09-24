@@ -27,8 +27,8 @@ void main() {
   group('validate versions', () {
     test('returns version passed if valid', () async {
       final validatedVersion = await validator.validateVersion(
+        version,
         logger: logger,
-        version: version,
       );
 
       verify(() => logger.progress('Checking version number')).called(1);
@@ -60,8 +60,8 @@ void main() {
       ).thenReturn(version);
 
       final validatedVersion = await validator.validateVersion(
+        version,
         logger: logger,
-        version: null,
       );
 
       verify(() => logger.progress('Checking version number')).called(1);
@@ -91,8 +91,8 @@ void main() {
       ).thenReturn(version);
 
       final validatedVersion = await validator.validateVersion(
+        version,
         logger: logger,
-        version: '1.1',
       );
 
       verify(() => logger.progress('Checking version number')).called(1);
@@ -135,8 +135,8 @@ void main() {
         ).thenReturn(build);
 
         final validatedVersion = await validator.validateVersion(
+          null,
           logger: logger,
-          version: null,
         );
 
         verify(() => logger.progress('Checking version number')).called(1);
