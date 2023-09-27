@@ -4,7 +4,8 @@ import 'package:pub_semver/pub_semver.dart';
 /// This mixin validates and prompts for correct version to be set if invalid
 mixin ValidateVersion {
   /// Check if version is valid and return the correct version.
-  Future<String> validateVersion(String? version, {
+  Future<String> validateVersion(
+    String? version, {
     required Logger logger,
   }) async {
     final checkProgress = logger.progress('Checking version number');

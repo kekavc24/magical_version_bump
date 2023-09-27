@@ -46,7 +46,7 @@ class DefaultVersionModifiers extends VersionModifiers {
   /// Basic factory
   factory DefaultVersionModifiers.fromArgResults(ArgResults argResults) {
     return DefaultVersionModifiers(
-      version: argResults.setVersion ,
+      version: argResults.setVersion,
       prerelease: argResults.setPrerelease,
       build: argResults.setBuild,
       keepPre: argResults.keepPre,
@@ -73,7 +73,7 @@ class BumpVersionModifiers extends VersionModifiers {
   factory BumpVersionModifiers.fromArgResults(ArgResults argResults) {
     return BumpVersionModifiers(
       presetType: argResults.checkPreset(),
-      version: argResults.setVersion ,
+      version: argResults.setVersion,
       prerelease: argResults.setPrerelease,
       build: argResults.setBuild,
       keepPre: argResults.keepPre,
@@ -81,7 +81,7 @@ class BumpVersionModifiers extends VersionModifiers {
       strategy: argResults.strategy,
     );
   }
-  
+
   /// Preset type
   final PresetType presetType;
 
