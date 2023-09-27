@@ -17,5 +17,5 @@ abstract class CommandHandler with HandleFile, ValidateVersion, ModifyYaml {
   final Logger logger;
 
   /// Handle command
-  void handleCommand(ArgResults? argResults);
+  Future<void> handleCommand(ArgResults? argResults);
 }

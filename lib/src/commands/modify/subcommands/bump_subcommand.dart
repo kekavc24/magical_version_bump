@@ -2,9 +2,7 @@ part of '../modify_base_subcommand.dart';
 
 /// This command only modifies one node, bumps the version.
 class BumpSubcommand extends ModifySubCommand {
-  BumpSubcommand({required super.logger})
-      : _logger = logger,
-        _hander = HandleBumpCommand(logger: logger) {
+  BumpSubcommand({required super.logger, required super.handler}) {
     argParser
       ..addMultiOption(
         'targets',
@@ -32,27 +30,4 @@ class BumpSubcommand extends ModifySubCommand {
 
   @override
   String get description => 'A subcommand that bumps a valid semVer version';
-
-  final Logger _logger;
-  final HandleBumpCommand _hander;
-
-  @override
-  Future<int> run() async {
-    try {
-      await _hander.handleCommand(argResults);
-    } on MagicalException catch (e) {
-      _logger.err(e.toString());
-
-      return ExitCode.usage.code;
-    } on PathNotFoundException catch (e) {
-      _logger.err(e.message);
-
-      return ExitCode.osFile.code;
-    } catch (e) {
-      _logger.err(e.toString());
-
-      return ExitCode.software.code;
-    }
-    return ExitCode.success.code;
-  }
 }

@@ -1,9 +1,4 @@
-import 'dart:io';
-
 import 'package:magical_version_bump/src/commands/base_command.dart';
-import 'package:magical_version_bump/src/core/command_handlers/command_handlers.dart';
-import 'package:magical_version_bump/src/utils/exceptions/command_exceptions.dart';
-import 'package:mason_logger/mason_logger.dart';
 
 part 'subcommands/bump_subcommand.dart';
 part 'subcommands/set_subcommand.dart';
@@ -11,11 +6,11 @@ part 'subcommands/set_subcommand.dart';
 // ignore: comment_references
 /// Generic class for [ModifyCommand]. All subcommands will either:
 ///
-/// * Allow modification of a single node
-/// * Allow modification of multiple nodes
+/// * Allow modification of a single node - `Bump` subcommand
+/// * Allow modification of multiple nodes - `Set` subcommand
 ///
-abstract class ModifySubCommand extends MagicalCommand {
-  ModifySubCommand({required super.logger}) {
+abstract class ModifySubCommand extends RunnableCommand {
+  ModifySubCommand({required super.logger, required super.handler}) {
     argParser
       ..addOption(
         'set-version',
