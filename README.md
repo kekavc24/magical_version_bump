@@ -60,8 +60,8 @@ This command manipulates the contents of an existing yaml/json file.
 
 Available subcommands include :
 
-- `set` - overwrites/appends to nodes in your yaml/json files. Read more <a href="./example/SET_COMMAND.md" target = "_blank">here</a>
-- `bump` - bumps the version in your yaml/json file. Read more <a href="./example/BUMP_COMMAND.md" target = "_blank">here</a>
+- `set` - overwrites/appends to nodes in your yaml/json files. [Read more][set_command_url]
+- `bump` - bumps the version in your yaml/json file. [Read more][bump_command_url]
 
 ## Default
 
@@ -123,3 +123,5 @@ All code contributions and reviews are welcome ❤.
 [very_good_analysis_badge]: https://img.shields.io/badge/style-very_good_analysis-B22C89.svg
 [very_good_analysis_link]: https://pub.dev/packages/very_good_analysis
 [workflow_repo_link]: https://github.com/kekavc24/magical_workflows
+[set_command_url]: https://github.com/kekavc24/magical_version_bump/blob/master/example/SET_COMMAND.md
+[bump_command_url]: https://github.com/kekavc24/magical_version_bump/blob/master/example/BUMP_COMMAND.md
