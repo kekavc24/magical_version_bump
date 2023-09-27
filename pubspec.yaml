@@ -6,8 +6,10 @@ homepage: https://github.com/kekavc24/magical_version_bump
 repository: https://github.com/kekavc24/magical_version_bump
 issue_tracker: https://github.com/kekavc24/magical_version_bump/issues
 topics:
-  - yaml
   - cli
+  - version
+  - pubspec
+  - yaml
 
 environment:
   sdk: ">=3.0.0 <4.0.0"
