@@ -33,61 +33,24 @@ final class HandleBumpCommand extends CommandHandler {
       setPath: pathInfo.path,
     );
 
-    var currentVersion = '';
-
     // Preset any values before validating the version. When `--preset` flag is
     // used or `--set-version` option
-    if (versionModifiers.presetType == PresetType.all ||
-        versionModifiers.presetType == PresetType.version) {
-      Version? oldVersion;
+    final currentVersion = MagicalSEMVER.addPresets(
+      fileData.version ?? '',
+      modifiers: versionModifiers,
+    );
 
-      if (fileData.version != null) {
-        oldVersion = Version.parse(fileData.version!);
-      }
-
-      /// Throw error if both `set-version` and [oldVersion] are null
-      ///
-      if (versionModifiers.version == null && oldVersion == null) {
-        throw MagicalException(
-          violation: 'At least one valid version is required.',
-        );
-      }
-
-      /// Fallback to old version if version from modifiers is null.
-      /// Since `set-prerelease` or `set-build` in `preset` may be used but not
-      /// `set-version`
-      ///
-      currentVersion = Version.parse(
-        versionModifiers.version ?? fileData.version!,
-      ).setPreAndBuild(
-        updatedPre: versionModifiers.keepPre
-            ? (oldVersion!.preRelease.isEmpty
-                ? null
-                : oldVersion.preRelease.join('.'))
-            : versionModifiers.prerelease,
-        updatedBuild: versionModifiers.keepBuild
-            ? (oldVersion!.build.isEmpty ? null : oldVersion.build.join('.'))
-            : versionModifiers.build,
-      );
-    }
-
-    /// Validate version and get correct version if invalid. Only use the local
-    /// version if the version was never preset using `set-version`
-    ///
-    /// When preset, the [currentVersion] will not be empty.
-    currentVersion = await validateVersion(
-      versionModifiers.presetType == PresetType.none
-          ? fileData.version
-          : currentVersion,
+    /// Validate version and get correct version if invalid.
+    final validatedVersion = await validateVersion(
+      currentVersion,
       logger: logger,
     );
 
-    // Modify the version
+    // Bump the version
     final modProgress = logger.progress('Bumping up version');
 
-    // Get the target with highest weight in relative strategy
-    final modifiedVersion = await dynamicBump(
-      currentVersion,
+    final modifiedVersion = MagicalSEMVER.bumpVersion(
+      validatedVersion,
       versionTargets: preppedArgs.targets,
       strategy: versionModifiers.strategy,
     );
@@ -97,21 +60,11 @@ final class HandleBumpCommand extends CommandHandler {
       logger.warn('Your build number had issues');
     }
 
-    var versionToSave = modifiedVersion.version;
-
-    // If preset is false, but user passed in prerelease & build info.
-    // Update it.
-    if ((versionModifiers.presetType == PresetType.none ||
-            versionModifiers.presetType == PresetType.version) &&
-        (versionModifiers.prerelease != null ||
-            versionModifiers.build != null)) {
-      versionToSave = Version.parse(versionToSave).setPreAndBuild(
-        keepPre: versionModifiers.keepPre,
-        keepBuild: versionModifiers.keepBuild,
-        updatedPre: versionModifiers.prerelease,
-        updatedBuild: versionModifiers.build,
-      );
-    }
+    // Add final touches before updating yaml file
+    final versionToSave = MagicalSEMVER.addFinalTouches(
+      modifiedVersion.version,
+      modifiers: versionModifiers,
+    );
 
     final modifiedFile = await updateYamlFile(
       fileData.file,
