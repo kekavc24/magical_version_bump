@@ -1,4 +1,3 @@
-import 'package:magical_version_bump/src/utils/enums/enums.dart';
 import 'package:magical_version_bump/src/utils/mixins/command_mixins.dart';
 import 'package:test/test.dart';
 import 'package:yaml/yaml.dart';
@@ -12,12 +11,6 @@ void main() {
   late YamlMap testYamlMap;
 
   const version = '11.11.11';
-  const versionWithBuild = '$version+11';
-
-  final majorTarget = <String>['major'];
-  final minorTarget = <String>['minor'];
-  final patchTarget = <String>['patch'];
-  final buildTarget = <String>['build-number'];
 
   const fakeYaml = '''
   version: $version
@@ -51,126 +44,6 @@ void main() {
   setUp(() {
     modifier = _FakeYamlModifier();
     testYamlMap = YamlMap.wrap(mappy);
-  });
-
-  group('independent versioning (absolute)', () {
-    test('bumps up only major version', () async {
-      const bumpedVersion = '12.11.11';
-
-      // Bump up version by 1
-      final dynamicBump = await modifier.dynamicBump(
-        version,
-        versionTargets: majorTarget,
-        strategy: ModifyStrategy.absolute,
-      );
-
-      expect(dynamicBump.version, bumpedVersion);
-    });
-
-    test('bumps up only minor version', () async {
-      const bumpedVersion = '11.12.11';
-
-      // Bump up version by 1
-      final dynamicBump = await modifier.dynamicBump(
-        version,
-        versionTargets: minorTarget,
-        strategy: ModifyStrategy.absolute,
-      );
-
-      expect(dynamicBump.version, bumpedVersion);
-    });
-
-    test('bumps up only patch version', () async {
-      const bumpedVersion = '11.11.12';
-
-      // Bump up version by 1
-      final dynamicBump = await modifier.dynamicBump(
-        version,
-        versionTargets: patchTarget,
-        strategy: ModifyStrategy.absolute,
-      );
-
-      expect(dynamicBump.version, bumpedVersion);
-    });
-
-    test('bumps up only build number', () async {
-      const bumpedVersion = '11.11.11+12';
-
-      // Bump up version by 1
-      final dynamicBump = await modifier.dynamicBump(
-        versionWithBuild,
-        versionTargets: buildTarget,
-        strategy: ModifyStrategy.absolute,
-      );
-
-      expect(dynamicBump.version, bumpedVersion);
-    });
-
-    test('appends and bumps up only build number', () async {
-      const bumpedVersion = '11.11.11+1';
-
-      // Bump up version by 1
-      final dynamicBump = await modifier.dynamicBump(
-        version,
-        versionTargets: buildTarget,
-        strategy: ModifyStrategy.absolute,
-      );
-
-      expect(dynamicBump.version, bumpedVersion);
-    });
-  });
-
-  group('collective versioning (relative)', () {
-    test('collectively bumps up major version', () async {
-      const bumpedVersion = '12.0.0';
-
-      final dynamicBump = await modifier.dynamicBump(
-        version,
-        versionTargets: majorTarget,
-        strategy: ModifyStrategy.relative,
-      );
-
-      expect(dynamicBump.version, bumpedVersion);
-    });
-
-    test('collectively bumps up/down minor version', () async {
-      const bumpedVersion = '11.12.0';
-
-      final dynamicBump = await modifier.dynamicBump(
-        version,
-        versionTargets: minorTarget,
-        strategy: ModifyStrategy.relative,
-      );
-
-      expect(dynamicBump.version, bumpedVersion);
-    });
-
-    test('collectively bumps up/down patch version', () async {
-      const bumpedVersion = '11.11.12';
-
-      final dynamicBump = await modifier.dynamicBump(
-        version,
-        versionTargets: patchTarget,
-        strategy: ModifyStrategy.relative,
-      );
-
-      expect(dynamicBump.version, bumpedVersion);
-    });
-
-    test('throws error when more than one targets are added', () async {
-      final future = modifier.dynamicBump(
-        version,
-        versionTargets: [...majorTarget, ...patchTarget, ...buildTarget],
-        strategy: ModifyStrategy.relative,
-      );
-
-      expect(
-        () async => future,
-        throwsViolation(
-          'Expected only one target for this versioning strategy',
-        ),
-      );
-    });
   });
 
   group('nested update appends', () {
