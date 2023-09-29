@@ -46,59 +46,22 @@ class HandleSetCommand extends CommandHandler {
       }
     }
 
-    // Set any version updated
+    /// Incase `set-version` was used instead of using the `dictionary` syntax,
+    /// update it
     if (versionModifiers.build != null ||
         versionModifiers.prerelease != null ||
         versionModifiers.version != null) {
-      var version = '';
-
-      logger.warn('Version flag detected. Must verify version is valid');
-
-      // Check version that user want to change to or the current version
-      version = await validateVersion(
-        versionModifiers.version ?? fileData.version,
-        logger: logger,
+      final version = MagicalSEMVER.addPresets(
+        fileData.version ?? '',
+        modifiers: versionModifiers,
       );
-
-      Version? parsedOldVersion;
-
-      String? updatedVersion;
-
-      if (versionModifiers.keepPre ||
-          versionModifiers.keepBuild ||
-          versionModifiers.prerelease != null ||
-          versionModifiers.build != null) {
-        // Must not be null
-        if (fileData.version == null) {
-          throw MagicalException(
-            violation: 'Old version cannot be empty/null',
-          );
-        }
-
-        parsedOldVersion = Version.parse(fileData.version!);
-
-        updatedVersion = Version.parse(
-          version,
-        ).setPreAndBuild(
-          keepPre: versionModifiers.keepPre,
-          keepBuild: versionModifiers.keepBuild,
-          updatedPre:
-              versionModifiers.keepPre && parsedOldVersion.preRelease.isNotEmpty
-                  ? parsedOldVersion.preRelease.join('.')
-                  : versionModifiers.prerelease,
-          updatedBuild:
-              versionModifiers.keepBuild && parsedOldVersion.build.isNotEmpty
-                  ? parsedOldVersion.build.join('.')
-                  : versionModifiers.build,
-        );
-      }
 
       editedFile = await updateYamlFile(
         editedFile,
         dictionary: (
           append: false,
           rootKeys: ['version'],
-          data: updatedVersion ?? version,
+          data: version,
         ),
       );
     }
