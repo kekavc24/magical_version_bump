@@ -11,7 +11,7 @@ class MagicalSEMVER {
   /// Add any presets based on the `presetType` and return version
   static String addPresets(
     String versionFromFile, {
-    required BumpVersionModifiers modifiers,
+    required VersionModifiers modifiers,
   }) {
     // If no preset was set, return version from file as is.
     if (modifiers.presetType == PresetType.none) return versionFromFile;
@@ -182,7 +182,7 @@ class MagicalSEMVER {
   /// false or only `set-version` was used
   static String addFinalTouches(
     String version, {
-    required BumpVersionModifiers modifiers,
+    required VersionModifiers modifiers,
   }) {
     // Check if preset was used
     final wasPreset = modifiers.presetType == PresetType.all;
@@ -197,8 +197,6 @@ class MagicalSEMVER {
     }
 
     return _parseVersion(version).setPreAndBuild(
-      keepPre: modifiers.keepPre,
-      keepBuild: modifiers.keepBuild,
       updatedPre: modifiers.prerelease,
       updatedBuild: modifiers.build,
     );

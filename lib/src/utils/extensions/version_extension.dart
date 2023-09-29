@@ -3,8 +3,6 @@ import 'package:pub_semver/pub_semver.dart';
 extension VersionExtension on Version {
   /// Set prerelease and build-number
   String setPreAndBuild({
-    bool keepPre = false,
-    bool keepBuild = false,
     String? updatedPre,
     String? updatedBuild,
   }) {
@@ -12,10 +10,8 @@ extension VersionExtension on Version {
       major,
       minor,
       patch,
-      pre: updatedPre ??
-          (keepPre && preRelease.isNotEmpty ? preRelease.join('.') : null),
-      build: updatedBuild ??
-          (keepBuild && build.isNotEmpty ? build.join('.') : null),
+      pre: updatedPre,
+      build: updatedBuild,
     ).toString();
   }
 

@@ -10,12 +10,16 @@ import 'package:magical_version_bump/src/utils/extensions/extensions.dart';
 ///   * `keep-build`
 abstract class VersionModifiers {
   VersionModifiers({
+    required this.presetType,
     required this.version,
     required this.prerelease,
     required this.build,
     required this.keepPre,
     required this.keepBuild,
   });
+
+  /// Preset type
+  final PresetType presetType;
 
   /// Version
   final String? version;
@@ -36,6 +40,7 @@ abstract class VersionModifiers {
 /// Default class just returns the abstract class
 class DefaultVersionModifiers extends VersionModifiers {
   DefaultVersionModifiers({
+    required super.presetType,
     required super.version,
     required super.prerelease,
     required super.build,
@@ -46,6 +51,7 @@ class DefaultVersionModifiers extends VersionModifiers {
   /// Basic factory
   factory DefaultVersionModifiers.fromArgResults(ArgResults argResults) {
     return DefaultVersionModifiers(
+      presetType: PresetType.all,
       version: argResults.setVersion,
       prerelease: argResults.setPrerelease,
       build: argResults.setBuild,
@@ -60,7 +66,7 @@ class DefaultVersionModifiers extends VersionModifiers {
 ///   * `strategy`
 class BumpVersionModifiers extends VersionModifiers {
   BumpVersionModifiers({
-    required this.presetType,
+    required super.presetType,
     required super.version,
     required super.prerelease,
     required super.build,
@@ -81,9 +87,6 @@ class BumpVersionModifiers extends VersionModifiers {
       strategy: argResults.strategy,
     );
   }
-
-  /// Preset type
-  final PresetType presetType;
 
   /// Modify Strategy
   final ModifyStrategy strategy;

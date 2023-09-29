@@ -38,7 +38,7 @@ extension VersionModifierResults on ArgResults {
   /// Check preset
   PresetType checkPreset() {
     // Check preset flag
-    final preset = this['preset'] as bool;
+    final preset = this['preset'] as bool? ?? false;
 
     // Preset only version if preset is false & version is not null
     final presetOnlyVersion = !preset && this['set-version'] != null;
