@@ -61,7 +61,7 @@ final class HandleBumpCommand extends CommandHandler {
     }
 
     // Add final touches before updating yaml file
-    final versionToSave = MagicalSEMVER.addFinalTouches(
+    final versionToSave = MagicalSEMVER.appendPreAndBuild(
       modifiedVersion.version,
       modifiers: versionModifiers,
     );

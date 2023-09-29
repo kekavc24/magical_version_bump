@@ -180,7 +180,7 @@ class MagicalSEMVER {
 
   /// Add any dangling `set-prerelease` or `set-build` info if `preset` was
   /// false or only `set-version` was used
-  static String addFinalTouches(
+  static String appendPreAndBuild(
     String version, {
     required VersionModifiers modifiers,
   }) {
