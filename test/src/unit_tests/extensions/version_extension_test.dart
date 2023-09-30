@@ -2,7 +2,6 @@ import 'package:magical_version_bump/src/utils/extensions/extensions.dart';
 import 'package:pub_semver/pub_semver.dart';
 import 'package:test/test.dart';
 
-
 void main() {
   const version = '10.10.10-prerelease+21';
   const versionWithCustomBuild = '8.8.8+MagicalVersionBump';

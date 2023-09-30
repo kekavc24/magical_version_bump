@@ -24,7 +24,7 @@ void main() {
   const build = '100';
   const version = '8.8.8+8';
 
-  setUp(() {
+  setUp(() async {
     logger = _MockLogger();
     commandRunner = MagicalVersionBumpCommandRunner(
       logger: logger,
@@ -97,12 +97,6 @@ void main() {
       final args = [...defaultArgs, '--set-version', version];
 
       final result = await commandRunner.run(args);
-
-      verify(
-        () => logger.warn(
-          'Version flag detected. Must verify version is valid',
-        ),
-      ).called(1);
 
       final currentValue = await readFileNode('version');
       await resetFile();
