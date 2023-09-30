@@ -1,3 +1,8 @@
+# 1.0.1
+
+* `refactor` : improve code readability and testability.
+* `docs` : fix documentation issue
+
 # 1.0.0
 
 Hurray 🎊🥳🎉🎊. Package is now stable. Changes include:
