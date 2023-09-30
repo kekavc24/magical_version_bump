@@ -17,8 +17,13 @@ class MagicalSEMVER {
     if (modifiers.presetType == PresetType.none) return versionFromFile;
 
     /// If only the version will be preset, return the version passed in from
-    /// `set-version` stored in the version modifier class. Must not be `NULL`
-    if (modifiers.presetType == PresetType.version) {
+    /// `set-version` stored in the version modifier class.
+    ///
+    /// Must not be `NULL`. Also make sure no old prerelease/build needs to be
+    /// retained
+    if (modifiers.presetType == PresetType.version &&
+        !modifiers.keepBuild &&
+        !modifiers.keepPre) {
       return modifiers.version ?? '';
     }
 
@@ -41,6 +46,14 @@ class MagicalSEMVER {
       );
     }
 
+    /// Old version can never be null if we are retaining prerelease & build
+    /// info
+    if (oldVersion == null && (modifiers.keepBuild || modifiers.keepPre)) {
+      throw MagicalException(
+        violation: 'Old version cannot be empty or null',
+      );
+    }
+
     /// As mentioned above both can never be null. Give version from
     /// `set-version` has a higher precedence and only fallback to
     /// old version (version from file) if version from modifiers is null.
@@ -54,10 +67,13 @@ class MagicalSEMVER {
       modifiers.version ?? versionFromFile,
     ).setPreAndBuild(
       updatedPre: modifiers.keepPre
-          ? oldVersion?.preRelease.join('.')
+          ? (oldVersion!.preRelease.isNotEmpty
+              ? oldVersion.preRelease.join('.')
+              : null)
           : modifiers.prerelease,
-      updatedBuild:
-          modifiers.keepBuild ? oldVersion?.build.join('.') : modifiers.build,
+      updatedBuild: modifiers.keepBuild
+          ? (oldVersion!.build.isNotEmpty ? oldVersion.build.join('.') : null)
+          : modifiers.build,
     );
 
     return version;
@@ -196,9 +212,17 @@ class MagicalSEMVER {
       return version;
     }
 
-    return _parseVersion(version).setPreAndBuild(
-      updatedPre: modifiers.prerelease,
-      updatedBuild: modifiers.build,
+    final versionToSave = _parseVersion(version);
+
+    return versionToSave.setPreAndBuild(
+      updatedPre: modifiers.prerelease ??
+          (modifiers.keepPre && versionToSave.preRelease.isNotEmpty
+              ? versionToSave.preRelease.join('.')
+              : null),
+      updatedBuild: modifiers.build ??
+          (modifiers.keepBuild && versionToSave.build.isNotEmpty
+              ? versionToSave.build.join('.')
+              : null),
     );
   }
 }

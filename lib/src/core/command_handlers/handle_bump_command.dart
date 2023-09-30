@@ -33,8 +33,8 @@ final class HandleBumpCommand extends CommandHandler {
       setPath: pathInfo.path,
     );
 
-    // Preset any values before validating the version. When `--preset` flag is
-    // used or `--set-version` option
+    /// Preset any values before validating the version. When `--preset` flag
+    /// is used or `--set-version` option
     final currentVersion = MagicalSEMVER.addPresets(
       fileData.version ?? '',
       modifiers: versionModifiers,
