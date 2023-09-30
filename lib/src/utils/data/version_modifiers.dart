@@ -51,13 +51,28 @@ class DefaultVersionModifiers extends VersionModifiers {
   /// Basic factory
   factory DefaultVersionModifiers.fromArgResults(ArgResults argResults) {
     return DefaultVersionModifiers(
-      presetType: PresetType.all,
+      presetType: _sortPreset(argResults),
       version: argResults.setVersion,
       prerelease: argResults.setPrerelease,
       build: argResults.setBuild,
       keepPre: argResults.keepPre,
       keepBuild: argResults.keepBuild,
     );
+  }
+
+  static PresetType _sortPreset(ArgResults argResults) {
+    final currentPreset = argResults.checkPreset();
+
+    // If preset is none or version, confirm if any of build or prerelease was
+    // set
+    if (currentPreset == PresetType.none ||
+        currentPreset == PresetType.version) {
+      return argResults.setBuild != null || argResults.setPrerelease != null
+          ? PresetType.all
+          : currentPreset;
+    }
+
+    return currentPreset;
   }
 }
 
