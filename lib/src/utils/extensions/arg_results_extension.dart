@@ -36,9 +36,9 @@ extension VersionModifierResults on ArgResults {
       : ModifyStrategy.relative;
 
   /// Check preset
-  PresetType checkPreset() {
-    // Check preset flag
-    final preset = this['preset'] as bool? ?? false;
+  PresetType checkPreset({bool ignoreFlag = false}) {
+    // Check preset flag. Set to false if we want to ignore
+    final preset = ignoreFlag ? !ignoreFlag : this['preset'] as bool;
 
     // Preset only version if preset is false & version is not null
     final presetOnlyVersion = !preset && this['set-version'] != null;

@@ -1,6 +1,7 @@
 import 'package:args/args.dart';
 import 'package:magical_version_bump/src/core/argument_checkers/arg_checker.dart';
 import 'package:magical_version_bump/src/core/custom_version_modifiers/semver_version_modifer.dart';
+import 'package:magical_version_bump/src/utils/enums/enums.dart';
 import 'package:magical_version_bump/src/utils/exceptions/command_exceptions.dart';
 import 'package:magical_version_bump/src/utils/extensions/extensions.dart';
 import 'package:magical_version_bump/src/utils/mixins/command_mixins.dart';

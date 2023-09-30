@@ -48,9 +48,7 @@ class HandleSetCommand extends CommandHandler {
 
     /// Incase `set-version` was used instead of using the `dictionary` syntax,
     /// update it
-    if (versionModifiers.build != null ||
-        versionModifiers.prerelease != null ||
-        versionModifiers.version != null) {
+    if (versionModifiers.presetType != PresetType.none) {
       final version = MagicalSEMVER.addPresets(
         fileData.version ?? '',
         modifiers: versionModifiers,

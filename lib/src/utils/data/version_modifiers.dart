@@ -61,7 +61,7 @@ class DefaultVersionModifiers extends VersionModifiers {
   }
 
   static PresetType _sortPreset(ArgResults argResults) {
-    final currentPreset = argResults.checkPreset();
+    final currentPreset = argResults.checkPreset(ignoreFlag: true);
 
     // If preset is none or version, confirm if any of build or prerelease was
     // set
