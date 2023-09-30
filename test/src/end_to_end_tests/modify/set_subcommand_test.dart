@@ -20,11 +20,11 @@ void main() {
   const name = 'Test File';
   const description = 'This is a test';
   const homepage = 'https://url.to.homepage';
-  const preleaseArg = '--set-prerelease=test';
-  const buildArg = '--set-build=100';
+  const prerelease = 'test';
+  const build = '100';
   const version = '8.8.8+8';
 
-  setUp(() {
+  setUp(() async {
     logger = _MockLogger();
     commandRunner = MagicalVersionBumpCommandRunner(
       logger: logger,
@@ -98,12 +98,6 @@ void main() {
 
       final result = await commandRunner.run(args);
 
-      verify(
-        () => logger.warn(
-          'Version flag detected. Must verify version is valid',
-        ),
-      ).called(1);
-
       final currentValue = await readFileNode('version');
       await resetFile();
 
@@ -162,7 +156,7 @@ void main() {
 
     test('changes the prerelease in version and removes build info', () async {
       //
-      final args = [...defaultArgs, preleaseArg];
+      final args = [...defaultArgs, '--set-prerelease', prerelease];
 
       final result = await commandRunner.run(args);
 
@@ -176,7 +170,12 @@ void main() {
     });
 
     test('changes the prerelease in version and keeps build info', () async {
-      final args = [...defaultArgs, preleaseArg, '--keep-build'];
+      final args = [
+        ...defaultArgs,
+        '--set-prerelease',
+        prerelease,
+        '--keep-build',
+      ];
 
       final result = await commandRunner.run(args);
 
@@ -190,7 +189,7 @@ void main() {
     });
 
     test('changes the build and removes prerelease info', () async {
-      final args = [...defaultArgs, buildArg];
+      final args = [...defaultArgs, '--set-build', build];
 
       final result = await commandRunner.run(args);
 
@@ -204,7 +203,13 @@ void main() {
     });
 
     test('changes the build and sets prerelease info', () async {
-      final args = [...defaultArgs, preleaseArg, buildArg];
+      final args = [
+        ...defaultArgs,
+        '--set-prerelease',
+        prerelease,
+        '--set-build',
+        build,
+      ];
 
       final result = await commandRunner.run(args);
 

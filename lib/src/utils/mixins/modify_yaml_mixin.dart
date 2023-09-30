@@ -1,39 +1,16 @@
-import 'package:magical_version_bump/src/utils/enums/enums.dart';
 import 'package:magical_version_bump/src/utils/exceptions/command_exceptions.dart';
-import 'package:magical_version_bump/src/utils/extensions/extensions.dart';
 import 'package:magical_version_bump/src/utils/extensions/map_extensions.dart';
 import 'package:magical_version_bump/src/utils/typedefs/typedefs.dart';
-import 'package:pub_semver/pub_semver.dart';
 import 'package:yaml/yaml.dart';
 import 'package:yaml_edit/yaml_edit.dart';
 
 /// This mixin modifies a yaml node to desired option
 mixin ModifyYaml {
-  /// Bump version by 1. Used by the `Bump` subcommand.
-  ///
-  /// With absolute,
-  /// each version number will be bumped independently.
-  ///
-  /// 1.1.1 -> bump major version -> 2.1.1
-  ///
-  /// With relative,
-  /// each version is modified relative to its position. This the default
-  /// behaviour i.e
-  ///
-  /// 1.1.1 -> bump major version -> 2.0.0
-  Future<({bool buildHadIssues, String version})> dynamicBump(
-    String version, {
-    required List<String> versionTargets,
-    required ModifyStrategy strategy,
+  /// Update yaml file
+  Future<String> updateYamlFile(
+    String file, {
+    required Dictionary dictionary,
   }) async {
-    return Version.parse(version).modifyVersion(
-      versionTargets: versionTargets,
-      strategy: strategy,
-    );
-  }
-
-  /// Edit yaml file
-  Future<String> updateYamlFile(String file, Dictionary dictionary) async {
     // Setup editor
     final editor = YamlEditor(file);
 
@@ -353,7 +330,7 @@ mixin ModifyYaml {
       // Loop all keys in reverse. Appending or adding data
       for (final (index, currentKey) in pathsInReverse.indexed) {
         ///
-        /// The current index indicated number of elements to skip. Add 1 since
+        /// The current index indicates number of elements to skip. Add 1 since
         /// we have to include the target key
         final numOfSkippable = index + 1;
 

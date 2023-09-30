@@ -12,7 +12,7 @@ final class HandleBumpCommand extends CommandHandler {
     final sanitizer = BumpArgumentsChecker(argResults: argResults);
 
     // Validate args
-    final validatedArgs = sanitizer.customValidate();
+    final validatedArgs = sanitizer.validateArgs();
 
     if (!validatedArgs.isValid) {
       prepProgress.fail(validatedArgs.reason!.key);
@@ -21,8 +21,8 @@ final class HandleBumpCommand extends CommandHandler {
 
     // Required information to bump version
     final preppedArgs = sanitizer.prepArgs();
-    final pathInfo = sanitizer.pathInfo;
-    final versionModifiers = sanitizer.modifiers(checkPreset: true);
+    final pathInfo = argResults!.pathInfo;
+    final versionModifiers = preppedArgs.modifiers;
 
     prepProgress.complete('Checked arguments');
 
@@ -33,62 +33,26 @@ final class HandleBumpCommand extends CommandHandler {
       setPath: pathInfo.path,
     );
 
-    var currentVersion = '';
-
-    // Preset any values before validating the version. When `--preset` flag is
-    // used or `--set-version` option
-    if (versionModifiers.preset || versionModifiers.presetOnlyVersion) {
-      Version? oldVersion;
-
-      if (fileData.version != null) {
-        oldVersion = Version.parse(fileData.version!);
-      }
-
-      /// Throw error if both `set-version` and [oldVersion] are null
-      ///
-      if (versionModifiers.version == null && oldVersion == null) {
-        throw MagicalException(
-          violation: 'At least one valid version is required.',
-        );
-      }
-
-      /// Fallback to old version if version from modifiers is null.
-      /// Since `set-prerelease` or `set-build` in `preset` may be used but not
-      /// `set-version`
-      ///
-      currentVersion = Version.parse(
-        versionModifiers.version ?? fileData.version!,
-      ).setPreAndBuild(
-        updatedPre: versionModifiers.keepPre
-            ? (oldVersion!.preRelease.isEmpty
-                ? null
-                : oldVersion.preRelease.join('.'))
-            : versionModifiers.prerelease,
-        updatedBuild: versionModifiers.keepBuild
-            ? (oldVersion!.build.isEmpty ? null : oldVersion.build.join('.'))
-            : versionModifiers.build,
-      );
-    }
-
-    /// Validate version and get correct version if invalid. Only use the local
-    /// version if the version was never preset using `set-version`
-    ///
-    /// When preset, the [currentVersion] will no be empty.
-    currentVersion = await validateVersion(
-      logger: logger,
-      version: !versionModifiers.preset && !versionModifiers.presetOnlyVersion
-          ? fileData.version
-          : currentVersion,
+    /// Preset any values before validating the version. When `--preset` flag
+    /// is used or `--set-version` option
+    final currentVersion = MagicalSEMVER.addPresets(
+      fileData.version ?? '',
+      modifiers: versionModifiers,
     );
 
-    // Modify the version
+    /// Validate version and get correct version if invalid.
+    final validatedVersion = await validateVersion(
+      currentVersion,
+      logger: logger,
+    );
+
+    // Bump the version
     final modProgress = logger.progress('Bumping up version');
 
-    // Get the target with highest weight in relative strategy
-    final modifiedVersion = await dynamicBump(
-      currentVersion,
+    final modifiedVersion = MagicalSEMVER.bumpVersion(
+      validatedVersion,
       versionTargets: preppedArgs.targets,
-      strategy: preppedArgs.strategy,
+      strategy: versionModifiers.strategy,
     );
 
     // If build failed silently, warn user
@@ -96,24 +60,15 @@ final class HandleBumpCommand extends CommandHandler {
       logger.warn('Your build number had issues');
     }
 
-    var versionToSave = modifiedVersion.version;
-
-    // If preset is false, but user passed in prerelease & build info.
-    // Update it.
-    if ((!versionModifiers.preset || versionModifiers.presetOnlyVersion) &&
-        (versionModifiers.prerelease != null ||
-            versionModifiers.build != null)) {
-      versionToSave = Version.parse(versionToSave).setPreAndBuild(
-        keepPre: versionModifiers.keepPre,
-        keepBuild: versionModifiers.keepBuild,
-        updatedPre: versionModifiers.prerelease,
-        updatedBuild: versionModifiers.build,
-      );
-    }
+    // Add final touches before updating yaml file
+    final versionToSave = MagicalSEMVER.appendPreAndBuild(
+      modifiedVersion.version,
+      modifiers: versionModifiers,
+    );
 
     final modifiedFile = await updateYamlFile(
       fileData.file,
-      (append: false, rootKeys: ['version'], data: versionToSave),
+      dictionary: (append: false, rootKeys: ['version'], data: versionToSave),
     );
 
     modProgress.complete('Modified version');

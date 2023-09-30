@@ -7,3 +7,15 @@ enum ModifyStrategy { absolute, relative }
 
 /// Filetype being read
 enum FileType { yaml, json, unknown }
+
+/// Preset type when bumping version
+enum PresetType {
+  /// No preset was used
+  none,
+
+  /// Set only version
+  version,
+
+  /// Preset version, prerelease & build number
+  all;
+}

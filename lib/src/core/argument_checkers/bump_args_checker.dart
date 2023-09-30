@@ -4,39 +4,36 @@ part of 'arg_checker.dart';
 final class BumpArgumentsChecker extends ArgumentsChecker {
   BumpArgumentsChecker({required super.argResults});
 
-  /// Validate modify args
-  ({bool isValid, InvalidReason? reason}) customValidate() {
+  static const error =
+      '''You need to pass in a target i.e. major, minor, patch or build-number''';
+
+  @override
+  ({bool isValid, InvalidReason? reason}) validateArgs() {
     // Check args normally
-    final checkArgs = validateArgs();
+    final checkArgs = defaultValidation();
 
     if (!checkArgs.isValid) {
       return checkArgs;
     }
 
-    final errInTargets = checkTargets(
-      argResults!['targets'] as List<String>,
-    );
-
     return (
-      isValid: errInTargets.isEmpty,
-      reason: errInTargets.isEmpty
+      isValid: argResults!.targets.isNotEmpty,
+      reason: argResults!.targets.isNotEmpty
           ? null
-          : InvalidReason('Invalid targets', errInTargets),
+          : const InvalidReason('Invalid targets', error)
     );
   }
 
   /// Prep modify args
   @override
-  ({ModifyStrategy strategy, List<String> targets}) prepArgs() {
-    // Check strategy
-    final strategy = argResults!['strategy'].toString().bumpStrategy;
+  ({BumpVersionModifiers modifiers, List<String> targets}) prepArgs() {
+    final parsedTargets = argResults!.targets;
 
-    // Get targets
-    final parsedTargets = argResults!['targets'] as List<String>;
+    final modifiers = BumpVersionModifiers.fromArgResults(argResults!);
 
     return (
-      strategy: strategy,
-      targets: strategy == ModifyStrategy.relative
+      modifiers: modifiers,
+      targets: modifiers.strategy == ModifyStrategy.relative
           ? parsedTargets.getRelative()
           : parsedTargets,
     );

@@ -11,21 +11,20 @@ class HandleSetCommand extends CommandHandler {
 
     final sanitizer = SetArgumentsChecker(argResults: argResults);
 
-    // Check for modifiers
-    final checkedPath = sanitizer.pathInfo;
-    final versionModifiers = sanitizer.modifiers(checkPreset: false);
+    /// Use default validation.
+    final validatedArgs = sanitizer.defaultValidation();
 
-    // Validate and prep args simultaneously
-    final preppedArgs = sanitizer.customValidate(
-      didSetVersion: versionModifiers.version != null ||
-          versionModifiers.prerelease != null ||
-          versionModifiers.build != null,
-    );
-
-    if (!preppedArgs.isValid && versionModifiers.version == null) {
-      prepProgress.fail(preppedArgs.reason!.key);
-      throw MagicalException(violation: preppedArgs.reason!.value);
+    if (!validatedArgs.isValid) {
+      prepProgress.fail(validatedArgs.reason!.key);
+      throw MagicalException(
+        violation: validatedArgs.reason!.value,
+      );
     }
+
+    final checkedPath = argResults!.pathInfo;
+    final preppedArgs = sanitizer.prepArgs();
+
+    final versionModifiers = preppedArgs.modifiers;
 
     prepProgress.complete('Checked arguments');
 
@@ -43,62 +42,24 @@ class HandleSetCommand extends CommandHandler {
 
     if (preppedArgs.dictionaries.isNotEmpty) {
       for (final dictionary in preppedArgs.dictionaries) {
-        editedFile = await updateYamlFile(editedFile, dictionary);
+        editedFile = await updateYamlFile(editedFile, dictionary: dictionary);
       }
     }
-    // Set any version updated
-    if (versionModifiers.build != null ||
-        versionModifiers.prerelease != null ||
-        versionModifiers.version != null) {
-      var version = '';
 
-      logger.warn('Version flag detected. Must verify version is valid');
-
-      // Check version that user want to change to or the current version
-      version = await validateVersion(
-        logger: logger,
-        version: versionModifiers.version ?? fileData.version,
+    /// Incase `set-version` was used instead of using the `dictionary` syntax,
+    /// update it
+    if (versionModifiers.presetType != PresetType.none) {
+      final version = MagicalSEMVER.addPresets(
+        fileData.version ?? '',
+        modifiers: versionModifiers,
       );
-
-      Version? parsedOldVersion;
-
-      String? updatedVersion;
-
-      if (versionModifiers.keepPre ||
-          versionModifiers.keepBuild ||
-          versionModifiers.prerelease != null ||
-          versionModifiers.build != null) {
-        // Must not be null
-        if (fileData.version == null) {
-          throw MagicalException(
-            violation: 'Old version cannot be empty/null',
-          );
-        }
-
-        parsedOldVersion = Version.parse(fileData.version!);
-
-        updatedVersion = Version.parse(
-          version,
-        ).setPreAndBuild(
-          keepPre: versionModifiers.keepPre,
-          keepBuild: versionModifiers.keepBuild,
-          updatedPre:
-              versionModifiers.keepPre && parsedOldVersion.preRelease.isNotEmpty
-                  ? parsedOldVersion.preRelease.join('.')
-                  : versionModifiers.prerelease,
-          updatedBuild:
-              versionModifiers.keepBuild && parsedOldVersion.build.isNotEmpty
-                  ? parsedOldVersion.build.join('.')
-                  : versionModifiers.build,
-        );
-      }
 
       editedFile = await updateYamlFile(
         editedFile,
-        (
+        dictionary: (
           append: false,
           rootKeys: ['version'],
-          data: updatedVersion ?? version,
+          data: version,
         ),
       );
     }

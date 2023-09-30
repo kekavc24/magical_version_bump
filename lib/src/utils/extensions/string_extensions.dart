@@ -8,12 +8,6 @@ extension StringExtension on String {
         _ => FileType.unknown
       };
 
-  /// Get modify strategy for bumping version
-  ModifyStrategy get bumpStrategy => switch (this) {
-        'absolute' => ModifyStrategy.absolute,
-        _ => ModifyStrategy.relative
-      };
-
   /// Split and trim
   Iterable<String> splitAndTrim(String pattern) =>
       split(pattern).map((e) => e.trim());
