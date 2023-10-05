@@ -614,7 +614,10 @@ void main() {
         dictionary: dictionary,
       );
 
-      final updateValue = await readNestedNodes(updatedFile, ['version']);
+      final updateValue = await readNestedNodes<String>(
+        updatedFile,
+        ['version'],
+      );
 
       expect(updateValue, '10.10.10+10');
     });
@@ -631,7 +634,7 @@ void main() {
         dictionary: dictionary,
       );
 
-      final updateValue = await readNestedNodes(
+      final updateValue = await readNestedNodes<String>(
         updatedFile,
         ['name', 'test name'],
       );
@@ -651,7 +654,7 @@ void main() {
         dictionary: dictionary,
       );
 
-      final updateValue = await readNestedNodes(
+      final updateValue = await readNestedNodes<String>(
         updatedFile,
         ['test', 'nested-test'],
       );
@@ -671,7 +674,7 @@ void main() {
         dictionary: dictionary,
       );
 
-      final updateValue = await readNestedNodes(
+      final updateValue = await readNestedNodes<YamlList>(
         updatedFile,
         ['test', 'nested-test', 'nested-value'],
       );
@@ -691,7 +694,7 @@ void main() {
         dictionary: dictionary,
       );
 
-      final updateValue = await readNestedNodes(
+      final updateValue = await readNestedNodes<YamlList>(
         updatedFile,
         ['test', 'nested-test', 'nested-list'],
       );
@@ -717,7 +720,7 @@ void main() {
         dictionary: dictionary,
       );
 
-      final updateValue = await readNestedNodes(
+      final updateValue = await readNestedNodes<YamlMap>(
         updatedFile,
         ['test', 'nested-test', 'nested-map'],
       );
