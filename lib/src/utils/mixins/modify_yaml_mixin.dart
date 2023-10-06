@@ -60,8 +60,8 @@ mixin ModifyYaml {
     );
 
     /// Get the key that appears first in the file.
-    /// 
-    /// The `anchorKey` will be first root key or the `targetKey` we want to 
+    ///
+    /// The `anchorKey` will be first root key or the `targetKey` we want to
     /// update of no root keys are available
     final anchorKey = rootKeys.isEmpty ? targetKey : rootKeys.first;
 

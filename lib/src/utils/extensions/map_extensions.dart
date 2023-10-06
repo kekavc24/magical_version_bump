@@ -26,16 +26,16 @@ extension MapUtility on Map<dynamic, dynamic> {
     ) as T?;
   }
 
-  /// Recursively update a [target] key specified based on the [path] of 
+  /// Recursively update a [target] key specified based on the [path] of
   /// preceding keys.
-  /// 
+  ///
   /// `append` is boolean which specifies whether to add to existing values if
   /// `true` or overwriting any existing values if `false`.
-  /// 
+  ///
   /// `update` is dynamic and allows any data type support by `Dart`. With
   /// this package, the value will either be a `String`, `List<String>` or
   /// `Map<String, String>`
-  ///  
+  ///
   Map<dynamic, dynamic> recursivelyUpdate(
     dynamic update, {
     required String target,
@@ -73,11 +73,13 @@ extension MapUtility on Map<dynamic, dynamic> {
       if ((targetKeyValue is String || targetKeyValue is List) &&
           (update is! String && update is! List<String>)) {
         throw MagicalException(
-          violation: '''Cannot append new values at "$target". New value must be a String or List of Strings.''',
+          violation:
+              '''Cannot append new values at "$target". New value must be a String or List of Strings.''',
         );
       } else if (targetKeyValue is Map && update is! Map<String, String>) {
         throw MagicalException(
-          violation: '''Cannot append new mapped values at "$target". New value must be a map too.''',
+          violation:
+              '''Cannot append new mapped values at "$target". New value must be a map too.''',
         );
       }
 
@@ -117,7 +119,8 @@ extension MapUtility on Map<dynamic, dynamic> {
     /// path.
     if (valueAtKey != null && valueAtKey is! Map<dynamic, dynamic> && append) {
       throw MagicalException(
-        violation: '''Cannot append new values due to an existing value at "$currentKey". You need to overwrite this path key.''',
+        violation:
+            '''Cannot append new values due to an existing value at "$currentKey". You need to overwrite this path key.''',
       );
     }
 
