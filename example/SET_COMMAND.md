@@ -432,7 +432,7 @@ root-key:
 - Furthermore, make the nested key `nested-key` accept a map of values like so:
 
 ```bash
-mag modify set --dict "root-key|nested-key=map->value" --add "root-key=anotherMap->value,otherMap->value"
+mag modify set --dict "root-key|nested-key=map->value" --add "root-key|nested-key=anotherMap->value,otherMap->value"
 ```
 
 Updated file will look like so:

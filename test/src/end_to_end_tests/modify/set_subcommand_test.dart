@@ -57,7 +57,11 @@ void main() {
         final result = await commandRunner.run(args);
 
         expect(result, equals(ExitCode.usage.code));
-        verify(() => logger.err('Cannot append at name')).called(1);
+        verify(
+          () => logger.err(
+            '''Cannot append new values due to an existing value at "name". You need to overwrite this path key.''',
+          ),
+        ).called(1);
       },
     );
   });
