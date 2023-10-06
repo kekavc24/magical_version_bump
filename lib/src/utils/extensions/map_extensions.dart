@@ -73,11 +73,11 @@ extension MapUtility on Map<dynamic, dynamic> {
       if ((targetKeyValue is String || targetKeyValue is List) &&
           (update is! String && update is! List<String>)) {
         throw MagicalException(
-          violation: 'Cannot append new values at $target',
+          violation: '''Cannot append new values at "$target". New value must be a String or List of Strings.''',
         );
       } else if (targetKeyValue is Map && update is! Map<String, String>) {
         throw MagicalException(
-          violation: 'Cannot append new mapped values at $target',
+          violation: '''Cannot append new mapped values at "$target". New value must be a map too.''',
         );
       }
 
@@ -117,7 +117,7 @@ extension MapUtility on Map<dynamic, dynamic> {
     /// path.
     if (valueAtKey != null && valueAtKey is! Map<dynamic, dynamic> && append) {
       throw MagicalException(
-        violation: 'Cannot append new values at $currentKey',
+        violation: '''Cannot append new values due to an existing value at "$currentKey". You need to overwrite this path key.''',
       );
     }
 
