@@ -12,7 +12,7 @@ class HandleSetCommand extends CommandHandler {
     final sanitizer = SetArgumentsChecker(argResults: argResults);
 
     /// Use default validation.
-    final validatedArgs = sanitizer.defaultValidation();
+    final validatedArgs = sanitizer.validateArgs();
 
     if (!validatedArgs.isValid) {
       prepProgress.fail(validatedArgs.reason!.key);

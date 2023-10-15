@@ -219,7 +219,7 @@ void main() {
         args: [],
       ) as SetArgumentsChecker;
 
-      final validatedArgs = argsChecker.defaultValidation();
+      final validatedArgs = argsChecker.validateArgs();
 
       expect(validatedArgs.isValid, false);
       expect(validatedArgs.reason, isNotNull);
