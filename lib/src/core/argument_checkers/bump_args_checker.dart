@@ -10,7 +10,7 @@ final class BumpArgumentsChecker extends ArgumentsChecker {
   @override
   ({bool isValid, InvalidReason? reason}) validateArgs() {
     // Check args normally
-    final checkArgs = defaultValidation();
+    final checkArgs = super.validateArgs();
 
     if (!checkArgs.isValid) {
       return checkArgs;
