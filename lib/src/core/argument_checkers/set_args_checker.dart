@@ -6,7 +6,7 @@ final class SetArgumentsChecker extends ArgumentsChecker {
   /// Prep dictionaries
   @override
   ({
-    DefaultVersionModifiers modifiers,
+    VersionModifiers modifiers,
     List<Dictionary> dictionaries,
   }) prepArgs() {
     final dictionaries = <Dictionary>[];
@@ -34,7 +34,7 @@ final class SetArgumentsChecker extends ArgumentsChecker {
     }
 
     return (
-      modifiers: DefaultVersionModifiers.fromArgResults(argResults!),
+      modifiers: VersionModifiers.fromArgResults(argResults!),
       dictionaries: dictionaries,
     );
   }
