@@ -26,10 +26,10 @@ final class BumpArgumentsChecker extends ArgumentsChecker {
 
   /// Prep modify args
   @override
-  ({BumpVersionModifiers modifiers, List<String> targets}) prepArgs() {
+  ({VersionModifiers modifiers, List<String> targets}) prepArgs() {
     final parsedTargets = argResults!.targets;
 
-    final modifiers = BumpVersionModifiers.fromArgResults(argResults!);
+    final modifiers = VersionModifiers.fromBumpArgResults(argResults!);
 
     return (
       modifiers: modifiers,
