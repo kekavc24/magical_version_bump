@@ -11,15 +11,15 @@ part 'set_args_checker.dart';
 /// Contains basic code implementations to
 ///   * Prep args to desired format for each command
 ///   * Validate arguments
-base class ArgumentsChecker {
+abstract class ArgumentsChecker {
   ArgumentsChecker({required this.argResults});
 
   /// Argument results from command
   final ArgResults? argResults;
 
   /// Basic implementation to check if args are empty or null
-  ({bool isValid, InvalidReason? reason}) defaultValidation() {
-    // Args must not be empty or null
+  ({bool isValid, InvalidReason? reason}) validateArgs() {
+    /// Args must not be empty or null. 
     if (argResults == null || argResults!.arguments.isEmpty) {
       return (
         isValid: false,
@@ -34,8 +34,5 @@ base class ArgumentsChecker {
   }
 
   /// Prep args to desired format
-  void prepArgs() {}
-
-  /// Validate arguments
-  void validateArgs() {}
+  void prepArgs();
 }
