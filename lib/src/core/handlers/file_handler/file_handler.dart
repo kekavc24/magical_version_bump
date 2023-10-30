@@ -5,16 +5,18 @@ import 'package:args/args.dart';
 import 'package:magical_version_bump/src/utils/enums/enums.dart';
 import 'package:magical_version_bump/src/utils/extensions/extensions.dart';
 import 'package:mason_logger/mason_logger.dart';
+import 'package:meta/meta.dart';
 import 'package:yaml/yaml.dart';
 
 class FileHandler {
-  FileHandler._(this._requestPath);
+  FileHandler();
 
   /// Create a file handler based on arguments
   factory FileHandler.fromParsedArgs(ArgResults? argResults, Logger logger) {
-    _logger = logger;
     final pathInfo = argResults!.pathInfo;
-    final handler = FileHandler._(pathInfo.requestPath);
+    final handler = FileHandler()
+      ..requestPath = pathInfo.requestPath
+      ..fileLogger = logger;
 
     // Just set path if user doesn't want prompts
     if (!pathInfo.requestPath) {
@@ -25,31 +27,35 @@ class FileHandler {
   }
 
   /// File type
-  late FileType _fileType;
+  @protected
+  late FileType fileType;
 
   /// Path where file is stored
+  @protected
   late String path;
 
   /// Whether to use path from args/request path
-  final bool _requestPath;
+  @protected
+  late bool requestPath;
 
   /// Logger for interacting with Command line
-  static late Logger _logger;
+  @protected
+  late Logger fileLogger;
 
   /// Read file and return as yaml map
   Future<YamlMap> readFile() async {
-    if (_requestPath) {
+    if (requestPath) {
       // Request path to file
-      path = _logger.prompt(
+      path = fileLogger.prompt(
         'Please enter the path to file:',
         defaultValue: 'pubspec.yaml',
       );
     }
 
     // Update file type
-    _fileType = path.split('.').last.toLowerCase().fileType;
+    fileType = path.split('.').last.toLowerCase().fileType;
 
-    final readProgress = _logger.progress('Reading file');
+    final readProgress = fileLogger.progress('Reading file');
     final file = await File(path).readAsString();
 
     readProgress.complete('Read file');
@@ -59,11 +65,11 @@ class FileHandler {
 
   /// Save file
   Future<void> saveFile(YamlMap updatedYaml) async {
-    final saveProgress = _logger.progress('Saving changes');
+    final saveProgress = fileLogger.progress('Saving changes');
 
     final file = _convertMapToString(
       updatedYaml,
-      addIndent: _fileType == FileType.json,
+      addIndent: fileType == FileType.json,
     );
 
     await File(path).writeAsString(file);
