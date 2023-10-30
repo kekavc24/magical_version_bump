@@ -17,9 +17,9 @@ abstract class ArgumentsChecker {
   /// Argument results from command
   final ArgResults? argResults;
 
-  /// Validate arguments
+  /// Basic implementation to check if args are empty or null
   ({bool isValid, InvalidReason? reason}) validateArgs() {
-    // Args must not be empty or null
+    /// Args must not be empty or null. 
     if (argResults == null || argResults!.arguments.isEmpty) {
       return (
         isValid: false,
