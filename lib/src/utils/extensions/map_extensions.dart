@@ -69,33 +69,31 @@ extension MapUtility on Map<dynamic, dynamic> {
       // Due to many checks
       dynamic valueToAppend;
 
-      // Check for mismatch when target value is not null
-      if ((targetKeyValue is String || targetKeyValue is List) &&
-          (update is! String && update is! List<String>)) {
-        throw MagicalException(
-          violation:
-              '''Cannot append new values at "$target". New value must be a String or List of Strings.''',
-        );
-      } else if (targetKeyValue is Map && update is! Map<String, String>) {
-        throw MagicalException(
-          violation:
-              '''Cannot append new mapped values at "$target". New value must be a map too.''',
-        );
+      // Convert to list by default since only a single value exists
+      if (targetKeyValue is String) {
+        valueToAppend = update is List
+            ? <dynamic>[targetKeyValue, ...update]
+            : <dynamic>[targetKeyValue, update];
       }
 
-      // Convert all strings to list of strings
-      if (targetKeyValue is String) {
-        valueToAppend = update is String
-            ? <String>[targetKeyValue, update]
-            : <String>[targetKeyValue, ...update as List<String>];
-      } else if (targetKeyValue is List) {
-        valueToAppend = update is String
-            ? [...targetKeyValue, update]
-            : [...targetKeyValue, ...update as List<String>];
-      } else {
-        valueToAppend = <dynamic, dynamic>{}
-          ..addAll(targetKeyValue as Map)
-          ..addAll(update as Map<String, String>);
+      // For List, just spread in old values
+      else if (targetKeyValue is List) {
+        valueToAppend = update is List
+            ? [...targetKeyValue, ...update]
+            : [...targetKeyValue, update];
+      }
+
+      // For maps, anything that is not a map forces it to be list
+      else {
+        if (update is Map) {
+          valueToAppend = <dynamic, dynamic>{}
+            ..addAll(targetKeyValue as Map)
+            ..addAll(update as Map<String, String>);
+        } else {
+          valueToAppend = update is String
+              ? <dynamic>[targetKeyValue, update]
+              : <dynamic>[targetKeyValue, ...update as List];
+        }
       }
 
       this.update(target, (value) => valueToAppend);
@@ -117,7 +115,7 @@ extension MapUtility on Map<dynamic, dynamic> {
     ///
     /// However, if `append` is `false`, means we are overwriting the whole
     /// path.
-    if (valueAtKey != null && valueAtKey is! Map<dynamic, dynamic> && append) {
+    if (valueAtKey != null && valueAtKey is String && append) {
       throw MagicalException(
         violation:
             '''Cannot append new values due to an existing value at "$currentKey". You need to overwrite this path key.''',
@@ -138,7 +136,56 @@ extension MapUtility on Map<dynamic, dynamic> {
 
       return this;
     }
-    // Current value as is
+
+    ///
+    /// As earlier stated, we guarantee that a missing key will always be
+    /// recreated. Thus:
+    ///
+    /// * If a String is encountered, we force it into a list and iterate it.
+    ///   and create the key if missing
+    /// * If value is a list, we iterate and look for our key
+    if (valueAtKey is List || valueAtKey is String) {
+      final modifiableValueAtKey = valueAtKey is String
+          ? <dynamic>[valueAtKey]
+          : <dynamic>[...valueAtKey as List];
+
+      // Recursive read all values of list
+      final recursedOutput = _recurseNestedList(
+        modifiableValueAtKey,
+        update: update,
+        target: target,
+        currentPath: updatedPath,
+        append: append,
+      );
+
+      ///
+      /// If after recursing it wasn't modified, we add the wanted key as a
+      /// null map, which guarantees further recursions will update it.
+      ///
+      /// Thus, guarantee-ing our guarantee of creating any missing keys we
+      /// find missing while recursing
+      ///
+      if (!recursedOutput.didModify) {
+        final wantedKeyUpdate = <dynamic, dynamic>{}.recursivelyUpdate(
+          update,
+          target: target,
+          path: updatedPath,
+          append: append,
+        );
+
+        modifiableValueAtKey.add(wantedKeyUpdate);
+      } else {
+        modifiableValueAtKey
+          ..clear()
+          ..addAll(recursedOutput.modified);
+      }
+
+      this[currentKey] = modifiableValueAtKey;
+
+      return this;
+    }
+
+    // Current value as is from map
     final castedValueAtKey = <dynamic, dynamic>{
       ...valueAtKey as Map<dynamic, dynamic>,
     };
@@ -152,4 +199,109 @@ extension MapUtility on Map<dynamic, dynamic> {
 
     return this;
   }
+}
+
+/// Private function solely for recursing the nested list in map. Not to be
+/// used outside this extension.
+({bool didModify, List<dynamic> modified}) _recurseNestedList(
+  List<dynamic> listToRecurse, {
+  required dynamic update,
+  required String target,
+  required List<String> currentPath,
+  required bool append,
+}) {
+  ///
+  /// For lists, we want to look for the next key so that we recurse on it
+  /// as a map.
+  ///
+  /// * If the key is a string, we convert to map to recurse on it only if
+  ///   append is false. We cannot append to an existing value. We,
+  ///   however, can overwrite it.
+  ///
+  /// * If we find a map, check if it contains the key. If it does, we
+  ///   recurse on it.
+  ///
+  /// * If we find a list, call this function recursively
+
+  // Get the next key
+  final wantedKey = currentPath.isEmpty ? target : currentPath.first;
+
+  // We first make list modifiable
+  final modifiableList = [...listToRecurse];
+
+  /// If the loop, managed to modify the desired value.
+  var didFindAndModify = false;
+
+  // Loop it value by value
+  for (final (index, valueInList) in modifiableList.indexed) {
+    // For strings
+    if (valueInList is String) {
+      // Only matching values
+      if (valueInList != wantedKey) continue;
+
+      // We cannot append, only overwrite
+      if (append) {
+        throw MagicalException(
+          violation:
+              '''Cannot append new values at "$valueInList". You need to overwrite this value as it is nested in a list.''',
+        );
+      }
+
+      // We convert to map
+      final mapForString = <dynamic, dynamic>{}.recursivelyUpdate(
+        update,
+        target: target,
+        path: currentPath,
+        append: append,
+      );
+
+      // Update value with map
+      modifiableList[index] = mapForString;
+
+      // Mark as modified
+      didFindAndModify = true;
+    }
+
+    // For maps
+    else if (valueInList is Map) {
+      // Must have the key in it
+      if (!valueInList.containsKey(wantedKey)) continue;
+
+      // If it does, we know it will be updated if we recurse on the map
+      modifiableList[index] = {...valueInList}.recursivelyUpdate(
+        update,
+        target: target,
+        path: currentPath,
+        append: append,
+      );
+
+      // Mark as modified
+      didFindAndModify = true;
+    }
+
+    //
+    else {
+      final recursedList = _recurseNestedList(
+        valueInList as List,
+        update: update,
+        target: target,
+        currentPath: currentPath,
+        append: append,
+      );
+
+      if (!recursedList.didModify) continue;
+
+      modifiableList[index] = recursedList.modified;
+
+      didFindAndModify = true;
+    }
+
+    // Break this loop if was modified
+    if (didFindAndModify) break;
+  }
+
+  return (
+    didModify: didFindAndModify,
+    modified: didFindAndModify ? modifiableList : [],
+  );
 }
