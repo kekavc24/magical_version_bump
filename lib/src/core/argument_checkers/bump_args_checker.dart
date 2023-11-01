@@ -8,7 +8,9 @@ final class BumpArgumentsChecker extends ArgumentsChecker {
       '''You need to pass in a target i.e. major, minor, patch or build-number''';
 
   @override
-  ({bool isValid, InvalidReason? reason}) validateArgs() {
+  ({bool isValid, InvalidReason? reason}) validateArgs({
+    bool ignoreRestArgs = true,
+  }) {
     // Check args normally
     final checkArgs = super.validateArgs();
 
