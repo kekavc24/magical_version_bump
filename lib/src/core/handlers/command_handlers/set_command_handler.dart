@@ -53,7 +53,7 @@ class HandleSetCommand extends CommandHandler {
     changeProgress.complete('Changed all nodes');
 
     /// Save file changes
-    await _fileHandler.saveFile(loadYaml(editedFile) as YamlMap);
+    await _fileHandler.saveFile(editedFile);
 
     /// Show success
     logger.success('Updated your yaml file!');
