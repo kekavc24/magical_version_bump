@@ -18,6 +18,11 @@ void main() {
         },
       },
     },
+    'key-with-list': [
+      'one value',
+      {'nested key': 'value'},
+      ['value-in-list'],
+    ],
   };
 
   group('recursively reads value', () {
@@ -35,6 +40,18 @@ void main() {
     test('when key is deeply nested', () {
       final keys = ['deep key', 'deeper key', 'deepest key'];
       const targetKey = 'deeper deepest key';
+
+      final valueAtKey = mappy.recursiveRead<String>(
+        path: keys,
+        target: targetKey,
+      );
+
+      expect(valueAtKey, equals('value'));
+    });
+
+    test('when key is in map nested in a list', () {
+      final keys = ['key-with-list'];
+      const targetKey = 'nested key';
 
       final valueAtKey = mappy.recursiveRead<String>(
         path: keys,
@@ -62,7 +79,7 @@ void main() {
           append: true,
         );
 
-        final valueAtKey = updatedMap.recursiveRead<List<String>>(
+        final valueAtKey = updatedMap.recursiveRead<List<dynamic>>(
           path: keys,
           target: targetKey,
         );
@@ -87,7 +104,7 @@ void main() {
           append: true,
         );
 
-        final valueAtKey = updatedMap.recursiveRead<List<String>>(
+        final valueAtKey = updatedMap.recursiveRead<List<dynamic>>(
           path: keys,
           target: targetKey,
         );
@@ -176,6 +193,78 @@ void main() {
         );
       },
     );
+
+    test('a value when key is in a map nested in a list', () {
+      final localMap = {...mappy};
+
+      final keys = ['key-with-list'];
+      const targetKey = 'nested key';
+      const update = 'another value';
+
+      final updatedMap = localMap.recursivelyUpdate(
+        update,
+        target: targetKey,
+        path: keys,
+        append: true,
+      );
+
+      final valueAtKey = updatedMap.recursiveRead<List<dynamic>>(
+        path: keys,
+        target: targetKey,
+      );
+
+      expect(valueAtKey, equals(['value', update]));
+    });
+
+    test(
+      'a map to a key with only a string, converts it to list',
+      () {
+        final localMap = {...mappy};
+
+        const targetKey = 'key';
+        const update = {'test': 'works'};
+
+        final updatedMap = localMap.recursivelyUpdate(
+          update,
+          target: targetKey,
+          path: [],
+          append: true,
+        );
+
+        final valueAtKey = updatedMap.recursiveRead<List<dynamic>>(
+          path: [],
+          target: targetKey,
+        );
+
+        expect(valueAtKey, equals(['value', update]));
+      },
+    );
+
+    test(
+      'when appending a string or list of values to a map of values',
+      () {
+        final localMap = {...mappy};
+
+        const targetKey = 'deep key';
+        const update = 'test';
+
+        final valueBefore = localMap[targetKey];
+
+        final updatedMap = localMap.recursivelyUpdate(
+          update,
+          target: targetKey,
+          path: [],
+          append: true,
+        );
+
+        final valueAtKey = updatedMap.recursiveRead<List<dynamic>>(
+          path: [],
+          target: targetKey,
+        );
+
+        expect(valueAtKey, equals([valueBefore, update]));
+      },
+    );
   });
 
   group('nested update overwrites', () {
@@ -253,6 +342,28 @@ void main() {
         expect(valueAtKey, equals(update));
       },
     );
+
+    test('when key is in a map nested in a list', () {
+      final localMap = {...mappy};
+
+      final keys = ['key-with-list'];
+      const targetKey = 'nested key';
+      const update = 'another value';
+
+      final updatedMap = localMap.recursivelyUpdate(
+        update,
+        target: targetKey,
+        path: keys,
+        append: false,
+      );
+
+      final valueAtKey = updatedMap.recursiveRead<String>(
+        path: keys,
+        target: targetKey,
+      );
+
+      expect(valueAtKey, equals(update));
+    });
   });
 
   group('nested update adds missing key', () {
@@ -302,50 +413,6 @@ void main() {
   });
 
   group('nested update throws exception', () {
-    test(
-      'when appending a map of values to string or list of values',
-      () {
-        final localMap = {...mappy};
-
-        const targetKey = 'key';
-        const update = {'test': 'error'};
-
-        expect(
-          () => localMap.recursivelyUpdate(
-            update,
-            target: targetKey,
-            path: [],
-            append: true,
-          ),
-          throwsViolation(
-            '''Cannot append new values at "$targetKey". New value must be a String or List of Strings.''',
-          ),
-        );
-      },
-    );
-
-    test(
-      'when appending a string or list of values to a map of values',
-      () {
-        final localMap = {...mappy};
-
-        const targetKey = 'deep key';
-        const update = 'test';
-
-        expect(
-          () => localMap.recursivelyUpdate(
-            update,
-            target: targetKey,
-            path: [],
-            append: true,
-          ),
-          throwsViolation(
-            '''Cannot append new mapped values at "$targetKey". New value must be a map too.''',
-          ),
-        );
-      },
-    );
-
     test(
       '''when path is not exhausted and value encountered at path key is not a map''',
       () {

@@ -19,3 +19,15 @@ enum PresetType {
   /// Preset version, prerelease & build number
   all;
 }
+
+/// Amount of values that match condition in list of string
+enum MatchCount {
+  /// No match
+  none,
+
+  /// At least 1 or more
+  some,
+
+  /// All values match
+  all
+}

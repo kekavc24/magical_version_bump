@@ -69,48 +69,19 @@ final class SetArgumentsChecker extends ArgumentsChecker {
     /// Format for specifying more than 1 value is ","
     ///
     /// i.e `value`,`nextValue`,`otherValue`
-    final values = keysAndValue.last.splitAndTrim(',').retainNonEmpty();
-
-    final isMappy = values.first.contains('->');
-
-    /// If more than one value is passed in, we have to check all follow
-    /// the same format.
     ///
-    /// The first value determines the format the rest should follow!
-    if (values.length > 1) {
-      final allFollowFormat = values.every(
-        (element) => isMappy ? element.contains('->') : !element.contains('->'),
-      );
-
-      if (!allFollowFormat) {
-        throw MagicalException(
-          violation: 'Mixed format at $parsedValue',
-        );
-      }
-    }
-
-    if (isMappy) {
-      final valueMap = values.fold(
-        <String, String>{},
-        (previousValue, element) {
-          final mappedValues = element.splitAndTrim('->');
-          previousValue.update(
-            mappedValues.first,
-            (value) => mappedValues.last.isEmpty ? 'null' : mappedValues.last,
-            ifAbsent: () =>
-                mappedValues.last.isEmpty ? 'null' : mappedValues.last,
-          );
-          return previousValue;
-        },
-      );
-
-      return (rootKeys: keys.toList(), append: append, data: valueMap);
-    }
+    /// Remove any empty values in list.
+    ///
+    /// Dynamically extract any maps present.
+    final values = keysAndValue.last
+        .splitAndTrim(',')
+        .retainNonEmpty()
+        .splitBasedOnMatch();
 
     return (
       rootKeys: keys.toList(),
       append: append,
-      data: values.length == 1 ? values.first : values.toList(),
+      data: values is List && values.length == 1 ? values.first : values,
     );
   }
 }
