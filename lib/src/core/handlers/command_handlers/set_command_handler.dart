@@ -3,40 +3,24 @@ part of 'command_handlers.dart';
 class HandleSetCommand extends CommandHandler {
   HandleSetCommand({required super.logger});
 
+  @override
+  void _setUpArgChecker(ArgResults? argResults) {
+    super._argumentsChecker = SetArgumentsChecker(argResults: argResults);
+  }
+
   /// Change specified node in yaml file
   @override
-  Future<void> handleCommand(ArgResults? argResults) async {
-    // Start progress
-    final prepProgress = logger.progress('Checking arguments');
+  Future<void> _coreCommandHandler(ArgResults? argResults) async {
+    final checker = _getChecker<SetArgumentsChecker>();
 
-    final sanitizer = SetArgumentsChecker(argResults: argResults);
-
-    /// Use default validation.
-    final validatedArgs = sanitizer.validateArgs();
-
-    if (!validatedArgs.isValid) {
-      prepProgress.fail(validatedArgs.reason!.key);
-      throw MagicalException(
-        violation: validatedArgs.reason!.value,
-      );
-    }
-
-    final checkedPath = argResults!.pathInfo;
-    final preppedArgs = sanitizer.prepArgs();
-
+    final preppedArgs = checker.prepArgs();
     final versionModifiers = preppedArgs.modifiers;
 
-    prepProgress.complete('Checked arguments');
-
     // Read pubspec.yaml file
-    final fileData = await readFile(
-      requestPath: checkedPath.requestPath,
-      logger: logger,
-      setPath: checkedPath.path,
-    );
+    final fileData = await _fileHandler.readFile();
 
     // Set up re-usable file
-    var editedFile = fileData.file;
+    var editedFile = json.encode(fileData);
 
     final changeProgress = logger.progress('Updating nodes');
 
@@ -49,8 +33,10 @@ class HandleSetCommand extends CommandHandler {
     /// Incase `set-version` was used instead of using the `dictionary` syntax,
     /// update it
     if (versionModifiers.presetType != PresetType.none) {
+      final localVersion = fileData['version'] as String?;
+
       final version = MagicalSEMVER.addPresets(
-        fileData.version ?? '',
+        localVersion ?? '',
         modifiers: versionModifiers,
       );
 
@@ -67,12 +53,7 @@ class HandleSetCommand extends CommandHandler {
     changeProgress.complete('Changed all nodes');
 
     /// Save file changes
-    await saveFile(
-      file: editedFile,
-      path: fileData.path,
-      logger: logger,
-      type: fileData.fileType,
-    );
+    await _fileHandler.saveFile(editedFile);
 
     /// Show success
     logger.success('Updated your yaml file!');

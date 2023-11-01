@@ -17,10 +17,14 @@ abstract class ArgumentsChecker {
   /// Argument results from command
   final ArgResults? argResults;
 
-  /// Validate arguments
-  ({bool isValid, InvalidReason? reason}) validateArgs() {
-    // Args must not be empty or null
-    if (argResults == null || argResults!.arguments.isEmpty) {
+  /// Basic implementation to check if args are empty or null
+  ({bool isValid, InvalidReason? reason}) validateArgs({
+    bool ignoreRestArgs = true,
+  }) {
+    /// Args must not be empty or null.
+    if (argResults == null ||
+        argResults!.arguments.isEmpty ||
+        (ignoreRestArgs && argResults!.rest.isNotEmpty)) {
       return (
         isValid: false,
         reason: const InvalidReason(
