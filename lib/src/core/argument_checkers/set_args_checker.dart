@@ -69,9 +69,9 @@ final class SetArgumentsChecker extends ArgumentsChecker {
     /// Format for specifying more than 1 value is ","
     ///
     /// i.e `value`,`nextValue`,`otherValue`
-    /// 
+    ///
     /// Remove any empty values in list.
-    /// 
+    ///
     /// Dynamically extract any maps present.
     final values = keysAndValue.last
         .splitAndTrim(',')
