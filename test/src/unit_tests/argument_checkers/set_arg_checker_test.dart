@@ -236,7 +236,7 @@ void main() {
       );
 
       expect(dictionary.rootKeys, equals(['testKey']));
-      expect(dictionary.data is String, true);
+      expect(dictionary.data, isA<String>());
       expect(dictionary.data, 'testValue');
     });
 
@@ -247,7 +247,7 @@ void main() {
       );
 
       expect(dictionary.rootKeys, equals(['testKey', 'anotherKey']));
-      expect(dictionary.data is String, true);
+      expect(dictionary.data, isA<String>());
       expect(dictionary.data, 'testValue');
     });
 
@@ -258,7 +258,7 @@ void main() {
       );
 
       expect(dictionary.rootKeys, equals(['testKey']));
-      expect(dictionary.data is List<String>, true);
+      expect(dictionary.data, isList);
       expect(dictionary.data, equals(['testValue', 'anotherValue']));
     });
 
@@ -269,7 +269,7 @@ void main() {
       );
 
       expect(dictionary.rootKeys, equals(['testKey']));
-      expect(dictionary.data is List<String>, true);
+      expect(dictionary.data, isList);
       expect(dictionary.data, equals(['testValue', 'anotherValue']));
     });
 
@@ -280,7 +280,7 @@ void main() {
       );
 
       expect(dictionary.rootKeys, equals(['testKey', 'anotherKey']));
-      expect(dictionary.data is List<String>, true);
+      expect(dictionary.data, isList);
       expect(dictionary.data, equals(['testValue', 'anotherValue']));
     });
 
@@ -291,10 +291,27 @@ void main() {
       );
 
       expect(dictionary.rootKeys, equals(['testKey']));
-      expect(dictionary.data is Map<String, String>, true);
+      expect(dictionary.data, isMap);
       expect(
         dictionary.data,
         equals({'testMapKey': 'testMapValue'}),
+      );
+    });
+
+    test('extracts strings and mapped values as list of values', () {
+      final dictionary = nullableChecker.extractDictionary(
+        'key=value,mapKey->mapValue',
+        append: false,
+      );
+
+      expect(dictionary.rootKeys, equals(['key']));
+      expect(dictionary.data, isList);
+      expect(
+        dictionary.data,
+        equals([
+          'value',
+          {'mapKey': 'mapValue'},
+        ]),
       );
     });
 
@@ -305,7 +322,7 @@ void main() {
       );
 
       expect(dictionary.rootKeys, equals(['testKey']));
-      expect(dictionary.data is Map<String, String>, true);
+      expect(dictionary.data, isMap);
       expect(
         dictionary.data,
         equals({'testMapKey': 'null'}),
@@ -324,7 +341,7 @@ void main() {
       };
 
       expect(dictionary.rootKeys, equals(['testKey', 'anotherKey']));
-      expect(dictionary.data is Map<String, String>, true);
+      expect(dictionary.data, isMap);
       expect(dictionary.data, equals(expectedMappedValues));
     });
 
@@ -357,18 +374,6 @@ void main() {
         throwsViolation(
           'Invalid keys and value pair at "$valueWithOnePair"',
         ),
-      );
-    });
-
-    test('throws error when parsed value has non-uniform formats', () {
-      const nonUniformValue = 'key=value,mapKey->mapValue';
-
-      expect(
-        () => nullableChecker.extractDictionary(
-          nonUniformValue,
-          append: false,
-        ),
-        throwsViolation('Mixed format at $nonUniformValue'),
       );
     });
   });

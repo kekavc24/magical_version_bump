@@ -81,7 +81,7 @@ final class SetArgumentsChecker extends ArgumentsChecker {
     return (
       rootKeys: keys.toList(),
       append: append,
-      data: values,
+      data: values is List && values.length == 1 ? values.first : values,
     );
   }
 }
