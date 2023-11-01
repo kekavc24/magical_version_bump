@@ -10,7 +10,7 @@ class HandleSetCommand extends CommandHandler {
 
   /// Change specified node in yaml file
   @override
-  Future<void> handleCommand(ArgResults? argResults) async {
+  Future<void> _coreCommandHandler(ArgResults? argResults) async {
     final checker = _getChecker<SetArgumentsChecker>();
 
     final preppedArgs = checker.prepArgs();
