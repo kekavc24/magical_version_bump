@@ -8,7 +8,6 @@ import 'package:magical_version_bump/src/utils/enums/enums.dart';
 import 'package:magical_version_bump/src/utils/exceptions/command_exceptions.dart';
 import 'package:magical_version_bump/src/utils/mixins/command_mixins.dart';
 import 'package:mason_logger/mason_logger.dart';
-import 'package:yaml/yaml.dart';
 
 part 'bump_command_handler.dart';
 part 'set_command_handler.dart';
