@@ -64,7 +64,7 @@ final class HandleBumpCommand extends CommandHandler {
     modProgress.complete('Modified version');
 
     // Save file changes
-    await _fileHandler.saveFile(loadYaml(modifiedFile) as YamlMap);
+    await _fileHandler.saveFile(modifiedFile);
 
     // Show success
     logger.success(

@@ -64,15 +64,13 @@ class FileHandler {
   }
 
   /// Save file
-  Future<void> saveFile(YamlMap updatedYaml) async {
+  Future<void> saveFile(String file) async {
     final saveProgress = fileLogger.progress('Saving changes');
 
-    final file = _convertMapToString(
-      updatedYaml,
-      addIndent: fileType == FileType.json,
-    );
+    final fileTosave =
+        fileType == FileType.json ? _convertMapToString(file) : file;
 
-    await File(path).writeAsString(file);
+    await File(path).writeAsString(fileTosave);
 
     return saveProgress.complete('Saved changes');
   }
@@ -81,9 +79,9 @@ class FileHandler {
   YamlMap _convertToMap(String file) => loadYaml(file) as YamlMap;
 
   /// Convert to pretty json/yaml string
-  String _convertMapToString(YamlMap yamlMap, {required bool addIndent}) {
-    // Normal yaml files
-    if (!addIndent) return json.encode(yamlMap);
+  String _convertMapToString(String file) {
+    // Convert to yaml
+    final yamlMap = loadYaml(file);
 
     // For json files add indent
     final indent = ' ' * 4;
