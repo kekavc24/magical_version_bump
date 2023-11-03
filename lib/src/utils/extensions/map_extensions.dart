@@ -278,11 +278,8 @@ class _NestedMapHelper {
 
     // Loop it value by value
     for (final (index, valueInList) in modifiableList.indexed) {
-      // For strings
-      if (valueInList is String) {
-        // Only matching values
-        if (valueInList != wantedKey) continue;
-
+      // For strings, only matching values
+      if (valueInList is String && valueInList == wantedKey) {
         // We cannot append, only overwrite
         if (append) {
           throw MagicalException(
@@ -306,11 +303,8 @@ class _NestedMapHelper {
         didFindAndModify = true;
       }
 
-      // For maps
-      else if (valueInList is Map) {
-        // Must have the key in it
-        if (!valueInList.containsKey(wantedKey)) continue;
-
+      // For maps. It must contain key
+      else if (valueInList is Map && valueInList.containsKey(wantedKey)) {
         // If it does, we know it will be updated if we recurse on the map
         modifiableList[index] = {...valueInList}.recursivelyUpdate(
           update,
