@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:args/args.dart';
 import 'package:magical_version_bump/src/utils/enums/enums.dart';
 import 'package:magical_version_bump/src/utils/extensions/extensions.dart';
+import 'package:magical_version_bump/src/utils/typedefs/typedefs.dart';
 import 'package:mason_logger/mason_logger.dart';
 import 'package:meta/meta.dart';
 import 'package:yaml/yaml.dart';
@@ -43,7 +44,7 @@ class FileHandler {
   late Logger fileLogger;
 
   /// Read file and return as yaml map
-  Future<YamlMap> readFile() async {
+  Future<FileOutput> readFile() async {
     if (requestPath) {
       // Request path to file
       path = fileLogger.prompt(
@@ -60,7 +61,7 @@ class FileHandler {
 
     readProgress.complete('Read file');
 
-    return _convertToMap(file);
+    return (file: file, fileAsMap: convertToMap(file));
   }
 
   /// Save file
@@ -76,12 +77,12 @@ class FileHandler {
   }
 
   /// Convert read file to YAML map
-  YamlMap _convertToMap(String file) => loadYaml(file) as YamlMap;
+  YamlMap convertToMap(String file) => loadYaml(file) as YamlMap;
 
   /// Convert to pretty json/yaml string
   String _convertMapToString(String file) {
     // Convert to yaml
-    final yamlMap = loadYaml(file);
+    final yamlMap = convertToMap(file);
 
     // For json files add indent
     final indent = ' ' * 4;

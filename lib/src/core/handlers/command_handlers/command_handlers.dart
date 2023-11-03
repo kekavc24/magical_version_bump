@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:args/args.dart';
 import 'package:magical_version_bump/src/core/argument_checkers/arg_checker.dart';
 import 'package:magical_version_bump/src/core/custom_version_modifiers/semver_version_modifer.dart';

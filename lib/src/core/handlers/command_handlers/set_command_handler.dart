@@ -17,23 +17,34 @@ class HandleSetCommand extends CommandHandler {
     final versionModifiers = preppedArgs.modifiers;
 
     // Read pubspec.yaml file
-    final fileData = await _fileHandler.readFile();
+    final fileOuput = await _fileHandler.readFile();
 
     // Set up re-usable file
-    var editedFile = json.encode(fileData);
+    var editedFile = fileOuput.file;
 
     final changeProgress = logger.progress('Updating nodes');
 
     if (preppedArgs.dictionaries.isNotEmpty) {
-      for (final dictionary in preppedArgs.dictionaries) {
-        editedFile = await updateYamlFile(editedFile, dictionary: dictionary);
+      ///
+      /// Loop all entries. The first entry will use file read fresh from disk
+      /// while successive entries will use the previously modified file
+      for (final (index, dictionary) in preppedArgs.dictionaries.indexed) {
+        editedFile = index == 0
+            ? await updateYamlFile(fileOuput, dictionary: dictionary)
+            : await updateYamlFile(
+                (
+                  file: editedFile,
+                  fileAsMap: _fileHandler.convertToMap(editedFile)
+                ),
+                dictionary: dictionary,
+              );
       }
     }
 
     /// Incase `set-version` was used instead of using the `dictionary` syntax,
     /// update it
     if (versionModifiers.presetType != PresetType.none) {
-      final localVersion = fileData['version'] as String?;
+      final localVersion = fileOuput.fileAsMap['version'] as String?;
 
       final version = MagicalSEMVER.addPresets(
         localVersion ?? '',
@@ -41,7 +52,7 @@ class HandleSetCommand extends CommandHandler {
       );
 
       editedFile = await updateYamlFile(
-        editedFile,
+        (file: editedFile, fileAsMap: _fileHandler.convertToMap(editedFile)),
         dictionary: (
           append: false,
           rootKeys: ['version'],

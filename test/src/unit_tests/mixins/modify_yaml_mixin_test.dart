@@ -1,4 +1,5 @@
 import 'package:magical_version_bump/src/utils/mixins/command_mixins.dart';
+import 'package:magical_version_bump/src/utils/typedefs/typedefs.dart';
 import 'package:test/test.dart';
 import 'package:yaml/yaml.dart';
 
@@ -8,6 +9,7 @@ class _FakeYamlModifier with ModifyYaml {}
 
 void main() {
   late _FakeYamlModifier modifier;
+  late FileOutput yamlOutput;
 
   const version = '11.11.11';
 
@@ -26,6 +28,7 @@ void main() {
 
   setUp(() {
     modifier = _FakeYamlModifier();
+    yamlOutput = (file: fakeYaml, fileAsMap: loadYaml(fakeYaml));
   });
 
   group('updates', () {
@@ -37,7 +40,7 @@ void main() {
       );
 
       final updatedFile = await modifier.updateYamlFile(
-        fakeYaml,
+        yamlOutput,
         dictionary: dictionary,
       );
 
@@ -57,7 +60,7 @@ void main() {
       );
 
       final updatedFile = await modifier.updateYamlFile(
-        fakeYaml,
+        yamlOutput,
         dictionary: dictionary,
       );
 
@@ -77,7 +80,7 @@ void main() {
       );
 
       final updatedFile = await modifier.updateYamlFile(
-        fakeYaml,
+        yamlOutput,
         dictionary: dictionary,
       );
 
@@ -97,7 +100,7 @@ void main() {
       );
 
       final updatedFile = await modifier.updateYamlFile(
-        fakeYaml,
+        yamlOutput,
         dictionary: dictionary,
       );
 
@@ -117,7 +120,7 @@ void main() {
       );
 
       final updatedFile = await modifier.updateYamlFile(
-        fakeYaml,
+        yamlOutput,
         dictionary: dictionary,
       );
 
@@ -143,7 +146,7 @@ void main() {
       );
 
       final updatedFile = await modifier.updateYamlFile(
-        fakeYaml,
+        yamlOutput,
         dictionary: dictionary,
       );
 

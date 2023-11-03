@@ -1,17 +1,16 @@
-import 'package:magical_version_bump/src/utils/extensions/extensions.dart';
 import 'package:magical_version_bump/src/utils/extensions/map_extensions.dart';
 import 'package:magical_version_bump/src/utils/typedefs/typedefs.dart';
 import 'package:yaml_edit/yaml_edit.dart';
 
-/// This mixin modifies a yaml node to desired option
+/// This mixin modifies a yaml/json node to desired option
 mixin ModifyYaml {
   /// Update yaml file
   Future<String> updateYamlFile(
-    String file, {
+    FileOutput fileOutput, {
     required Dictionary dictionary,
   }) async {
     // Setup editor
-    final editor = YamlEditor(file);
+    final editor = YamlEditor(fileOutput.file);
 
     // Get keys to use in update
     final rootKeys = [...dictionary.rootKeys];
@@ -29,7 +28,7 @@ mixin ModifyYaml {
     }
 
     /// Convert file to map
-    final fileAsDynamicMap = file.convertToMap();
+    final fileAsDynamicMap = fileOutput.fileAsMap;
 
     /// When more than 1 key is provided, we need to guarantee that:
     ///

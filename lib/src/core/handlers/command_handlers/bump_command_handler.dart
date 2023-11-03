@@ -19,9 +19,9 @@ final class HandleBumpCommand extends CommandHandler {
     final versionModifiers = preppedArgs.modifiers;
 
     // Read pubspec.yaml file
-    final fileData = await _fileHandler.readFile();
+    final fileOuput = await _fileHandler.readFile();
 
-    final localVersion = fileData['version'] as String?;
+    final localVersion = fileOuput.fileAsMap['version'] as String?;
 
     /// Preset any values before validating the version. When `--preset` flag
     /// is used or `--set-version` option
@@ -57,7 +57,7 @@ final class HandleBumpCommand extends CommandHandler {
     );
 
     final modifiedFile = await updateYamlFile(
-      json.encode(fileData),
+      fileOuput,
       dictionary: (append: false, rootKeys: ['version'], data: versionToSave),
     );
 
