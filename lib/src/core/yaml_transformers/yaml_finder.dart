@@ -106,7 +106,7 @@ class MagicalFinder implements Finder {
     ///   * We check if indexes are in sequence
 
     // Check every element is there
-    var hasAll = nodeKeys.every(_keysToFind.keys.contains);
+    var hasAll = nodeKeys.hasAll(_keysToFind.keys);
 
     // If key order is strict, check if all elements are present in order
     if (_keysToFind.strictOrder && hasAll) {

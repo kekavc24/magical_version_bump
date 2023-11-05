@@ -104,4 +104,9 @@ extension Operations on Iterable<String> {
     // Just return "as-is" if none
     return this;
   }
+
+  /// Has all values found in another list
+  bool hasAll(Iterable<String> other) {
+    return every(other.contains) && (length == other.length);
+  }
 }
