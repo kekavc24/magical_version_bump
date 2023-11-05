@@ -42,25 +42,25 @@ class TestVersionModifier implements VersionModifiers {
       strategy: strategy,
     );
   }
-  
+
   @override
   String? build;
-  
+
   @override
   bool keepBuild;
-  
+
   @override
   bool keepPre;
-  
+
   @override
   String? prerelease;
-  
+
   @override
   PresetType presetType;
-  
+
   @override
   ModifyStrategy strategy;
-  
+
   @override
   String? version;
 }
