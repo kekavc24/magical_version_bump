@@ -9,33 +9,69 @@ part 'yaml_finder.dart';
 part 'data/matched_node_data.dart';
 part 'data/node_data.dart';
 
-/// Interface class to find by count
-abstract interface class Finder {
+/// Abstract class for looking for values in yaml maps
+///
+/// Both [MagicalFinder] & MagicalSearcher will implement this
+abstract class Finder {
+  Finder({
+    required this.indexer,
+    this.keysToFind,
+    this.valuesToFind,
+    this.pairsToFind,
+  });
+
+  /// An indexer that recurses through the [ YamlMap ] and spits out terminal
+  /// values sequentially.
+  final MagicalIndexer indexer;
+
+  final KeysToFind? keysToFind;
+
+  final ValuesToFind? valuesToFind;
+
+  final PairsToFind? pairsToFind;
+
+  // Non-nullable values
+  KeysToFind get _keysToFind => keysToFind!;
+  ValuesToFind get _valuesToFind => valuesToFind!;
+  PairsToFind get _pairsToFind => pairsToFind!;
+
+  /// An on-demand generator that is indexing the file
+  Iterable<NodeData> get _generator => indexer.indexYaml();
+
   /// Find first value
-  MatchedNodeData? findFirst();
+  MatchedNodeData? findFirst() => findByCount(1).firstOrNull;
 
   /// Find by count. May find a number less than that provided
-  List<MatchedNodeData> findByCount(int count);
+  List<MatchedNodeData> findByCount(int count) =>
+      findByCountSync(count).toList();
 
   /// Find by count synchronously, value by value
-  Iterable<MatchedNodeData> findByCountSync(int count);
+  Iterable<MatchedNodeData> findByCountSync(int count) sync* {
+    if (count < 1) {
+      throw MagicalException(
+        violation: 'Count must be a value equal/greater than 1',
+      );
+    }
+
+    yield* findAllSync().take(count);
+  }
 
   /// Find all values
-  List<MatchedNodeData> findAll();
+  List<MatchedNodeData> findAll() => findAllSync().toList();
 
   /// Find all synchronously, value by value
-  Iterable<MatchedNodeData> findAllSync();
-}
+  Iterable<MatchedNodeData> findAllSync() sync* {
+    for (final nodeData in _generator) {
+      // Generate matched node data
+      final matchedNodeData = generateMatch(nodeData);
 
-/// Interface class to replace a value in a yaml/json file
-abstract interface class Replacer {
-  /// Replace first matching value
-  void replaceFirst();
+      // We only yield it if it is valid
+      if (matchedNodeData.isValidMatch()) {
+        yield matchedNodeData;
+      }
+    }
+  }
 
-  /// Replace based on provided count. May replace a number less than that
-  /// provided
-  void replaceByCount(int count);
-
-  /// Replace all values
-  void replaceAll();
+  /// Generates a based on internal functionality
+  MatchedNodeData generateMatch(NodeData nodeData);
 }
