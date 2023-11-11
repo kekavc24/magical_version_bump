@@ -1,57 +1,27 @@
 part of 'yaml_transformer.dart';
 
 /// Find the first value matching a condition
-class MagicalFinder implements Finder {
-  MagicalFinder(
-    this._indexer,
-    this._keysToFind,
-    this._valuesToFind,
-    this._pairsToFind,
-  );
+class MagicalFinder extends Finder {
+  MagicalFinder({
+    required super.indexer,
+    super.keysToFind,
+    super.valuesToFind,
+    super.pairsToFind,
+  });
 
-  /// Initializes a custom indexer
-  factory MagicalFinder.setup(
+  /// Setup everything that may need to found
+  factory MagicalFinder.setUp(
     YamlMap yamlMap, {
-    required KeysToFind keysToFind,
-    required ValuesToFind valuesToFind,
+    KeysToFind? keysToFind,
+    ValuesToFind? valuesToFind,
     PairsToFind? pairsToFind,
   }) {
     return MagicalFinder(
-      MagicalIndexer.forYaml(yamlMap),
-      keysToFind,
-      valuesToFind,
-      pairsToFind ?? {},
+      indexer: MagicalIndexer.forYaml(yamlMap),
+      keysToFind: keysToFind,
+      valuesToFind: valuesToFind,
+      pairsToFind: pairsToFind,
     );
-  }
-
-  /// An indexer that recurses through the [ YamlMap ] and spits out terminal
-  /// values sequentially.
-  final MagicalIndexer _indexer;
-
-  final KeysToFind _keysToFind;
-
-  final ValuesToFind _valuesToFind;
-
-  final PairsToFind _pairsToFind;
-
-  /// An on-demand generator that is indexing the file
-  Iterable<NodeData> get _generator => _indexer.indexYaml();
-
-  @override
-  MatchedNodeData? findFirst() {
-    // Uses the non-generator method
-    final match = findByCount(1);
-    return match.firstOrNull;
-  }
-
-  @override
-  List<MatchedNodeData> findByCount(int count) {
-    return findByCountSync(count).toList(); // Collect values from generator
-  }
-
-  @override
-  List<MatchedNodeData> findAll() {
-    return findAllSync().toList(); // Collect values from generator
   }
 
   @override
@@ -66,28 +36,20 @@ class MagicalFinder implements Finder {
   }
 
   @override
-  Iterable<MatchedNodeData> findAllSync() sync* {
-    for (final nodeData in _generator) {
-      // Generate matched node data
-      final matchedNodeData = MatchedNodeData.fromFinder(
-        nodeData: nodeData,
-        matchedKeys: getMatchingKeys(nodeData),
-        matchedValue: getFirstMachingValue(nodeData),
-        matchedPairs: getMatchingPairs(nodeData),
-      );
-
-      // We only yield it if it is valid
-      if (matchedNodeData.isValidMatch()) {
-        yield matchedNodeData;
-      }
-    }
+  MatchedNodeData generateMatch(NodeData nodeData) {
+    return MatchedNodeData.fromFinder(
+      nodeData: nodeData,
+      matchedKeys: getMatchingKeys(nodeData),
+      matchedValue: getFirstMachingValue(nodeData),
+      matchedPairs: getMatchingPairs(nodeData),
+    );
   }
 
   /// Check if keys contain a value
   @protected
   List<String> getMatchingKeys(NodeData nodeData) {
     // If empty, just return null, as we can't match for it
-    if (_keysToFind.keys.isEmpty) return [];
+    if (keysToFind == null || _keysToFind.keys.isEmpty) return [];
 
     // Get all nodes keys together in order
     final nodeKeys = [...nodeData.precedingKeys, nodeData.key];
@@ -142,7 +104,7 @@ class MagicalFinder implements Finder {
   @protected
   String getFirstMachingValue(NodeData nodeData) {
     // No need to check if empty
-    if (_valuesToFind.isEmpty) return '';
+    if (valuesToFind == null || _valuesToFind.isEmpty) return '';
 
     return _valuesToFind.firstWhere(
       (element) => element == nodeData.data,
@@ -155,7 +117,7 @@ class MagicalFinder implements Finder {
   @protected
   Map<String, String> getMatchingPairs(NodeData nodeData) {
     // No need to check if empty
-    if (_pairsToFind.isEmpty) return {};
+    if (pairsToFind == null || _pairsToFind.isEmpty) return {};
 
     // Format the data to matching data type
     final nodeDataAsPairs = nodeData.transformToPairs();
