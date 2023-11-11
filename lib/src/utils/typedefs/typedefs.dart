@@ -12,7 +12,7 @@ typedef InvalidReason = MapEntry<String, String>;
 typedef Dictionary = ({List<String> rootKeys, bool append, dynamic data});
 
 /// Path info from commands
-typedef PathInfo = ({bool requestPath, String path});
+typedef PathInfo = ({bool requestPath, List<String> paths});
 
 /// File output after file has been read
 typedef FileOutput = ({String file, YamlMap fileAsMap});

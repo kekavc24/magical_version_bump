@@ -9,6 +9,8 @@ import 'package:mason_logger/mason_logger.dart';
 import 'package:meta/meta.dart';
 import 'package:yaml/yaml.dart';
 
+typedef FilePathsAndTypes = Map<String, FileType>;
+
 class FileHandler {
   FileHandler();
 
@@ -21,59 +23,87 @@ class FileHandler {
 
     // Just set path if user doesn't want prompts
     if (!pathInfo.requestPath) {
-      handler.path = pathInfo.path;
+      handler.files = getFileTypes(pathInfo.paths);
     }
 
     return handler;
   }
 
-  /// File type
-  @protected
-  late FileType fileType;
-
-  /// Path where file is stored
-  @protected
-  late String path;
-
   /// Whether to use path from args/request path
   @protected
   late bool requestPath;
+
+  /// File paths and their file types
+  @protected
+  late FilePathsAndTypes files;
 
   /// Logger for interacting with Command line
   @protected
   late Logger fileLogger;
 
-  /// Read file and return as yaml map
+  /// Read first file only. Used by handlers for commands that read from a
+  /// single directory.
   Future<FileOutput> readFile() async {
-    if (requestPath) {
-      // Request path to file
-      path = fileLogger.prompt(
-        'Please enter the path to file:',
-        defaultValue: 'pubspec.yaml',
-      );
-    }
-
-    // Update file type
-    fileType = path.split('.').last.toLowerCase().fileType;
-
-    final readProgress = fileLogger.progress('Reading file');
-    final file = await File(path).readAsString();
-
-    readProgress.complete('Read file');
-
-    return (file: file, fileAsMap: convertToMap(file));
+    final outputs = await readAll();
+    return outputs.first;
   }
 
-  /// Save file
-  Future<void> saveFile(String file) async {
+  /// Read multiple files provided by user. If not provided, requests them.
+  ///
+  /// `SingleDirectoryCommand`s should use [readFile] as it
+  /// returns just one file.
+  ///
+  Future<List<FileOutput>> readAll({bool multiple = false}) async {
+    // Get file paths
+    final paths =
+        requestPath ? requestPaths(multiple: multiple) : files.keys.toList();
+
+    // Update file type
+    final outputs = <FileOutput>[];
+
+    final readProgress = fileLogger.progress(
+      "Reading ${multiple ? 'files' : 'file'}",
+    );
+
+    // Start reading all files
+    for (final path in paths) {
+      final file = await File(path).readAsString();
+      final output = (file: file, fileAsMap: convertToMap(file));
+      outputs.add(output);
+    }
+
+    // Set file and their types if not initially set
+    if (requestPath) files = getFileTypes(paths);
+
+    readProgress.complete('Read files');
+    return outputs;
+  }
+
+  /// Save file.
+  Future<void> saveFile(String modifiedFile, {int index = 0}) async {
     final saveProgress = fileLogger.progress('Saving changes');
 
-    final fileTosave =
-        fileType == FileType.json ? _convertMapToString(file) : file;
+    // File path details
+    final fileDetails = files.entries.elementAt(index);
 
-    await File(path).writeAsString(fileTosave);
+    final fileTosave = fileDetails.value == FileType.json
+        ? _convertMapToString(modifiedFile)
+        : modifiedFile;
+
+    await File(fileDetails.key).writeAsString(fileTosave);
 
     return saveProgress.complete('Saved changes');
+  }
+
+  /// Save multiple files.
+  ///
+  /// NOTE: The order of altered files must match order of their request. All
+  /// file outputs must order of file requests/paths provided.
+  Future<void> saveAll(List<String> modifiedFiles) async {
+    // Loop all
+    for (final (index, modifiedFile) in modifiedFiles.indexed) {
+      await saveFile(modifiedFile, index: index);
+    }
   }
 
   /// Convert read file to YAML map
@@ -89,5 +119,35 @@ class FileHandler {
     final encoder = JsonEncoder.withIndent(indent);
 
     return encoder.convert(yamlMap);
+  }
+
+  /// Store each file with partner file type
+  @protected
+  static FilePathsAndTypes getFileTypes(List<String> paths) {
+    return paths.fold({}, (previousValue, path) {
+      previousValue.addAll(
+        {path: path.split('.').last.toLowerCase().fileType},
+      );
+      return previousValue;
+    });
+  }
+
+  /// Request file paths from user
+  @protected
+  List<String> requestPaths({required bool multiple}) {
+    // Request input from user
+    final request = multiple
+        ? 'Please enter all paths to files (use comma to separate): '
+        : 'Please enter the path to file: ';
+
+    final userInput = fileLogger.prompt(
+      request,
+      defaultValue: 'pubspec.yaml',
+    );
+
+    // Return lists of path
+    return multiple
+        ? userInput.splitAndTrim(',').retainNonEmpty()
+        : [userInput];
   }
 }

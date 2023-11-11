@@ -6,7 +6,7 @@ import 'package:magical_version_bump/src/utils/exceptions/command_exceptions.dar
 import 'package:mason_logger/mason_logger.dart';
 
 /// Abstract command used by all commands. Every command or subcommand will
-/// have access to the `request-path` flag & `directory` option.
+/// have access to the `request-path` flag
 ///
 /// This class will **ONLY** be extended by commands that :
 ///   * Have a set of subcommands
@@ -15,19 +15,12 @@ import 'package:mason_logger/mason_logger.dart';
 ///
 abstract class MagicalCommand extends Command<int> {
   MagicalCommand({required this.logger}) {
-    argParser
-      ..addFlag(
-        'request-path',
-        help: 'Prompt for directory to find yaml/json file',
-        negatable: false,
-        aliases: ['reqPath'],
-      )
-      ..addOption(
-        'directory',
-        help: 'Directory where to find yaml/json file',
-        aliases: ['dir'],
-        defaultsTo: 'pubspec.yaml',
-      );
+    argParser.addFlag(
+      'request-path',
+      help: 'Prompt for directory to find yaml/json file',
+      negatable: false,
+      aliases: ['reqPath'],
+    );
   }
 
   /// Logger for utility purposes
@@ -60,5 +53,28 @@ abstract class RunnableCommand extends MagicalCommand {
       return ExitCode.software.code;
     }
     return ExitCode.success.code;
+  }
+}
+
+/// A command that reads a yaml/json from a single directory
+abstract class SingleDirectoryCommand extends RunnableCommand {
+  SingleDirectoryCommand({required super.logger, required super.handler}) {
+    argParser.addOption(
+      'directory',
+      help: 'Directory where to find yaml/json file',
+      aliases: ['dir'],
+      defaultsTo: 'pubspec.yaml',
+    );
+  }
+}
+
+/// A command that can read yaml/json files from multiple directories
+abstract class MultiDirectoryCommand extends RunnableCommand {
+  MultiDirectoryCommand({required super.logger, required super.handler}) {
+    argParser.addMultiOption(
+      'directory',
+      help: 'Directory where to find yaml/json files',
+      aliases: ['dir'],
+    );
   }
 }
