@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:magical_version_bump/src/command_runner.dart';
-import 'package:magical_version_bump/src/commands/base_command.dart';
+import 'package:magical_version_bump/src/commands/base_commands.dart';
 import 'package:magical_version_bump/src/version.dart';
 import 'package:mason_logger/mason_logger.dart';
 import 'package:pub_updater/pub_updater.dart';

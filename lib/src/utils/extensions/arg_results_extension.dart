@@ -3,9 +3,12 @@ part of 'extensions.dart';
 /// Extension group with general info
 extension SharedArgResults on ArgResults {
   PathInfo get pathInfo {
+    // Read paths before hand
+    final paths = this['directory'];
+
     return (
       requestPath: this['request-path'] as bool,
-      path: this['directory'] as String,
+      paths: paths is List<String> ? paths : [paths as String],
     );
   }
 }

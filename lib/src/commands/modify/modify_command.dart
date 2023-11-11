@@ -1,4 +1,4 @@
-import 'package:magical_version_bump/src/commands/base_command.dart';
+import 'package:magical_version_bump/src/commands/base_commands.dart';
 import 'package:magical_version_bump/src/commands/modify/modify_base_subcommand.dart';
 import 'package:magical_version_bump/src/core/handlers/command_handlers/command_handlers.dart';
 

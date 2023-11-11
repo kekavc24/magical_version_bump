@@ -1,4 +1,4 @@
-import 'package:magical_version_bump/src/commands/base_command.dart';
+import 'package:magical_version_bump/src/commands/base_commands.dart';
 
 part 'subcommands/bump_subcommand.dart';
 part 'subcommands/set_subcommand.dart';
@@ -9,7 +9,7 @@ part 'subcommands/set_subcommand.dart';
 /// * Allow modification of a single node - `Bump` subcommand
 /// * Allow modification of multiple nodes - `Set` subcommand
 ///
-abstract class ModifySubCommand extends RunnableCommand {
+abstract class ModifySubCommand extends SingleDirectoryCommand {
   ModifySubCommand({required super.logger, required super.handler}) {
     argParser
       ..addOption(
