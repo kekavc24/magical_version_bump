@@ -109,4 +109,9 @@ extension Operations on Iterable<String> {
   bool hasAll(Iterable<String> other) {
     return every(other.contains) && (length == other.length);
   }
+
+  /// Has any value found in another list
+  bool hasAny(Iterable<String> other) {
+    return any(other.contains);
+  }
 }

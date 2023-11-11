@@ -1,6 +1,6 @@
 part of '../yaml_transformer.dart';
 
-/// Data object with specifically created when a finder [ FinderByCount ]
+/// Data object with specifically created when a finder [ Finder ]
 /// finds it based on some predefined condition
 class MatchedNodeData {
   MatchedNodeData._(
