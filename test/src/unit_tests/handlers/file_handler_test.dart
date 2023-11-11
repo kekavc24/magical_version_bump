@@ -1,8 +1,8 @@
 import 'package:magical_version_bump/src/core/handlers/file_handler/file_handler.dart';
+import 'package:magical_version_bump/src/utils/typedefs/typedefs.dart';
 import 'package:mason_logger/mason_logger.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:test/test.dart';
-import 'package:yaml/yaml.dart';
 
 import '../../../helpers/helpers.dart';
 
@@ -18,21 +18,27 @@ class _FakeFileHandler extends FileHandler {
     required String path,
     required Logger logger,
   }) {
-    return _FakeFileHandler()
+    final handler = _FakeFileHandler()
       ..requestPath = requestPath
-      ..path = path
       ..fileLogger = logger;
+    if (!requestPath) handler.files = FileHandler.getFileTypes([path]);
+    return handler;
   }
 
-  _FakeFileHandler copyWith({bool? requestPath, String? path}) {
+  _FakeFileHandler copyWith({
+    String? path,
+    bool? requestPath,
+  }) {
     return _FakeFileHandler.forTest(
-      path: path ?? this.path,
+      path: path ?? getPath(0),
       requestPath: requestPath ?? this.requestPath,
       logger: fileLogger,
     );
   }
 
-  String getPath() => path;
+  String getPath(int index) => files.keys.elementAt(index);
+
+  List<String> getAllPaths() => files.keys.toList();
 }
 
 void main() {
@@ -60,8 +66,8 @@ void main() {
 
       verify(() => logger.progress('Reading file')).called(1);
 
-      expect(data, isA<YamlMap>());
-      expect(handler.getPath(), defaultPath);
+      expect(data, isA<FileOutput>());
+      expect(handler.getPath(0), defaultPath);
     });
 
     test('reads pubspec.yaml file from path set by user', () async {
@@ -70,8 +76,8 @@ void main() {
 
       verify(() => logger.progress('Reading file')).called(1);
 
-      expect(data, isA<YamlMap>());
-      expect(handler.getPath(), 'fake.yaml');
+      expect(data, isA<FileOutput>());
+      expect(handler.getPath(0), 'fake.yaml');
     });
 
     test(
@@ -81,7 +87,7 @@ void main() {
 
         when(
           () => logger.prompt(
-            'Please enter the path to file:',
+            'Please enter the path to file: ',
             defaultValue: any(
               named: 'defaultValue',
             ),
@@ -92,8 +98,32 @@ void main() {
 
         verify(() => logger.progress('Reading file')).called(1);
 
-        expect(data, isA<YamlMap>());
-        expect(handler.getPath(), testpath);
+        expect(data, isA<FileOutput>());
+        expect(handler.getPath(0), testpath);
+      },
+    );
+
+    test('read multiple files from paths provided by user in prompt', 
+      () async {
+        handler = handler.copyWith(requestPath: true);
+
+        final multiPaths = [defaultPath, testpath];
+
+        when(
+          () => logger.prompt(
+            'Please enter all paths to files (use comma to separate): ',
+            defaultValue: any(
+              named: 'defaultValue',
+            ),
+          ),
+        ).thenReturn(multiPaths.join(','));
+
+        final data = await handler.readAll(multiple: true);
+
+        verify(() => logger.progress('Reading files')).called(1);
+
+        expect(data, isA<List<FileOutput>>());
+        expect(handler.getAllPaths(), equals(multiPaths));
       },
     );
 
@@ -102,7 +132,7 @@ void main() {
 
       when(
         () => logger.prompt(
-          'Please enter the path to file:',
+          'Please enter the path to file: ',
           defaultValue: any(
             named: 'defaultValue',
           ),
