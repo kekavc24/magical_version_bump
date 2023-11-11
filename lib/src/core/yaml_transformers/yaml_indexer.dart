@@ -27,17 +27,17 @@ part of 'yaml_transformer.dart';
 /// marked as nested. See [ NodeData ]
 ///
 class MagicalIndexer {
-  MagicalIndexer._(this.yamlMap);
+  MagicalIndexer(this._yamlMap);
 
   /// Instantiate with yaml
-  factory MagicalIndexer.forYaml(YamlMap yamlMap) => MagicalIndexer._(yamlMap);
+  factory MagicalIndexer.forYaml(YamlMap yamlMap) => MagicalIndexer(yamlMap);
 
   /// Yaml map to search and index
-  late YamlMap yamlMap;
+  final YamlMap _yamlMap;
 
   /// Trigger for indexing to start
   Iterable<NodeData> indexYaml() sync* {
-    for (final entry in yamlMap.entries) {
+    for (final entry in _yamlMap.entries) {
       final setUpData = NodeData.fromYaml(
         entry.key as String,
         [],

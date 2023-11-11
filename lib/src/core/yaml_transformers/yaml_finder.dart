@@ -2,7 +2,7 @@ part of 'yaml_transformer.dart';
 
 /// Find the first value matching a condition
 class MagicalFinder implements Finder {
-  MagicalFinder._(
+  MagicalFinder(
     this._indexer,
     this._keysToFind,
     this._valuesToFind,
@@ -14,13 +14,13 @@ class MagicalFinder implements Finder {
     YamlMap yamlMap, {
     required KeysToFind keysToFind,
     required ValuesToFind valuesToFind,
-    required PairsToFind pairsToFind,
+    PairsToFind? pairsToFind,
   }) {
-    return MagicalFinder._(
+    return MagicalFinder(
       MagicalIndexer.forYaml(yamlMap),
       keysToFind,
       valuesToFind,
-      pairsToFind,
+      pairsToFind ?? {},
     );
   }
 
@@ -35,7 +35,7 @@ class MagicalFinder implements Finder {
   final PairsToFind _pairsToFind;
 
   /// An on-demand generator that is indexing the file
-  Iterable<NodeData> get _indexingStream => _indexer.indexYaml();
+  Iterable<NodeData> get _generator => _indexer.indexYaml();
 
   @override
   MatchedNodeData? findFirst() {
@@ -67,7 +67,7 @@ class MagicalFinder implements Finder {
 
   @override
   Iterable<MatchedNodeData> findAllSync() sync* {
-    for (final nodeData in _indexingStream) {
+    for (final nodeData in _generator) {
       // Generate matched node data
       final matchedNodeData = MatchedNodeData.fromFinder(
         nodeData: nodeData,
