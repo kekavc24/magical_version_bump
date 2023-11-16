@@ -31,3 +31,15 @@ enum MatchCount {
   /// All values match
   all
 }
+
+/// Type of update to map
+enum UpdateMode { 
+  /// Adds value to terminal end
+  append, 
+
+  /// Replaces a single value
+  replace, 
+
+  /// Removes and replaces old value with a new one
+  overwrite 
+}

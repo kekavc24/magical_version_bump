@@ -54,7 +54,7 @@ class HandleSetCommand extends CommandHandler {
       editedFile = await updateYamlFile(
         (file: editedFile, fileAsMap: _fileHandler.convertToMap(editedFile)),
         dictionary: (
-          append: false,
+          updateMode: UpdateMode.overwrite,
           rootKeys: ['version'],
           data: version,
         ),

@@ -1,3 +1,4 @@
+import 'package:magical_version_bump/src/utils/enums/enums.dart';
 import 'package:magical_version_bump/src/utils/exceptions/command_exceptions.dart';
 import 'package:magical_version_bump/src/utils/extensions/extensions.dart';
 import 'package:magical_version_bump/src/utils/typedefs/typedefs.dart';
@@ -6,6 +7,7 @@ import 'package:yaml/yaml.dart';
 
 part 'yaml_indexer.dart';
 part 'yaml_finder.dart';
+part 'yaml_replacer.dart';
 part 'data/matched_node_data.dart';
 part 'data/node_data.dart';
 

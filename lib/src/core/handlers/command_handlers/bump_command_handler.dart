@@ -58,7 +58,11 @@ final class HandleBumpCommand extends CommandHandler {
 
     final modifiedFile = await updateYamlFile(
       fileOuput,
-      dictionary: (append: false, rootKeys: ['version'], data: versionToSave),
+      dictionary: (
+        updateMode: UpdateMode.overwrite,
+        rootKeys: ['version'],
+        data: versionToSave,
+      ),
     );
 
     modProgress.complete('Modified version');
