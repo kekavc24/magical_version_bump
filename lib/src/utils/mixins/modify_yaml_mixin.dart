@@ -1,3 +1,4 @@
+import 'package:magical_version_bump/src/utils/enums/enums.dart';
 import 'package:magical_version_bump/src/utils/extensions/map_extensions.dart';
 import 'package:magical_version_bump/src/utils/typedefs/typedefs.dart';
 import 'package:yaml_edit/yaml_edit.dart';
@@ -21,7 +22,7 @@ mixin ModifyYaml {
     /// 2. Root is being overwritten
     ///
     /// Update and return updated file
-    if (rootKeys.length == 1 && !dictionary.append) {
+    if (rootKeys.length == 1 && dictionary.updateMode != UpdateMode.append) {
       editor.update([rootKeys.first], dictionary.data);
 
       return editor.toString();
@@ -55,7 +56,9 @@ mixin ModifyYaml {
       dictionary.data,
       target: targetKey,
       path: rootKeys,
-      append: dictionary.append,
+      updateMode: dictionary.updateMode,
+      keyAndReplacement: {},
+      valueToReplace: null,
     );
 
     /// Get the key that appears first in the file.

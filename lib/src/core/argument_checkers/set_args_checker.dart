@@ -80,7 +80,7 @@ final class SetArgumentsChecker extends ArgumentsChecker {
 
     return (
       rootKeys: keys.toList(),
-      append: append,
+      updateMode: append ? UpdateMode.append : UpdateMode.overwrite,
       data: values is List && values.length == 1 ? values.first : values,
     );
   }

@@ -25,17 +25,6 @@ class MagicalFinder extends Finder {
   }
 
   @override
-  Iterable<MatchedNodeData> findByCountSync(int count) sync* {
-    if (count < 1) {
-      throw MagicalException(
-        violation: 'Count must be a value equal/greater than 1',
-      );
-    }
-
-    yield* findAllSync().take(count);
-  }
-
-  @override
   MatchedNodeData generateMatch(NodeData nodeData) {
     return MatchedNodeData.fromFinder(
       nodeData: nodeData,
