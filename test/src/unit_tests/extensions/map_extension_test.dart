@@ -1,3 +1,4 @@
+import 'package:magical_version_bump/src/utils/enums/enums.dart';
 import 'package:magical_version_bump/src/utils/extensions/map_extensions.dart';
 import 'package:test/test.dart';
 
@@ -76,7 +77,9 @@ void main() {
           update,
           target: targetKey,
           path: keys,
-          append: true,
+          updateMode: UpdateMode.append,
+          keyAndReplacement: {},
+          valueToReplace: null,
         );
 
         final valueAtKey = updatedMap.recursiveRead<List<dynamic>>(
@@ -101,7 +104,9 @@ void main() {
           update,
           target: targetKey,
           path: keys,
-          append: true,
+          updateMode: UpdateMode.append,
+          keyAndReplacement: {},
+          valueToReplace: null,
         );
 
         final valueAtKey = updatedMap.recursiveRead<List<dynamic>>(
@@ -126,7 +131,9 @@ void main() {
           update,
           target: targetKey,
           path: keys,
-          append: true,
+          updateMode: UpdateMode.append,
+          keyAndReplacement: {},
+          valueToReplace: null,
         );
 
         final valueAtKey = updatedMap.recursiveRead<List<dynamic>>(
@@ -151,7 +158,9 @@ void main() {
           update,
           target: targetKey,
           path: keys,
-          append: true,
+          updateMode: UpdateMode.append,
+          keyAndReplacement: {},
+          valueToReplace: null,
         );
 
         final valueAtKey = updatedMap.recursiveRead<List<dynamic>>(
@@ -176,7 +185,9 @@ void main() {
           update,
           target: targetKey,
           path: keys,
-          append: true,
+          updateMode: UpdateMode.append,
+          keyAndReplacement: {},
+          valueToReplace: null,
         );
 
         final valueAtKey = updatedMap.recursiveRead<Map<dynamic, dynamic>>(
@@ -205,7 +216,9 @@ void main() {
         update,
         target: targetKey,
         path: keys,
-        append: true,
+        updateMode: UpdateMode.append,
+        keyAndReplacement: {},
+        valueToReplace: null,
       );
 
       final valueAtKey = updatedMap.recursiveRead<List<dynamic>>(
@@ -228,7 +241,9 @@ void main() {
           update,
           target: targetKey,
           path: [],
-          append: true,
+          updateMode: UpdateMode.append,
+          keyAndReplacement: {},
+          valueToReplace: null,
         );
 
         final valueAtKey = updatedMap.recursiveRead<List<dynamic>>(
@@ -254,7 +269,9 @@ void main() {
           update,
           target: targetKey,
           path: [],
-          append: true,
+          updateMode: UpdateMode.append,
+          keyAndReplacement: {},
+          valueToReplace: null,
         );
 
         final valueAtKey = updatedMap.recursiveRead<List<dynamic>>(
@@ -281,7 +298,9 @@ void main() {
           update,
           target: targetKey,
           path: keys,
-          append: false,
+          updateMode: UpdateMode.overwrite,
+          keyAndReplacement: {},
+          valueToReplace: null,
         );
 
         final valueAtKey = updatedMap.recursiveRead<String>(
@@ -306,7 +325,9 @@ void main() {
           update,
           target: targetKey,
           path: keys,
-          append: false,
+          updateMode: UpdateMode.overwrite,
+          keyAndReplacement: {},
+          valueToReplace: null,
         );
 
         final valueAtKey = updatedMap.recursiveRead<List<dynamic>>(
@@ -331,7 +352,9 @@ void main() {
           update,
           target: targetKey,
           path: keys,
-          append: false,
+          updateMode: UpdateMode.overwrite,
+          keyAndReplacement: {},
+          valueToReplace: null,
         );
 
         final valueAtKey = updatedMap.recursiveRead<Map<dynamic, dynamic>>(
@@ -354,7 +377,9 @@ void main() {
         update,
         target: targetKey,
         path: keys,
-        append: false,
+        updateMode: UpdateMode.overwrite,
+        keyAndReplacement: {},
+        valueToReplace: null,
       );
 
       final valueAtKey = updatedMap.recursiveRead<String>(
@@ -378,7 +403,9 @@ void main() {
         update,
         target: missingTargetkey,
         path: missingRootKeys,
-        append: true,
+        updateMode: UpdateMode.append,
+        keyAndReplacement: {},
+        valueToReplace: null,
       );
 
       final valueAtKey = updatedMap.recursiveRead<List<dynamic>>(
@@ -400,7 +427,9 @@ void main() {
         update,
         target: missingTargetkey,
         path: rootKeys,
-        append: true,
+        updateMode: UpdateMode.append,
+        keyAndReplacement: {},
+        valueToReplace: null,
       );
 
       final valueAtKey = updatedMap.recursiveRead<List<dynamic>>(
@@ -426,7 +455,9 @@ void main() {
             update,
             target: targetKey,
             path: ['key'],
-            append: true,
+            updateMode: UpdateMode.append,
+            keyAndReplacement: {},
+            valueToReplace: null,
           ),
           throwsViolation(
             '''Cannot append new values due to an existing value at "key". You need to overwrite this path key.''',

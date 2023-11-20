@@ -1,3 +1,4 @@
+import 'package:magical_version_bump/src/utils/enums/enums.dart';
 import 'package:magical_version_bump/src/utils/mixins/command_mixins.dart';
 import 'package:magical_version_bump/src/utils/typedefs/typedefs.dart';
 import 'package:test/test.dart';
@@ -34,7 +35,7 @@ void main() {
   group('updates', () {
     test('key at root', () async {
       final dictionary = (
-        append: false,
+        updateMode: UpdateMode.overwrite,
         rootKeys: ['version'],
         data: '10.10.10+10',
       );
@@ -54,7 +55,7 @@ void main() {
 
     test('creates missing root key', () async {
       final dictionary = (
-        append: false,
+        updateMode: UpdateMode.overwrite,
         rootKeys: ['name', 'test name'],
         data: 'Test One, Two, Three',
       );
@@ -74,7 +75,7 @@ void main() {
 
     test('overwrites existing key with new values', () async {
       final dictionary = (
-        append: false,
+        updateMode: UpdateMode.overwrite,
         rootKeys: ['test', 'nested-test'],
         data: 'Test One, Two, Three',
       );
@@ -94,7 +95,7 @@ void main() {
 
     test('appends value to existing key with one value', () async {
       final dictionary = (
-        append: true,
+        updateMode: UpdateMode.append,
         rootKeys: ['test', 'nested-test', 'nested-value'],
         data: 'Test One, Two, Three',
       );
@@ -114,7 +115,7 @@ void main() {
 
     test('appends value to existing key with list of values', () async {
       final dictionary = (
-        append: true,
+        updateMode: UpdateMode.append,
         rootKeys: ['test', 'nested-test', 'nested-list'],
         data: 'Test One, Two, Three',
       );
@@ -137,7 +138,7 @@ void main() {
 
     test('appends map to existing key with map of values', () async {
       final dictionary = (
-        append: true,
+        updateMode: UpdateMode.append,
         rootKeys: ['test', 'nested-test', 'nested-map'],
         data: {
           'value': 'another value',
