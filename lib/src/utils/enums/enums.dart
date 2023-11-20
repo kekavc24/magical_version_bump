@@ -33,13 +33,13 @@ enum MatchCount {
 }
 
 /// Type of update to map
-enum UpdateMode { 
+enum UpdateMode {
   /// Adds value to terminal end
-  append, 
+  append,
 
   /// Replaces a single value
-  replace, 
+  replace,
 
   /// Removes and replaces old value with a new one
-  overwrite 
+  overwrite
 }

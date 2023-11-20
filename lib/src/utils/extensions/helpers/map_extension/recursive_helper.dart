@@ -6,15 +6,15 @@ class RecursiveHelper {
   ///
   /// Recurses a list and searches for a `target` and returns its value. This
   /// is a READ-ONLY version of [ recurseNestedList ].
-  /// 
+  ///
   ///   * `nestedList` - denotes list nested in map.
   ///   * `target` - denotes terminal key with value.
   ///   * `path` - denotes list of keys preceding `target`.
-  /// 
+  ///
   /// NOTE:
   ///   1. If target key is a value rather than a key, null is returned.
   ///   2. If a target key has no value, null is returned
-  ///   3. If a target key is not found, null will (and SHOULD) be returned 
+  ///   3. If a target key is not found, null will (and SHOULD) be returned
   ///      by the caller of this method.
   static T? readNestedList<T>(
     List<dynamic> nestedList, {
@@ -47,16 +47,16 @@ class RecursiveHelper {
   }
 
   ///
-  /// Recurses a list and updates any value(s) nested within the list. 
-  /// 
-  /// If the value is within a map i.e. the path to target key has not been 
-  /// exhausted, we recursively call the initial caller that is, 
+  /// Recurses a list and updates any value(s) nested within the list.
+  ///
+  /// If the value is within a map i.e. the path to target key has not been
+  /// exhausted, we recursively call the initial caller that is,
   /// `recursivelyUpdate` in `MapUtility` extension.
-  /// 
-  /// For `String`, value is updated at current index while looping. 
-  /// 
+  ///
+  /// For `String`, value is updated at current index while looping.
+  ///
   /// A `List` calls this method (recursively).
-  /// 
+  ///
   static RecursiveListOutput recurseNestedList(
     List<dynamic> listToRecurse, {
     required dynamic update,
@@ -72,7 +72,7 @@ class RecursiveHelper {
 
     /// Tracks if the loop managed to modify the desired value.
     var didFindAndModify = false;
-    
+
     if (isTerminal != null && isTerminal && updateMode == UpdateMode.replace) {
       ///
       /// This section is used by the [UpdateMode.replace] to replace the
@@ -115,11 +115,11 @@ class RecursiveHelper {
       }
       //
     }
-    
+
     /// With [UpdateMode.append] or [UpdateMode.overwrite],
     else {
       ///
-     
+
       ///
       /// For lists, we want to look for the next key so that we recurse on it
       /// as a map.

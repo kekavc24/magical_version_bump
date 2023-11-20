@@ -2,8 +2,9 @@ part of '../yaml_transformer.dart';
 
 /// Data object with specifically created when a finder [ Finder ]
 /// finds it based on some predefined condition
+@immutable
 class MatchedNodeData {
-  MatchedNodeData._(
+  const MatchedNodeData._(
     this.nodeData,
     this.matchedKeys,
     this.matchedValue,
@@ -38,4 +39,20 @@ class MatchedNodeData {
         matchedValue.isNotEmpty ||
         matchedPairs.isNotEmpty;
   }
+
+  @override
+  bool operator ==(Object other) =>
+      other is MatchedNodeData &&
+      nodeData == other.nodeData &&
+      collectionsUnorderedMatch(matchedKeys, other.matchedKeys) &&
+      matchedValue == other.matchedValue &&
+      collectionsUnorderedMatch(matchedPairs, other.matchedPairs);
+
+  @override
+  int get hashCode => Object.hash(
+        nodeData,
+        matchedKeys,
+        matchedValue,
+        matchedPairs,
+      );
 }

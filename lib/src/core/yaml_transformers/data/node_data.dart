@@ -4,13 +4,12 @@ part of '../yaml_transformer.dart';
 ///
 /// Typically denotes a terminal node found while indexing a Yaml map or any
 /// map
+@immutable
 class NodeData {
-  NodeData._(this.key, Iterable<String> path, this.data) {
-    precedingKeys = List.from(path);
-  }
+  const NodeData._(this.key, this.precedingKeys, this.data, this.isNested);
 
-  factory NodeData.fromYaml(String key, Iterable<String> path, dynamic data) {
-    return NodeData._(key, path, data);
+  factory NodeData.fromYaml(String key, List<String> path, dynamic data) {
+    return NodeData._(key, path, data, null);
   }
 
   factory NodeData.entryFromPreceding(
@@ -21,6 +20,7 @@ class NodeData {
       entry.key as String,
       [...oldData.precedingKeys, oldData.key],
       entry.value,
+      null,
     );
   }
 
@@ -29,17 +29,27 @@ class NodeData {
       oldData.key,
       [...oldData.precedingKeys],
       value,
+      null,
+    );
+  }
+
+  factory NodeData.markAsNested(NodeData oldData) {
+    return NodeData._(
+      oldData.key,
+      [...oldData.precedingKeys],
+      oldData.data,
+      true,
     );
   }
 
   /// Current key for this node
-  late String key;
+  final String key;
 
   /// Any preceding keys of a node
-  late final List<String> precedingKeys;
+  final List<String> precedingKeys;
 
   /// Current data at this node
-  late dynamic data;
+  final dynamic data;
 
   /// Whether to mark this as a start to a list nested in list.
   ///
@@ -56,11 +66,7 @@ class NodeData {
   /// Yaml will need them to be part of a key in the file itself. Will be null
   /// for yaml nodes.
   ///
-  bool? isNested;
-
-  void markAsNested() {
-    isNested = true;
-  }
+  final bool? isNested;
 
   /// Transform to key value pairs, based on this node data's path.
   Map<String, String> transformToPairs() {
@@ -86,5 +92,24 @@ class NodeData {
     // Add key and value as last pair
     mapOfPairs.addAll({key: data as String});
     return mapOfPairs;
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      other is NodeData &&
+      key == other.key &&
+      _dataIsSame(other.data) &&
+      collectionsMatch(precedingKeys, other.precedingKeys) &&
+      isNested == other.isNested;
+
+  @override
+  int get hashCode => Object.hash(key, precedingKeys, data, isNested);
+
+  bool _dataIsSame(dynamic other) {
+    if (data.runtimeType != other.runtimeType) return false;
+
+    if (data is String) return data == other;
+
+    return collectionsMatch(data, other);
   }
 }

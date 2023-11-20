@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:magical_version_bump/src/utils/enums/enums.dart';
 import 'package:magical_version_bump/src/utils/exceptions/command_exceptions.dart';
 import 'package:magical_version_bump/src/utils/extensions/extensions.dart';
