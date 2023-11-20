@@ -103,7 +103,8 @@ void main() {
       },
     );
 
-    test('read multiple files from paths provided by user in prompt', 
+    test(
+      'read multiple files from paths provided by user in prompt',
       () async {
         handler = handler.copyWith(requestPath: true);
 

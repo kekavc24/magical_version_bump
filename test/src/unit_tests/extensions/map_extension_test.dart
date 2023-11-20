@@ -1,3 +1,4 @@
+import 'package:magical_version_bump/src/core/yaml_transformers/yaml_transformer.dart';
 import 'package:magical_version_bump/src/utils/enums/enums.dart';
 import 'package:magical_version_bump/src/utils/extensions/map_extensions.dart';
 import 'package:test/test.dart';
@@ -11,11 +12,8 @@ void main() {
     'deep key': {
       'deeper key': {
         'deepest key': {
-          'deeper deepest key': 'value',
-          'another deepest key': ['value'],
-          'other depeest key': {
-            'absolute deep key': 'value',
-          },
+          'absolute deep key': 'value',
+          'another key': ['value'],
         },
       },
     },
@@ -40,7 +38,7 @@ void main() {
 
     test('when key is deeply nested', () {
       final keys = ['deep key', 'deeper key', 'deepest key'];
-      const targetKey = 'deeper deepest key';
+      const targetKey = 'absolute deep key';
 
       final valueAtKey = mappy.recursiveRead<String>(
         path: keys,
@@ -70,7 +68,7 @@ void main() {
         final localMap = {...mappy};
 
         final keys = ['deep key', 'deeper key', 'deepest key'];
-        const targetKey = 'deeper deepest key';
+        const targetKey = 'absolute deep key';
         const update = 'another value';
 
         final updatedMap = localMap.recursivelyUpdate(
@@ -97,7 +95,7 @@ void main() {
         final localMap = {...mappy};
 
         final keys = ['deep key', 'deeper key', 'deepest key'];
-        const targetKey = 'deeper deepest key';
+        const targetKey = 'another key';
         const update = ['another value', 'double other value'];
 
         final updatedMap = localMap.recursivelyUpdate(
@@ -124,7 +122,7 @@ void main() {
         final localMap = {...mappy};
 
         final keys = ['deep key', 'deeper key', 'deepest key'];
-        const targetKey = 'another deepest key';
+        const targetKey = 'another key';
         const update = 'another value';
 
         final updatedMap = localMap.recursivelyUpdate(
@@ -151,7 +149,7 @@ void main() {
         final localMap = {...mappy};
 
         final keys = ['deep key', 'deeper key', 'deepest key'];
-        const targetKey = 'another deepest key';
+        const targetKey = 'another key';
         const update = ['another value', 'double other value'];
 
         final updatedMap = localMap.recursivelyUpdate(
@@ -177,8 +175,8 @@ void main() {
       () {
         final localMap = {...mappy};
 
-        final keys = ['deep key', 'deeper key', 'deepest key'];
-        const targetKey = 'other depeest key';
+        final keys = ['deep key', 'deeper key'];
+        const targetKey = 'deepest key';
         const update = {'another value': 'double other value'};
 
         final updatedMap = localMap.recursivelyUpdate(
@@ -197,10 +195,11 @@ void main() {
 
         expect(
           valueAtKey,
-          {
+          equals({
             'absolute deep key': 'value',
+            'another key': ['value'],
             ...update,
-          },
+          }),
         );
       },
     );
@@ -291,7 +290,7 @@ void main() {
         final localMap = {...mappy};
 
         final keys = ['deep key', 'deeper key', 'deepest key'];
-        const targetKey = 'deeper deepest key';
+        const targetKey = 'absolute deep key';
         const update = 'another value';
 
         final updatedMap = localMap.recursivelyUpdate(
@@ -318,7 +317,7 @@ void main() {
         final localMap = {...mappy};
 
         final keys = ['deep key', 'deeper key', 'deepest key'];
-        const targetKey = 'deeper deepest key';
+        const targetKey = 'absolute deep key';
         const update = ['another value', 'double other value'];
 
         final updatedMap = localMap.recursivelyUpdate(
@@ -344,8 +343,8 @@ void main() {
       () {
         final localMap = {...mappy};
 
-        final keys = ['deep key', 'deeper key', 'deepest key'];
-        const targetKey = 'deeper deepest key';
+        final keys = ['deep key', 'deeper key'];
+        const targetKey = 'deepest key';
         const update = {'another value': 'double other value'};
 
         final updatedMap = localMap.recursivelyUpdate(
@@ -438,6 +437,174 @@ void main() {
       );
 
       expect(valueAtKey, equals([update]));
+    });
+  });
+
+  group('nested update replace', () {
+    test('renames list of keys in path', () {
+      final localMap = {
+        'deeper key': {
+          'deepest key': {
+            'absolute deep key': 'value',
+            'another key': ['value'],
+          },
+        },
+      };
+
+      final replacements = <String, String>{
+        'deeper key': 'updated key',
+        'another key': 'final update',
+      };
+
+      final path = ['deeper key', 'deepest key'];
+      const target = 'another key';
+
+      final expectedMap = {
+        'updated key': {
+          'deepest key': {
+            'absolute deep key': 'value',
+            'final update': ['value'],
+          },
+        },
+      };
+
+      final updatedMap = localMap.recursivelyUpdate(
+        null,
+        target: target,
+        path: path,
+        updateMode: UpdateMode.replace,
+        keyAndReplacement: replacements,
+        valueToReplace: null,
+      );
+
+      expect(updatedMap, equals(expectedMap));
+    });
+
+    test('renames key when nested in a list', () {
+      final localMap = <dynamic, dynamic>{
+        'key-with-list': [
+          'one value',
+          {'nested key': 'value'},
+          ['value-in-list'],
+        ],
+      };
+
+      final replacements = <String, String>{
+        'nested key': 'updated key',
+      };
+
+      final path = ['key-with-list'];
+      const target = 'nested key';
+
+      final expectedMap = {
+        'key-with-list': [
+          'one value',
+          {'updated key': 'value'},
+          ['value-in-list'],
+        ],
+      };
+
+      final updatedMap = localMap.recursivelyUpdate(
+        null,
+        target: target,
+        path: path,
+        updateMode: UpdateMode.replace,
+        keyAndReplacement: replacements,
+        valueToReplace: null,
+      );
+
+      expect(collectionsMatch(expectedMap, updatedMap), true);
+    });
+
+    test('replaces value', () {
+      final localMap = <dynamic, dynamic>{
+        'deep key': {
+          'deeper key': 'value',
+        },
+      };
+
+      final updatedMap = localMap.recursivelyUpdate(
+        'update',
+        target: 'deeper key',
+        path: ['deep key'],
+        updateMode: UpdateMode.replace,
+        keyAndReplacement: {},
+        valueToReplace: 'value',
+      );
+
+      final expectedMap = {
+        'deep key': {
+          'deeper key': 'update',
+        },
+      };
+
+      expect(collectionsMatch(expectedMap, updatedMap), true);
+    });
+
+    test('replaces value nested in list', () {
+      final localMap = <dynamic, dynamic>{
+        'deep key': {
+          'deeper key': [
+            'one value',
+            {'nested key': 'value'},
+            ['value-in-list'],
+          ],
+        },
+      };
+
+      final updatedMap = localMap.recursivelyUpdate(
+        'update',
+        target: 'deeper key',
+        path: ['deep key'],
+        updateMode: UpdateMode.replace,
+        keyAndReplacement: {},
+        valueToReplace: 'one value',
+      );
+
+      final expectedMap = {
+        'deep key': {
+          'deeper key': [
+            'update',
+            {'nested key': 'value'},
+            ['value-in-list'],
+          ],
+        },
+      };
+
+      expect(collectionsMatch(expectedMap, updatedMap), true);
+    });
+
+    test('replaces value in list nested in another list', () {
+      final localMap = <dynamic, dynamic>{
+        'deep key': {
+          'deeper key': [
+            'one value',
+            {'nested key': 'value'},
+            ['value-in-list'],
+          ],
+        },
+      };
+
+      final updatedMap = localMap.recursivelyUpdate(
+        'update',
+        target: 'deeper key',
+        path: ['deep key'],
+        updateMode: UpdateMode.replace,
+        keyAndReplacement: {},
+        valueToReplace: 'value-in-list',
+      );
+
+      final expectedMap = {
+        'deep key': {
+          'deeper key': [
+            'one value',
+            {'nested key': 'value'},
+            ['update'],
+          ],
+        },
+      };
+
+      expect(collectionsMatch(expectedMap, updatedMap), true);
     });
   });
 
