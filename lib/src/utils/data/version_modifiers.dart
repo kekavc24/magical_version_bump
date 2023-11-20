@@ -12,9 +12,12 @@ import 'package:magical_version_bump/src/utils/extensions/extensions.dart';
 ///   * `keep-build`
 class VersionModifiers {
   /// Default constructor
-  VersionModifiers.fromArgResults(ArgResults argResults) {
+  VersionModifiers.fromArgResults(
+    ArgResults argResults, {
+    bool initializePreset = true,
+  }) {
     version = argResults.setVersion;
-    presetType = _sortPreset(argResults);
+    if (initializePreset) presetType = _sortPreset(argResults);
     prerelease = argResults.setPrerelease;
     build = argResults.setBuild;
     keepPre = argResults.keepPre;
@@ -23,7 +26,8 @@ class VersionModifiers {
 
   /// Constructor that adds strategy for `bump` subcommand
   factory VersionModifiers.fromBumpArgResults(ArgResults argResults) {
-    return VersionModifiers.fromArgResults(argResults)
+    return VersionModifiers.fromArgResults(argResults, initializePreset: false)
+      ..presetType = argResults.checkPreset(ignoreFlag: false)
       ..strategy = argResults.strategy;
   }
 
