@@ -40,7 +40,7 @@ class MagicalIndexer {
     for (final entry in _yamlMap.entries) {
       final setUpData = NodeData.fromYaml(
         entry.key as String,
-        [],
+        const [],
         entry.value,
       );
 
@@ -110,8 +110,7 @@ class MagicalIndexer {
       if (child is List) {
         // Use current parent as list
         for (final indexedChild in _indexNestedInList(parent, child)) {
-          indexedChild.markAsNested();
-          yield indexedChild;
+          yield NodeData.markAsNested(indexedChild);
         }
         continue;
       }

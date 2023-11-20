@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:magical_version_bump/src/utils/enums/enums.dart';
 import 'package:yaml/yaml.dart';
 
@@ -69,3 +70,11 @@ typedef ReplacementInfoStats = ({
   List<String> successful,
   List<String> failed,
 });
+
+/// Check if collections match. Check for order too.
+bool collectionsMatch(dynamic e1, dynamic e2) =>
+    const DeepCollectionEquality().equals(e1, e2);
+
+/// Check if collections match. Ignores order
+bool collectionsUnorderedMatch(dynamic e1, dynamic e2) =>
+    const DeepCollectionEquality.unordered().equals(e1, e2);

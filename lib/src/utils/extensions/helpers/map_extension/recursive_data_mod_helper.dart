@@ -13,7 +13,7 @@ class RecursiveDataHelper {
   }
 
   /// Obtains the current working map.
-  /// 
+  ///
   /// In `UpdateMode.replace`, a key may need to be renamed. For this, we swap
   /// it. Otherwise, just return map "as-is".
   static Map<dynamic, dynamic> getMap({

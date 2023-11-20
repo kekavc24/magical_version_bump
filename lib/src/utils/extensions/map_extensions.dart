@@ -127,14 +127,14 @@ extension MapUtility on Map<dynamic, dynamic> {
     ///
     /// All [ UpdateMode ]s require the next section.
     ///
-  
+
     ///
     /// Since we have not exhausted all keys in this path, the value must
     /// either be a:
-    ///   * `Map<dynamic, dynamic>`. For `UpdateMode.replace`, this is a 
+    ///   * `Map<dynamic, dynamic>`. For `UpdateMode.replace`, this is a
     ///      guarantee as we previously indexed this map.
     ///   * `null` value or `UpdateMode.overwrite`.
-    /// 
+    ///
     /// For `null`, we will create missing key as this was a guarantee for
     /// updating the yaml file.
     ///
