@@ -29,7 +29,7 @@ mixin ModifyYaml {
     }
 
     /// Convert file to map
-    final fileAsDynamicMap = fileOutput.fileAsMap;
+    final fileAsDynamicMap = {...fileOutput.fileAsMap};
 
     /// When more than 1 key is provided, we need to guarantee that:
     ///
