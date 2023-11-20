@@ -39,7 +39,7 @@ extension VersionModifierResults on ArgResults {
       : ModifyStrategy.relative;
 
   /// Check preset
-  PresetType checkPreset({bool ignoreFlag = false}) {
+  PresetType checkPreset({required bool ignoreFlag}) {
     // Check preset flag. Set to false if we want to ignore
     final preset = ignoreFlag ? !ignoreFlag : this['preset'] as bool;
 
