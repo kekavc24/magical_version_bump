@@ -1,5 +1,6 @@
 import 'package:args/args.dart';
 import 'package:magical_version_bump/src/core/argument_checkers/arg_checker.dart';
+import 'package:magical_version_bump/src/utils/enums/enums.dart';
 import 'package:test/test.dart';
 
 import '../../../helpers/helpers.dart';
@@ -21,8 +22,8 @@ void main() {
 
       final expectedDictionary = (
         rootKeys: ['test'],
-        append: false,
         data: '1',
+        updateMode: UpdateMode.overwrite,
       );
 
       argsChecker = setUpSanitizer(
@@ -34,7 +35,10 @@ void main() {
       final preppedArgs = argsChecker.prepArgs();
 
       expect(preppedArgs.dictionaries.length, 1);
-      expect(preppedArgs.dictionaries.first.append, expectedDictionary.append);
+      expect(
+        preppedArgs.dictionaries.first.updateMode,
+        equals(expectedDictionary.updateMode),
+      );
       expect(
         preppedArgs.dictionaries.first.rootKeys,
         equals(expectedDictionary.rootKeys),
@@ -47,7 +51,7 @@ void main() {
 
       final expectedDictionary = (
         rootKeys: ['test', 'test2'],
-        append: false,
+        updateMode: UpdateMode.overwrite,
         data: ['1', '2'],
       );
 
@@ -60,7 +64,10 @@ void main() {
       final preppedArgs = argsChecker.prepArgs();
 
       expect(preppedArgs.dictionaries.length, 1);
-      expect(preppedArgs.dictionaries.first.append, expectedDictionary.append);
+      expect(
+        preppedArgs.dictionaries.first.updateMode,
+        equals(expectedDictionary.updateMode),
+      );
       expect(
         preppedArgs.dictionaries.first.rootKeys,
         equals(expectedDictionary.rootKeys),
@@ -76,7 +83,7 @@ void main() {
 
       final expectedDictionary = (
         rootKeys: ['test', 'test2'],
-        append: false,
+        updateMode: UpdateMode.overwrite,
         data: {'1': '2'},
       );
 
@@ -89,7 +96,10 @@ void main() {
       final preppedArgs = argsChecker.prepArgs();
 
       expect(preppedArgs.dictionaries.length, 1);
-      expect(preppedArgs.dictionaries.first.append, expectedDictionary.append);
+      expect(
+        preppedArgs.dictionaries.first.updateMode,
+        equals(expectedDictionary.updateMode),
+      );
       expect(
         preppedArgs.dictionaries.first.rootKeys,
         equals(expectedDictionary.rootKeys),
@@ -107,7 +117,7 @@ void main() {
 
       final expectedDictionary = (
         rootKeys: ['test'],
-        append: true,
+        updateMode: UpdateMode.append,
         data: '1',
       );
 
@@ -120,7 +130,10 @@ void main() {
       final preppedArgs = argsChecker.prepArgs();
 
       expect(preppedArgs.dictionaries.length, 1);
-      expect(preppedArgs.dictionaries.first.append, expectedDictionary.append);
+      expect(
+        preppedArgs.dictionaries.first.updateMode,
+        equals(expectedDictionary.updateMode),
+      );
       expect(
         preppedArgs.dictionaries.first.rootKeys,
         equals(expectedDictionary.rootKeys),
@@ -133,7 +146,7 @@ void main() {
 
       final expectedDictionary = (
         rootKeys: ['test', 'test2'],
-        append: true,
+        updateMode: UpdateMode.append,
         data: ['1', '2'],
       );
 
@@ -146,7 +159,10 @@ void main() {
       final preppedArgs = argsChecker.prepArgs();
 
       expect(preppedArgs.dictionaries.length, 1);
-      expect(preppedArgs.dictionaries.first.append, expectedDictionary.append);
+      expect(
+        preppedArgs.dictionaries.first.updateMode,
+        equals(expectedDictionary.updateMode),
+      );
       expect(
         preppedArgs.dictionaries.first.rootKeys,
         equals(expectedDictionary.rootKeys),
@@ -162,7 +178,7 @@ void main() {
 
       final expectedDictionary = (
         rootKeys: ['test', 'test2'],
-        append: true,
+        updateMode: UpdateMode.append,
         data: {'1': '2'},
       );
 
@@ -175,7 +191,10 @@ void main() {
       final preppedArgs = argsChecker.prepArgs();
 
       expect(preppedArgs.dictionaries.length, 1);
-      expect(preppedArgs.dictionaries.first.append, expectedDictionary.append);
+      expect(
+        preppedArgs.dictionaries.first.updateMode,
+        equals(expectedDictionary.updateMode),
+      );
       expect(
         preppedArgs.dictionaries.first.rootKeys,
         equals(expectedDictionary.rootKeys),
