@@ -14,14 +14,7 @@ import 'package:mason_logger/mason_logger.dart';
 ///     command itself or its subcommands.
 ///
 abstract class MagicalCommand extends Command<int> {
-  MagicalCommand({required this.logger}) {
-    argParser.addFlag(
-      'request-path',
-      help: 'Prompt for directory to find yaml/json file',
-      negatable: false,
-      aliases: ['reqPath'],
-    );
-  }
+  MagicalCommand({required this.logger});
 
   /// Logger for utility purposes
   final Logger logger;
@@ -30,7 +23,14 @@ abstract class MagicalCommand extends Command<int> {
 /// Generic runnable command template. Will be extended by commands or
 /// subcommands that are "run"-able.
 abstract class RunnableCommand extends MagicalCommand {
-  RunnableCommand({required super.logger, required this.handler});
+  RunnableCommand({required super.logger, required this.handler}) {
+    argParser.addFlag(
+      'request-path',
+      help: 'Prompt for directory to find yaml/json file',
+      negatable: false,
+      aliases: ['reqPath'],
+    );
+  }
 
   /// Each command will always have a handler class with custom logic
   final CommandHandler handler;

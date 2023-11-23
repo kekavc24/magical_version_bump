@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:args/args.dart';
-import 'package:magical_version_bump/src/core/argument_checkers/arg_checker.dart';
+import 'package:magical_version_bump/src/core/argument_normalizers/arg_normalizer.dart';
 import 'package:magical_version_bump/src/utils/data/version_modifiers.dart';
 import 'package:magical_version_bump/src/utils/enums/enums.dart';
 import 'package:magical_version_bump/src/utils/exceptions/command_exceptions.dart';

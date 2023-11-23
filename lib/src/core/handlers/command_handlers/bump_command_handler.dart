@@ -6,13 +6,15 @@ final class HandleBumpCommand extends CommandHandler {
   /// Setup our bump arguments
   @override
   void _setUpArgChecker(ArgResults? argResults) {
-    super._argumentsChecker = BumpArgumentsChecker(argResults: argResults);
+    super._argumentsNormalizer = BumpArgumentsNormalizer(
+      argResults: argResults,
+    );
   }
 
   /// Modify the version in pubspec.yaml
   @override
   Future<void> _coreCommandHandler(ArgResults? argResults) async {
-    final checker = _getChecker<BumpArgumentsChecker>();
+    final checker = _getChecker<BumpArgumentsNormalizer>();
 
     // Required information to bump version
     final preppedArgs = checker.prepArgs();

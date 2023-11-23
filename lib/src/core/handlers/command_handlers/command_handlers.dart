@@ -1,5 +1,5 @@
 import 'package:args/args.dart';
-import 'package:magical_version_bump/src/core/argument_checkers/arg_checker.dart';
+import 'package:magical_version_bump/src/core/argument_normalizers/arg_normalizer.dart';
 import 'package:magical_version_bump/src/core/custom_version_modifiers/semver_version_modifer.dart';
 import 'package:magical_version_bump/src/core/handlers/file_handler/file_handler.dart';
 import 'package:magical_version_bump/src/utils/enums/enums.dart';
@@ -21,7 +21,7 @@ abstract class CommandHandler with ValidateVersion, ModifyYaml {
   late FileHandler _fileHandler;
 
   /// Argument checker that validates and preps arguments
-  late ArgumentsChecker _argumentsChecker;
+  late ArgumentsNormalizer _argumentsNormalizer;
 
   /// Each subclass must implement this as each command has its own core logic.
   Future<void> _coreCommandHandler(ArgResults? argResults) async {
@@ -53,7 +53,7 @@ abstract class CommandHandler with ValidateVersion, ModifyYaml {
 
     final validationProgress = logger.progress('Checking arguments');
 
-    final validatedArgs = _argumentsChecker.validateArgs();
+    final validatedArgs = _argumentsNormalizer.validateArgs();
 
     if (!validatedArgs.isValid) {
       validationProgress.fail(validatedArgs.reason!.key);
@@ -75,5 +75,5 @@ abstract class CommandHandler with ValidateVersion, ModifyYaml {
   }
 
   /// Get arguments checker
-  T _getChecker<T extends ArgumentsChecker>() => _argumentsChecker as T;
+  T _getChecker<T extends ArgumentsNormalizer>() => _argumentsNormalizer as T;
 }
