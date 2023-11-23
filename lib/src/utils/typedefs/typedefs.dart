@@ -25,12 +25,8 @@ typedef FileOutput = ({String file, YamlMap fileAsMap});
 
 /// Keys to find in yaml/json file
 typedef KeysToFind = ({
-  /// Whether to treat all keys as a group such that they all have to exist
-  /// not just one of them
-  bool areGrouped,
-
-  /// Whether to ensure they are in the defined order
-  bool strictOrder,
+  /// Desired Order type
+  OrderType orderType,
 
   /// Keys to find
   List<String> keys,
@@ -78,3 +74,18 @@ bool collectionsMatch(dynamic e1, dynamic e2) =>
 /// Check if collections match. Ignores order
 bool collectionsUnorderedMatch(dynamic e1, dynamic e2) =>
     const DeepCollectionEquality.unordered().equals(e1, e2);
+
+/// Denotes aggregate type to use, count and whether to aggregation type to
+/// each output
+typedef Aggregator = ({
+  AggregateType type,
+  bool applyToEach,
+  int? count,
+  ConsoleViewFormat viewFormat,
+});
+
+/// List of values in arguments
+typedef ParsedValues = List<String>;
+
+/// List of list of values in arguments
+typedef ListOfParsedValues = List<List<String>>;

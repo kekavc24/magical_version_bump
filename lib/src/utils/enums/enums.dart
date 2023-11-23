@@ -43,3 +43,42 @@ enum UpdateMode {
   /// Removes and replaces old value with a new one
   overwrite
 }
+
+/// Type of subcommand that may have been triggered
+enum WalkSubCommandType { find, search, rename, replace }
+
+/// View format for printing values found by `Finder` or `MagicalReplacer`
+enum ConsoleViewFormat {
+  /// Grouped by value found or by value replaced
+  grouped,
+
+  /// Live preview as they are found/replaced
+  live,
+
+  /// Hide output. Only available when replacing values
+  hide
+}
+
+/// Type of ordering based on a list of targets
+enum OrderType {
+  /// At least one of any
+  loose,
+
+  /// All present
+  grouped,
+
+  /// All present and in exact order specified
+  strict
+}
+
+/// Aggregation type based on count
+enum AggregateType {
+  /// Only first matching value
+  first,
+
+  /// Count of values
+  count,
+
+  /// Find all
+  all;
+}
