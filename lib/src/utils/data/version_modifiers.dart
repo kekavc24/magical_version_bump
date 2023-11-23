@@ -28,7 +28,7 @@ class VersionModifiers {
   factory VersionModifiers.fromBumpArgResults(ArgResults argResults) {
     return VersionModifiers.fromArgResults(argResults, initializePreset: false)
       ..presetType = argResults.checkPreset(ignoreFlag: false)
-      ..strategy = argResults.strategy;
+      ..strategy = argResults.strategy();
   }
 
   /// Preset type

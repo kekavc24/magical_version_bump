@@ -5,13 +5,15 @@ class HandleSetCommand extends CommandHandler {
 
   @override
   void _setUpArgChecker(ArgResults? argResults) {
-    super._argumentsChecker = SetArgumentsChecker(argResults: argResults);
+    super._argumentsNormalizer = SetArgumentsNormalizer(
+      argResults: argResults,
+    );
   }
 
   /// Change specified node in yaml file
   @override
   Future<void> _coreCommandHandler(ArgResults? argResults) async {
-    final checker = _getChecker<SetArgumentsChecker>();
+    final checker = _getChecker<SetArgumentsNormalizer>();
 
     final preppedArgs = checker.prepArgs();
     final versionModifiers = preppedArgs.modifiers;

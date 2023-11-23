@@ -1,12 +1,12 @@
 import 'package:args/args.dart';
-import 'package:magical_version_bump/src/core/argument_checkers/arg_checker.dart';
+import 'package:magical_version_bump/src/core/argument_normalizers/arg_normalizer.dart';
 import 'package:magical_version_bump/src/utils/enums/enums.dart';
 import 'package:test/test.dart';
 
 import '../../../helpers/helpers.dart';
 
 void main() {
-  late BumpArgumentsChecker argsChecker;
+  late BumpArgumentsNormalizer argsChecker;
   late ArgParser argParser;
 
   const error =
@@ -29,7 +29,7 @@ void main() {
         ArgCheckerType.bump,
         argParser: argParser,
         args: args,
-      ) as BumpArgumentsChecker;
+      ) as BumpArgumentsNormalizer;
 
       final preppedArgs = argsChecker.prepArgs();
 
@@ -49,7 +49,7 @@ void main() {
         ArgCheckerType.bump,
         argParser: argParser,
         args: args,
-      ) as BumpArgumentsChecker;
+      ) as BumpArgumentsNormalizer;
 
       final preppedArgs = argsChecker.prepArgs();
 
@@ -67,7 +67,7 @@ void main() {
         ArgCheckerType.bump,
         argParser: argParser,
         args: [],
-      ) as BumpArgumentsChecker;
+      ) as BumpArgumentsNormalizer;
 
       final validatedArgs = argsChecker.validateArgs();
 
@@ -84,7 +84,7 @@ void main() {
         ArgCheckerType.bump,
         argParser: argParser,
         args: args,
-      ) as BumpArgumentsChecker;
+      ) as BumpArgumentsNormalizer;
 
       final validatedArgs = argsChecker.validateArgs();
 

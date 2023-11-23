@@ -1,7 +1,7 @@
-part of 'arg_checker.dart';
+part of 'arg_normalizer.dart';
 
-final class SetArgumentsChecker extends ArgumentsChecker {
-  SetArgumentsChecker({required super.argResults});
+final class SetArgumentsNormalizer extends ArgumentsNormalizer {
+  SetArgumentsNormalizer({required super.argResults});
 
   /// Prep dictionaries
   @override

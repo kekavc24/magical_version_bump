@@ -30,7 +30,6 @@ class MagicalVersionBumpCommandRunner extends CompletionCommandRunner<int> {
     argParser
       ..addFlag(
         'version',
-        abbr: 'v',
         negatable: false,
         help: 'Print the current version.',
       )

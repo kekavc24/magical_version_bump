@@ -53,15 +53,15 @@ ArgParser setUpArgParser() {
 }
 
 /// Set up desired sanitizer type on demand
-ArgumentsChecker setUpSanitizer(
+ArgumentsNormalizer setUpSanitizer(
   ArgCheckerType type, {
   required ArgParser argParser,
   required List<String> args,
 }) {
   return switch (type) {
-    ArgCheckerType.setter => SetArgumentsChecker(
+    ArgCheckerType.setter => SetArgumentsNormalizer(
         argResults: argParser.parse(args),
       ),
-    _ => BumpArgumentsChecker(argResults: argParser.parse(args))
+    _ => BumpArgumentsNormalizer(argResults: argParser.parse(args))
   };
 }

@@ -1,18 +1,21 @@
 import 'package:args/args.dart';
+
 import 'package:magical_version_bump/src/utils/data/version_modifiers.dart';
 import 'package:magical_version_bump/src/utils/enums/enums.dart';
 import 'package:magical_version_bump/src/utils/exceptions/command_exceptions.dart';
 import 'package:magical_version_bump/src/utils/extensions/extensions.dart';
 import 'package:magical_version_bump/src/utils/typedefs/typedefs.dart';
 
-part 'bump_args_checker.dart';
-part 'set_args_checker.dart';
+part 'bump_args_normalizer.dart';
+part 'find_args_normalizer.dart';
+part 'replace_args_normalizer.dart';
+part 'set_args_normalizer.dart';
 
 /// Contains basic code implementations to
 ///   * Prep args to desired format for each command
 ///   * Validate arguments
-abstract class ArgumentsChecker {
-  ArgumentsChecker({required this.argResults});
+abstract class ArgumentsNormalizer {
+  ArgumentsNormalizer({required this.argResults});
 
   /// Argument results from command
   final ArgResults? argResults;
@@ -34,8 +37,13 @@ abstract class ArgumentsChecker {
       );
     }
 
-    return (isValid: true, reason: null);
+    return customValidate();
   }
+
+  ({bool isValid, InvalidReason? reason}) customValidate() => (
+        isValid: true,
+        reason: null,
+      );
 
   /// Prep args to desired format
   void prepArgs();
