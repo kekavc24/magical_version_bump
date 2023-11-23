@@ -1,8 +1,8 @@
-part of 'yaml_transformer.dart';
+part of 'finder.dart';
 
 /// Find the first value matching a condition
 class MagicalFinder extends Finder {
-  MagicalFinder({
+  MagicalFinder._({
     required super.indexer,
     super.keysToFind,
     super.valuesToFind,
@@ -10,14 +10,15 @@ class MagicalFinder extends Finder {
   });
 
   /// Setup everything that may need to found
-  factory MagicalFinder.setUp(
+  factory MagicalFinder.findIn(
     YamlMap yamlMap, {
-    KeysToFind? keysToFind,
-    ValuesToFind? valuesToFind,
-    PairsToFind? pairsToFind,
+    required KeysToFind? keysToFind,
+    required ValuesToFind? valuesToFind,
+    required PairsToFind? pairsToFind,
+    MagicalIndexer? indexer,
   }) {
-    return MagicalFinder(
-      indexer: MagicalIndexer.forYaml(yamlMap),
+    return MagicalFinder._(
+      indexer: indexer ?? MagicalIndexer.forYaml(yamlMap),
       keysToFind: keysToFind,
       valuesToFind: valuesToFind,
       pairsToFind: pairsToFind,
@@ -44,7 +45,7 @@ class MagicalFinder extends Finder {
     final nodeKeys = [...nodeData.precedingKeys, nodeData.key];
 
     // If not grouped, we check if any key we are searching for is present
-    if (!_keysToFind.areGrouped) {
+    if (_keysToFind.orderType == OrderType.loose) {
       return nodeKeys.where(_keysToFind.keys.contains).toList();
     }
 
@@ -60,7 +61,7 @@ class MagicalFinder extends Finder {
     var hasAll = nodeKeys.hasAll(_keysToFind.keys);
 
     // If key order is strict, check if all elements are present in order
-    if (_keysToFind.strictOrder && hasAll) {
+    if (_keysToFind.orderType == OrderType.strict && hasAll) {
       // Create a map of all possible indexes
       final mapOfPossibleIndexes = nodeKeys.indexed.fold(
         <String, List<int>>{},

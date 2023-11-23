@@ -1,4 +1,4 @@
-part of 'yaml_transformer.dart';
+part of '../yaml_transformer.dart';
 
 /// This class holds methods for indexing a yaml file down to a terminal value
 /// i.e the value marking the end of a key path
