@@ -1,3 +1,5 @@
+import 'package:magical_version_bump/src/core/yaml_transformers/data/pair_definition/pair_definition.dart';
+import 'package:magical_version_bump/src/core/yaml_transformers/yaml_transformer.dart';
 import 'package:magical_version_bump/src/utils/enums/enums.dart';
 import 'package:magical_version_bump/src/utils/extensions/map_extensions.dart';
 import 'package:magical_version_bump/src/utils/typedefs/typedefs.dart';
@@ -409,6 +411,187 @@ void main() {
       );
 
       expect(valueAtKey, equals([update]));
+    });
+  });
+
+  group('nested update replace', () {
+    test('renames list of keys in path', () {
+      final localMap = {
+        'deeper key': {
+          'deepest key': {
+            'absolute deep key': 'value',
+            'another key': ['value'],
+          },
+        },
+      };
+
+      final replacements = <String, String>{
+        'deeper key': 'updated key',
+        'another key': 'final update',
+      };
+
+      // We don't care about the value
+      final nodeData = NodeData.stringSkeleton(
+        path: const ['deeper key', 'deepest key'],
+        key: 'another key',
+        value: '',
+      );
+
+      final expectedMap = {
+        'updated key': {
+          'deepest key': {
+            'absolute deep key': 'value',
+            'final update': ['value'],
+          },
+        },
+      };
+
+      final updatedMap = localMap.updateIndexedMap(
+        null,
+        target: nodeData.key,
+        path: nodeData.precedingKeys,
+        keyAndReplacement: replacements,
+        value: null,
+      );
+
+      expect(updatedMap, equals(expectedMap));
+    });
+
+    test('renames key when nested in a list', () {
+      final localMap = <dynamic, dynamic>{
+        'key-with-list': [
+          'one value',
+          {'nested key': 'value'},
+          ['value-in-list'],
+        ],
+      };
+
+      final replacements = <String, String>{
+        'nested key': 'updated key',
+      };
+
+      final target = createKey(value: 'nested key', indices: [1]);
+      final path = ['key-with-list'].map((e) => createKey(value: e)).toList();
+
+      final expectedMap = {
+        'key-with-list': [
+          'one value',
+          {'updated key': 'value'},
+          ['value-in-list'],
+        ],
+      };
+
+      final updatedMap = localMap.updateIndexedMap(
+        null,
+        target: target,
+        path: path,
+        keyAndReplacement: replacements,
+        value: null,
+      );
+
+      expect(collectionsMatch(expectedMap, updatedMap), true);
+    });
+
+    test('replaces value', () {
+      final localMap = <dynamic, dynamic>{
+        'deep key': {
+          'deeper key': 'value',
+        },
+      };
+
+      final target = createKey(value: 'deeper key');
+      final path = createListOfKeys(keys: ['deep key'], linkedIndices: {});
+      final value = createValue(value: 'value', indices: [0]);
+
+      final updatedMap = localMap.updateIndexedMap(
+        'update',
+        target: target,
+        path: path,
+        keyAndReplacement: {},
+        value: value,
+      );
+
+      final expectedMap = {
+        'deep key': {
+          'deeper key': 'update',
+        },
+      };
+
+      expect(collectionsMatch(expectedMap, updatedMap), true);
+    });
+
+    test('replaces value nested in list', () {
+      final localMap = <dynamic, dynamic>{
+        'deep key': {
+          'deeper key': [
+            'one value',
+            {'nested key': 'value'},
+            ['value-in-list'],
+          ],
+        },
+      };
+
+      final target = createKey(value: 'deeper key');
+      final path = createListOfKeys(keys: ['deep key'], linkedIndices: {});
+      final value = createValue(value: 'one value', indices: [0]);
+
+      final updatedMap = localMap.updateIndexedMap(
+        'update',
+        target: target,
+        path: path,
+        keyAndReplacement: {},
+        value: value,
+      );
+
+      final expectedMap = {
+        'deep key': {
+          'deeper key': [
+            'update',
+            {'nested key': 'value'},
+            ['value-in-list'],
+          ],
+        },
+      };
+
+      expect(collectionsMatch(expectedMap, updatedMap), true);
+    });
+
+    test('replaces value in list nested in another list', () {
+      final localMap = <dynamic, dynamic>{
+        'deep key': {
+          'deeper key': [
+            'one value',
+            {'nested key': 'value'},
+            ['value-in-list'],
+          ],
+        },
+      };
+
+      final target = createKey(value: 'deeper key');
+      final path = createListOfKeys(keys: ['deep key'], linkedIndices: {});
+      final value = createValue(value: 'value-in-list', indices: [2, 0]);
+
+      final updatedMap = localMap.updateIndexedMap(
+        'update',
+        target: target,
+        path: path,
+        keyAndReplacement: {},
+        value: value,
+      );
+
+      print(updatedMap);
+
+      final expectedMap = {
+        'deep key': {
+          'deeper key': [
+            'one value',
+            {'nested key': 'value'},
+            ['update'],
+          ],
+        },
+      };
+
+      expect(collectionsMatch(expectedMap, updatedMap), true);
     });
   });
 
