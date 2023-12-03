@@ -52,8 +52,9 @@ List<dynamic> _updateIndexedList({
 
   // Remove the first index
   final currentIndex = modifiableIndices.removeAt(0);
-
-  return _updateIndexedList(
+  
+  // Update index recursively
+  modifiableList[currentIndex] = _updateIndexedList(
     isTerminal: isTerminal,
     isKey: isKey,
     list: modifiableList[currentIndex] as List,
@@ -64,4 +65,6 @@ List<dynamic> _updateIndexedList({
     keyAndReplacement: keyAndReplacement,
     value: value,
   );
+
+  return modifiableList;
 }

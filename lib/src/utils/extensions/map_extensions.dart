@@ -241,7 +241,7 @@ extension MapUtility on Map<dynamic, dynamic> {
 
     /// If list, we get the next Key with indices
     if (valueAtKey is List) {
-      final nextKey = updatedPath.first;
+      final nextKey = updatedPath.firstOrNull ?? target;
 
       recursableMap[currentKey] = _updateIndexedList(
         isTerminal: updatedPath.isEmpty,
