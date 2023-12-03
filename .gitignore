@@ -14,6 +14,7 @@ coverage/
 fake.dart
 fake.yaml
 fake.json
+mock_data.json
 .markdownlint.yaml
 
 # Android studio and IntelliJ
