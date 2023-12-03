@@ -1,32 +1,59 @@
-import 'package:magical_version_bump/src/utils/typedefs/typedefs.dart';
-import 'package:meta/meta.dart';
+/// Custom key/value definition
+///
+/// `value` - indicates the actual value
+/// `indices` - indicates the list of indices when nested in 1 or more lists
+typedef PairType<T> = ({T? value, List<int> indices});
 
-part 'key.dart';
-part 'value.dart';
+/// A key in a custom key/value definition
+///
+/// See [PairType]
+typedef Key = PairType<String>;
 
-/// Level of a key/value in a map
-enum Level {
-  /// Direct value of a key
-  normal,
+/// A value in a custom key/value definition
+///
+/// See [PairType]
+typedef Value = PairType<dynamic>;
 
-  /// Nested in a list
-  nested
+T _pairType<T>({
+  required dynamic value,
+  required List<int> indices,
+}) {
+  return (value: value, indices: indices) as T;
 }
 
-/// Forms the base class for a key/value in a map
-abstract base class PairType {
-  PairType({required this.level, required this.indices});
+/// Create key
+Key createKey({String? value, List<int>? indices}) => _pairType(
+      value: value,
+      indices: indices ?? [],
+    );
 
-  /// Level in based on parent key
-  final Level level;
+/// Creates a list of keys
+List<Key> createListOfKeys({
+  required List<String> keys,
+  required Map<String, List<int>> linkedIndices,
+}) {
+  return keys
+      .map((e) => createKey(value: e, indices: linkedIndices[e]))
+      .toList();
+}
 
-  /// List of indices in order of nested level
-  final List<int> indices;
+/// Create value
+Value createValue({required dynamic value, List<int>? indices}) => _pairType(
+      value: value,
+      indices: indices ?? [],
+    );
 
-  /// Checks whether this key is nested
-  bool isNested() => level == Level.nested;
+/// Creates a list of keys
+List<Value> createListOfValues({
+  required List<String> keys,
+  required Map<String, List<int>> linkedIndices,
+}) {
+  return keys
+      .map((e) => createValue(value: e, indices: linkedIndices[e]))
+      .toList();
+}
 
-  /// Checks whether they are on the same level
-  bool _isSameLevel(PairType other) =>
-      level == other.level && collectionsMatch(indices, other.indices);
+extension PairTypeExtension<T> on PairType<T> {
+  /// Checks if nested in a list
+  bool isNested() => this.indices.isNotEmpty;
 }
