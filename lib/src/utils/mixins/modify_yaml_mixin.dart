@@ -57,8 +57,6 @@ mixin ModifyYaml {
       target: targetKey,
       path: rootKeys,
       updateMode: dictionary.updateMode,
-      keyAndReplacement: {},
-      valueToReplace: null,
     );
 
     /// Get the key that appears first in the file.

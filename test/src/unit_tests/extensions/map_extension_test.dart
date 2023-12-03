@@ -76,8 +76,6 @@ void main() {
           target: targetKey,
           path: keys,
           updateMode: UpdateMode.append,
-          keyAndReplacement: {},
-          valueToReplace: null,
         );
 
         final valueAtKey = updatedMap.recursiveRead<List<dynamic>>(
@@ -103,8 +101,6 @@ void main() {
           target: targetKey,
           path: keys,
           updateMode: UpdateMode.append,
-          keyAndReplacement: {},
-          valueToReplace: null,
         );
 
         final valueAtKey = updatedMap.recursiveRead<List<dynamic>>(
@@ -130,8 +126,6 @@ void main() {
           target: targetKey,
           path: keys,
           updateMode: UpdateMode.append,
-          keyAndReplacement: {},
-          valueToReplace: null,
         );
 
         final valueAtKey = updatedMap.recursiveRead<List<dynamic>>(
@@ -157,8 +151,6 @@ void main() {
           target: targetKey,
           path: keys,
           updateMode: UpdateMode.append,
-          keyAndReplacement: {},
-          valueToReplace: null,
         );
 
         final valueAtKey = updatedMap.recursiveRead<List<dynamic>>(
@@ -184,8 +176,6 @@ void main() {
           target: targetKey,
           path: keys,
           updateMode: UpdateMode.append,
-          keyAndReplacement: {},
-          valueToReplace: null,
         );
 
         final valueAtKey = updatedMap.recursiveRead<Map<dynamic, dynamic>>(
@@ -216,8 +206,6 @@ void main() {
         target: targetKey,
         path: keys,
         updateMode: UpdateMode.append,
-        keyAndReplacement: {},
-        valueToReplace: null,
       );
 
       final valueAtKey = updatedMap.recursiveRead<List<dynamic>>(
@@ -241,8 +229,6 @@ void main() {
           target: targetKey,
           path: [],
           updateMode: UpdateMode.append,
-          keyAndReplacement: {},
-          valueToReplace: null,
         );
 
         final valueAtKey = updatedMap.recursiveRead<List<dynamic>>(
@@ -269,8 +255,6 @@ void main() {
           target: targetKey,
           path: [],
           updateMode: UpdateMode.append,
-          keyAndReplacement: {},
-          valueToReplace: null,
         );
 
         final valueAtKey = updatedMap.recursiveRead<List<dynamic>>(
@@ -298,8 +282,6 @@ void main() {
           target: targetKey,
           path: keys,
           updateMode: UpdateMode.overwrite,
-          keyAndReplacement: {},
-          valueToReplace: null,
         );
 
         final valueAtKey = updatedMap.recursiveRead<String>(
@@ -325,8 +307,6 @@ void main() {
           target: targetKey,
           path: keys,
           updateMode: UpdateMode.overwrite,
-          keyAndReplacement: {},
-          valueToReplace: null,
         );
 
         final valueAtKey = updatedMap.recursiveRead<List<dynamic>>(
@@ -352,8 +332,6 @@ void main() {
           target: targetKey,
           path: keys,
           updateMode: UpdateMode.overwrite,
-          keyAndReplacement: {},
-          valueToReplace: null,
         );
 
         final valueAtKey = updatedMap.recursiveRead<Map<dynamic, dynamic>>(
@@ -377,8 +355,6 @@ void main() {
         target: targetKey,
         path: keys,
         updateMode: UpdateMode.overwrite,
-        keyAndReplacement: {},
-        valueToReplace: null,
       );
 
       final valueAtKey = updatedMap.recursiveRead<String>(
@@ -403,8 +379,6 @@ void main() {
         target: missingTargetkey,
         path: missingRootKeys,
         updateMode: UpdateMode.append,
-        keyAndReplacement: {},
-        valueToReplace: null,
       );
 
       final valueAtKey = updatedMap.recursiveRead<List<dynamic>>(
@@ -427,8 +401,6 @@ void main() {
         target: missingTargetkey,
         path: rootKeys,
         updateMode: UpdateMode.append,
-        keyAndReplacement: {},
-        valueToReplace: null,
       );
 
       final valueAtKey = updatedMap.recursiveRead<List<dynamic>>(
@@ -437,174 +409,6 @@ void main() {
       );
 
       expect(valueAtKey, equals([update]));
-    });
-  });
-
-  group('nested update replace', () {
-    test('renames list of keys in path', () {
-      final localMap = {
-        'deeper key': {
-          'deepest key': {
-            'absolute deep key': 'value',
-            'another key': ['value'],
-          },
-        },
-      };
-
-      final replacements = <String, String>{
-        'deeper key': 'updated key',
-        'another key': 'final update',
-      };
-
-      final path = ['deeper key', 'deepest key'];
-      const target = 'another key';
-
-      final expectedMap = {
-        'updated key': {
-          'deepest key': {
-            'absolute deep key': 'value',
-            'final update': ['value'],
-          },
-        },
-      };
-
-      final updatedMap = localMap.recursivelyUpdate(
-        null,
-        target: target,
-        path: path,
-        updateMode: UpdateMode.replace,
-        keyAndReplacement: replacements,
-        valueToReplace: null,
-      );
-
-      expect(updatedMap, equals(expectedMap));
-    });
-
-    test('renames key when nested in a list', () {
-      final localMap = <dynamic, dynamic>{
-        'key-with-list': [
-          'one value',
-          {'nested key': 'value'},
-          ['value-in-list'],
-        ],
-      };
-
-      final replacements = <String, String>{
-        'nested key': 'updated key',
-      };
-
-      final path = ['key-with-list'];
-      const target = 'nested key';
-
-      final expectedMap = {
-        'key-with-list': [
-          'one value',
-          {'updated key': 'value'},
-          ['value-in-list'],
-        ],
-      };
-
-      final updatedMap = localMap.recursivelyUpdate(
-        null,
-        target: target,
-        path: path,
-        updateMode: UpdateMode.replace,
-        keyAndReplacement: replacements,
-        valueToReplace: null,
-      );
-
-      expect(collectionsMatch(expectedMap, updatedMap), true);
-    });
-
-    test('replaces value', () {
-      final localMap = <dynamic, dynamic>{
-        'deep key': {
-          'deeper key': 'value',
-        },
-      };
-
-      final updatedMap = localMap.recursivelyUpdate(
-        'update',
-        target: 'deeper key',
-        path: ['deep key'],
-        updateMode: UpdateMode.replace,
-        keyAndReplacement: {},
-        valueToReplace: 'value',
-      );
-
-      final expectedMap = {
-        'deep key': {
-          'deeper key': 'update',
-        },
-      };
-
-      expect(collectionsMatch(expectedMap, updatedMap), true);
-    });
-
-    test('replaces value nested in list', () {
-      final localMap = <dynamic, dynamic>{
-        'deep key': {
-          'deeper key': [
-            'one value',
-            {'nested key': 'value'},
-            ['value-in-list'],
-          ],
-        },
-      };
-
-      final updatedMap = localMap.recursivelyUpdate(
-        'update',
-        target: 'deeper key',
-        path: ['deep key'],
-        updateMode: UpdateMode.replace,
-        keyAndReplacement: {},
-        valueToReplace: 'one value',
-      );
-
-      final expectedMap = {
-        'deep key': {
-          'deeper key': [
-            'update',
-            {'nested key': 'value'},
-            ['value-in-list'],
-          ],
-        },
-      };
-
-      expect(collectionsMatch(expectedMap, updatedMap), true);
-    });
-
-    test('replaces value in list nested in another list', () {
-      final localMap = <dynamic, dynamic>{
-        'deep key': {
-          'deeper key': [
-            'one value',
-            {'nested key': 'value'},
-            ['value-in-list'],
-          ],
-        },
-      };
-
-      final updatedMap = localMap.recursivelyUpdate(
-        'update',
-        target: 'deeper key',
-        path: ['deep key'],
-        updateMode: UpdateMode.replace,
-        keyAndReplacement: {},
-        valueToReplace: 'value-in-list',
-      );
-
-      final expectedMap = {
-        'deep key': {
-          'deeper key': [
-            'one value',
-            {'nested key': 'value'},
-            ['update'],
-          ],
-        },
-      };
-
-      expect(collectionsMatch(expectedMap, updatedMap), true);
     });
   });
 
@@ -623,8 +427,6 @@ void main() {
             target: targetKey,
             path: ['key'],
             updateMode: UpdateMode.append,
-            keyAndReplacement: {},
-            valueToReplace: null,
           ),
           throwsViolation(
             '''Cannot append new values due to an existing value at "key". You need to overwrite this path key.''',

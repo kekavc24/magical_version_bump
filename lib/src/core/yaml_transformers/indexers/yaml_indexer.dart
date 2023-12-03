@@ -35,13 +35,11 @@ class MagicalIndexer {
   /// Yaml map to search and index
   final YamlMap _yamlMap;
 
-  /// Trigger for indexing to start
   Iterable<NodeData> indexYaml() sync* {
     for (final entry in _yamlMap.entries) {
-      final setUpData = NodeData.fromYaml(
-        entry.key as String,
-        const [],
-        entry.value,
+      final setUpData = NodeData.fromRoot(
+        key: entry.key as String,
+        value: entry.value,
       );
 
       yield* _recursiveIndex(setUpData);
@@ -49,84 +47,113 @@ class MagicalIndexer {
   }
 
   /// Entry point for indexing a node. Can be called recursively.
-  Iterable<NodeData> _recursiveIndex(NodeData dataInYaml) sync* {
-    if (!_isTerminal(dataInYaml.data)) {
-      final indexingStream = dataInYaml.data is Map<dynamic, dynamic>
-          ? _indexMap(dataInYaml, dataInYaml.data as Map<dynamic, dynamic>)
-          : _indexNestedInList(dataInYaml, dataInYaml.data as List);
-
-      yield* indexingStream;
+  Iterable<NodeData> _recursiveIndex(NodeData parent) sync* {
+    if (isTerminal(parent.data)) {
+      yield parent;
     } else {
-      yield dataInYaml;
+      yield* parent.data is Map<dynamic, dynamic>
+          ? _indexNestedMap(
+              parent: parent,
+              child: parent.data as YamlMap,
+              indices: [],
+            )
+          : _indexNestedList(
+              parent: parent,
+              children: parent.data as List,
+              indices: [],
+            );
     }
   }
 
-  /// Recursively index a map and yield any terminal value found.
-  Iterable<NodeData> _indexMap(
-    NodeData parent,
-    Map<dynamic, dynamic> nestedMap,
-  ) sync* {
+  /// Recursively index a map and yield any terminal values found.
+  ///
+  /// A recursion on the map always resets the list of indices for any further
+  /// recursive calls we may make as we are no longer in a list but a map.
+  ///
+  Iterable<NodeData> _indexNestedMap({
+    required NodeData parent,
+    required Map<dynamic, dynamic> child,
+    required List<int> indices,
+  }) sync* {
     // Loop all keys and values
-    for (final entry in nestedMap.entries) {
+    for (final entry in child.entries) {
       // Create new object
-      final nestedData = NodeData.entryFromPreceding(entry, parent);
+      final nestedData = NodeData.fromMapEntry(
+        parent: parent,
+        current: entry,
+        indices: indices,
+      );
 
-      /// If terminal, we add it to the stream
-      if (_isTerminal(nestedData.data)) {
+      /// If terminal, we return it as is
+      if (isTerminal(nestedData.data)) {
         yield nestedData;
       }
 
-      /// If not, the data is either a list or map.
+      /// If not, the data is either a list or map
       ///
-      /// For a map, we just call this function again
+      /// For a list, we index the list value by value.
       ///
-      /// For a list, we index the list value by value
       else if (entry.value is List) {
-        yield* _indexNestedInList(
-          nestedData,
-          entry.value as List,
+        yield* _indexNestedList(
+          parent: nestedData,
+          children: entry.value as List,
+          indices: [],
         );
       }
 
-      // We just use this recursive function as stream
+      // We just use this recursive function
       else {
-        yield* _recursiveIndex(nestedData);
+        yield* _indexNestedMap(
+          parent: nestedData,
+          child: nestedData.data as Map<dynamic, dynamic>,
+          indices: [],
+        );
       }
     }
   }
 
   /// Recursively index nested list and yield any terminal values found.
-  Iterable<NodeData> _indexNestedInList(
-    NodeData parent,
-    List<dynamic> nestedChildren,
-  ) sync* {
-    for (final child in nestedChildren) {
-      if (child is String) {
-        yield NodeData.terminalEntry(child, parent);
+  ///
+  /// A list will always generate new indices for a key, value or map,
+  /// forcing all [ NodeData ] key/value to be marked as nested with indices
+  /// in order from root list.
+  ///
+  Iterable<NodeData> _indexNestedList({
+    required NodeData parent,
+    required List<dynamic> children,
+    required List<int> indices,
+  }) sync* {
+    // Loop nested children with all indexed
+    for (final (index, child) in children.indexed) {
+      // Update indices we have so far
+      final updatedIndices = [...indices, index];
+
+      // If we reached the end, we yield a terminal value
+      if (isTerminal(child)) {
+        yield NodeData.atRootTerminal(
+          parent: parent,
+          terminalValue: child.toString(),
+          indices: updatedIndices,
+        );
         continue;
       }
 
-      // For json, we may encounter a list nested within a list
-      if (child is List) {
-        // Use current parent as list
-        for (final indexedChild in _indexNestedInList(parent, child)) {
-          yield NodeData.markAsNested(indexedChild);
-        }
+      // For another list, we recurse with function
+      else if (child is List) {
+        yield* _indexNestedList(
+          parent: parent,
+          children: child,
+          indices: updatedIndices,
+        );
         continue;
       }
 
-      // If not, we index it further
-      for (final entry in (child as YamlMap).entries) {
-        // Create an object,
-        final nested = NodeData.entryFromPreceding(entry, parent);
-
-        // We recursively index it further
-        yield* _recursiveIndex(nested);
-      }
+      // If map, we call recursive map indexer
+      yield* _indexNestedMap(
+        parent: parent,
+        child: child as YamlMap,
+        indices: updatedIndices,
+      );
     }
   }
-
-  /// Check if a value is terminal. A terminal value can ONLY be null or a
-  /// string.
-  bool _isTerminal(dynamic data) => data is String || data == null;
 }

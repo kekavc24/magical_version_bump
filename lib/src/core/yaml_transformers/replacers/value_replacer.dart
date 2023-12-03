@@ -22,13 +22,12 @@ class MagicalReplacer extends Replacer {
       checkForKey: false,
     );
 
-    final updatedMap = modifiable.recursivelyUpdate(
+    final updatedMap = modifiable.updateIndexedMap(
       replacement,
       target: matchedNodeData.nodeData.key,
       path: matchedNodeData.nodeData.precedingKeys,
-      updateMode: UpdateMode.replace,
       keyAndReplacement: {},
-      valueToReplace: matchedNodeData.nodeData.data as String,
+      value: matchedNodeData.nodeData.value,
     );
 
     return YamlMap.wrap(updatedMap);

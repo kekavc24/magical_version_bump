@@ -116,7 +116,7 @@ extension WalkerResults on ArgResults {
     return (
       type: _aggregatorType,
       applyToEach: true,
-      count: _limit,
+      count: _aggregatorType == AggregateType.first ? 1 : _limit,
       viewFormat: viewFormat,
     );
   }
