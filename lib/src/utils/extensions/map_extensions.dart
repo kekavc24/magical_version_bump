@@ -1,9 +1,11 @@
+import 'package:magical_version_bump/src/core/yaml_transformers/data/pair_definition/pair_definition.dart';
 import 'package:magical_version_bump/src/utils/enums/enums.dart';
 import 'package:magical_version_bump/src/utils/exceptions/command_exceptions.dart';
 import 'package:magical_version_bump/src/utils/typedefs/typedefs.dart';
 
 part 'helpers/map_extension/recursive_helper.dart';
 part 'helpers/map_extension/recursive_data_mod_helper.dart';
+part 'helpers/map_extension/predetermined_updates.dart';
 
 /// Extension to help read nested values
 extension MapUtility on Map<dynamic, dynamic> {
@@ -26,7 +28,7 @@ extension MapUtility on Map<dynamic, dynamic> {
     final modifiedPath = [...path]..removeAt(0);
 
     if (currentValue is List) {
-      return RecursiveHelper.readNestedList(
+      return _readNestedList(
         currentValue,
         target: target,
         path: modifiedPath,
@@ -43,7 +45,7 @@ extension MapUtility on Map<dynamic, dynamic> {
   /// preceding keys.
   ///
   /// `UpdateMode` specifies mode to use while recursively updating
-  /// this map.
+  /// this map. Only `UpdateMode.append` && `UpdateMode.overwrite`
   ///
   /// `update` is dynamic and allows any data type support by `Dart`. With
   /// this package, the value will either be a `String`, `List<String>` or
@@ -54,39 +56,24 @@ extension MapUtility on Map<dynamic, dynamic> {
     required String target,
     required List<String> path,
     required UpdateMode updateMode,
-    required KeyAndReplacement keyAndReplacement,
-    required String? valueToReplace,
   }) {
+    // Throw error if replace
+    if (updateMode == UpdateMode.replace) {
+      throw MagicalException(
+        violation:
+            '''This update mode is not supported. Use the "updateIndexedMap()" method instead''',
+      );
+    }
+
     // Base condition for our recursive function on reaching end.
     if (path.isEmpty) {
-      // Just in case this target key needs to be updated
-      final terminalMap = RecursiveDataHelper.getMap(
-        updateMode: updateMode,
-        current: target,
-        replacement: keyAndReplacement[target],
-        currentMap: this,
-      );
-
-      // If we are in replace mode and no value was pass as replacement
-      if (updateMode == UpdateMode.replace && valueToReplace == null) {
-        return terminalMap;
-      }
-
-      // Now key at root may have changed
-      final keyAtRootEnd = RecursiveDataHelper.getKey(
-        updateMode: updateMode,
-        current: target,
-        replacement: keyAndReplacement[target],
-      );
-
       // Read current value at the end
-      final targetKeyValue = terminalMap[keyAtRootEnd];
+      final targetKeyValue = this[target];
 
-      final updatedTerminal = RecursiveDataHelper.updateTerminalValue(
+      final updatedTerminal = _updateTerminalValue(
         updateMode: updateMode,
         update: update,
         currentValue: targetKeyValue,
-        valueToReplace: valueToReplace,
       );
 
       // Value to set
@@ -94,35 +81,20 @@ extension MapUtility on Map<dynamic, dynamic> {
           ? updatedTerminal.modified
           : updatedTerminal;
 
-      terminalMap.update(
-        keyAtRootEnd,
+      this.update(
+        target,
         (value) => terminalValueToSet,
         ifAbsent: () => terminalValueToSet,
       );
-      return terminalMap;
+      return this;
     }
 
     /// If path is not empty, just read the next key in sequence and do
     /// another update recursively!
-    final candidateKey = path.first;
-
-    /// Try swapping if in update mode
-    final currentKey = RecursiveDataHelper.getKey(
-      updateMode: updateMode,
-      current: candidateKey,
-      replacement: keyAndReplacement[candidateKey],
-    );
-
-    // Get map based on update mode
-    final recursableMap = RecursiveDataHelper.getMap(
-      updateMode: updateMode,
-      current: candidateKey,
-      replacement: keyAndReplacement[candidateKey],
-      currentMap: this,
-    );
+    final currentKey = path.first;
 
     // Read current value
-    final valueAtKey = recursableMap[currentKey];
+    final valueAtKey = this[currentKey];
 
     ///
     /// All [ UpdateMode ]s require the next section.
@@ -154,13 +126,11 @@ extension MapUtility on Map<dynamic, dynamic> {
 
     /// If value is `null`, we recreate the missing keys
     if (valueAtKey == null) {
-      recursableMap[currentKey] = <dynamic, dynamic>{}.recursivelyUpdate(
+      this[currentKey] = <dynamic, dynamic>{}.recursivelyUpdate(
         update,
         target: target,
         path: updatedPath,
         updateMode: updateMode,
-        keyAndReplacement: keyAndReplacement,
-        valueToReplace: valueToReplace,
       );
 
       return this;
@@ -179,14 +149,12 @@ extension MapUtility on Map<dynamic, dynamic> {
           : <dynamic>[...valueAtKey as List];
 
       // Recursive read all values of list
-      final recursedOutput = RecursiveHelper.recurseNestedList(
+      final recursedOutput = _recurseNestedList(
         modifiableValueAtKey,
         update: update,
         target: target,
         currentPath: updatedPath,
         updateMode: updateMode,
-        keyAndReplacement: keyAndReplacement,
-        valueToReplace: valueToReplace,
       );
 
       ///
@@ -202,8 +170,6 @@ extension MapUtility on Map<dynamic, dynamic> {
           target: target,
           path: updatedPath,
           updateMode: updateMode,
-          keyAndReplacement: keyAndReplacement,
-          valueToReplace: valueToReplace,
         );
 
         modifiableValueAtKey.add(wantedKeyUpdate);
@@ -213,7 +179,81 @@ extension MapUtility on Map<dynamic, dynamic> {
           ..addAll(recursedOutput.modified);
       }
 
-      recursableMap[currentKey] = modifiableValueAtKey;
+      this[currentKey] = modifiableValueAtKey;
+
+      return this;
+    }
+
+    // Current value as is from map
+    final castedValueAtKey = <dynamic, dynamic>{
+      ...valueAtKey as Map<dynamic, dynamic>,
+    };
+
+    this[currentKey] = castedValueAtKey.recursivelyUpdate(
+      update,
+      target: target,
+      path: updatedPath,
+      updateMode: updateMode,
+    );
+
+    return this;
+  }
+
+  /// Recurse a known map and update values or swap keys
+  Map<dynamic, dynamic> updateIndexedMap(
+    dynamic update, {
+    required Key target,
+    required List<Key> path,
+    required KeyAndReplacement keyAndReplacement,
+    required Value? value,
+  }) {
+    ///
+    if (path.isEmpty) {
+      return _updateIndexedTerminal(
+        update,
+        target: target,
+        keyAndReplacement: keyAndReplacement,
+        value: value,
+      );
+    }
+
+    /// Current key.
+    ///
+    /// This will always be called on a map, not a list thus we won't
+    /// need to recurse list
+    final keyFromPath = path.first.value!;
+
+    // Attempt a swap. If replacement is null, no swap.
+    final attemptedSwap = _attemptSwap(
+      currentKey: keyFromPath,
+      replacement: keyAndReplacement[keyFromPath],
+      currentMap: this,
+    );
+
+    final currentKey = attemptedSwap.key; // Key to used by default
+    final recursableMap = attemptedSwap.map; // Map
+
+    // Read value at key
+    final valueAtKey = recursableMap[currentKey];
+
+    // Update path
+    final updatedPath = [...path]..removeAt(0);
+
+    /// If list, we get the next Key with indices
+    if (valueAtKey is List) {
+      final nextKey = updatedPath.first;
+
+      recursableMap[currentKey] = _updateIndexedList(
+        isTerminal: updatedPath.isEmpty,
+        isKey: true,
+        list: valueAtKey,
+        indices: nextKey.indices,
+        update: update,
+        target: target,
+        path: updatedPath,
+        keyAndReplacement: keyAndReplacement,
+        value: value,
+      );
 
       return recursableMap;
     }
@@ -223,15 +263,61 @@ extension MapUtility on Map<dynamic, dynamic> {
       ...valueAtKey as Map<dynamic, dynamic>,
     };
 
-    recursableMap[currentKey] = castedValueAtKey.recursivelyUpdate(
+    recursableMap[currentKey] = castedValueAtKey.updateIndexedMap(
       update,
       target: target,
       path: updatedPath,
-      updateMode: updateMode,
       keyAndReplacement: keyAndReplacement,
-      valueToReplace: valueToReplace,
+      value: value,
     );
 
     return recursableMap;
+  }
+
+  Map<dynamic, dynamic> _updateIndexedTerminal(
+    dynamic update, {
+    required Key target,
+    required KeyAndReplacement keyAndReplacement,
+    required Value? value,
+  }) {
+    final candidate = target.value!; // Key that may change
+
+    // Attempt a swap to have latest version of this map
+    final attemptedSwap = _attemptSwap(
+      currentKey: candidate,
+      replacement: keyAndReplacement[candidate],
+      currentMap: this,
+    );
+
+    // No need to update value if none was used as replacement
+    if (value == null) return attemptedSwap.map;
+
+    // Get key and map
+    final keyAtRoot = attemptedSwap.key;
+    final terminalMap = attemptedSwap.map;
+
+    final valueAtRoot = terminalMap[keyAtRoot];
+
+    dynamic valueToSet; // Value to set
+
+    // If list update it as it was indexed before
+    if (valueAtRoot is List) {
+      valueToSet = _updateIndexedList(
+        isTerminal: true,
+        isKey: false,
+        list: valueAtRoot,
+        indices: value.indices,
+        update: update,
+      );
+    } else {
+      valueToSet = update;
+    }
+
+    terminalMap.update(
+      keyAtRoot,
+      (value) => valueToSet,
+      ifAbsent: () => valueToSet,
+    );
+    return terminalMap;
   }
 }

@@ -1,6 +1,6 @@
 part of '../yaml_transformer.dart';
 
-/// Data object with specifically created when a finder [ Finder ]
+/// Data object with specifically created when a `Finder`
 /// finds it based on some predefined condition
 @immutable
 class MatchedNodeData {
@@ -38,6 +38,35 @@ class MatchedNodeData {
     return matchedKeys.isNotEmpty ||
         matchedValue.isNotEmpty ||
         matchedPairs.isNotEmpty;
+  }
+
+  /// Get a map of the last index of each matched key and the list of keys.
+  ///
+  /// Keys matched must not be empty
+  ({Map<String, int> indexMap, List<Key> keys}) getMatchedKeysIndex() {
+    // Get keys
+    final keys = nodeData.getKeys();
+
+    final indexMap = keys.fold(
+      <String, int>{},
+      (previousValue, element) {
+        previousValue.addAll(
+          {element.toString(): keys.lastIndexOf(element)},
+        );
+        return previousValue;
+      },
+    );
+
+    return (indexMap: indexMap, keys: keys);
+  }
+
+  /// Get path of keys upto the last renameable key
+  String getPathToLastKey() {
+    final keyRecord = getMatchedKeysIndex();
+    final lastIndex = keyRecord.indexMap.values.max; // Get max
+
+    // Keys to be taken, include last index plus one
+    return keyRecord.keys.take(lastIndex + 1).join('/');
   }
 
   @override

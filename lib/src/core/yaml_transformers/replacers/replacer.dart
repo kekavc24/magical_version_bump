@@ -32,7 +32,7 @@ abstract class Replacer {
     // Get all keys with no duplicates
     final targets = <String>{for (final value in values) ...value}.toList();
     if (areKeys) {
-      return (areGrouped: false, strictOrder: false, keys: targets) as T;
+      return (keys: targets, orderType: OrderType.loose) as T;
     }
     return targets as T;
   }

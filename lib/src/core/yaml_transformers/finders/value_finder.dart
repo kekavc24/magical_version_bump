@@ -10,15 +10,29 @@ class MagicalFinder extends Finder {
   });
 
   /// Setup everything that may need to found
-  factory MagicalFinder.findIn(
+  factory MagicalFinder.findInYaml(
     YamlMap yamlMap, {
     required KeysToFind? keysToFind,
     required ValuesToFind? valuesToFind,
     required PairsToFind? pairsToFind,
-    MagicalIndexer? indexer,
   }) {
     return MagicalFinder._(
-      indexer: indexer ?? MagicalIndexer.forYaml(yamlMap),
+      indexer: MagicalIndexer.forYaml(yamlMap),
+      keysToFind: keysToFind,
+      valuesToFind: valuesToFind,
+      pairsToFind: pairsToFind,
+    );
+  }
+
+  /// Set up with predefined indexer
+  factory MagicalFinder.findWithIndexer(
+    MagicalIndexer indexer, {
+    required KeysToFind? keysToFind,
+    required ValuesToFind? valuesToFind,
+    required PairsToFind? pairsToFind,
+  }) {
+    return MagicalFinder._(
+      indexer: indexer,
       keysToFind: keysToFind,
       valuesToFind: valuesToFind,
       pairsToFind: pairsToFind,
@@ -42,7 +56,10 @@ class MagicalFinder extends Finder {
     if (keysToFind == null || _keysToFind.keys.isEmpty) return [];
 
     // Get all nodes keys together in order
-    final nodeKeys = [...nodeData.precedingKeys, nodeData.key];
+    final nodeKeys = [
+      ...nodeData.precedingKeys,
+      nodeData.key,
+    ].map((e) => e.toString());
 
     // If not grouped, we check if any key we are searching for is present
     if (_keysToFind.orderType == OrderType.loose) {
@@ -55,14 +72,14 @@ class MagicalFinder extends Finder {
     ///      the node keys
     ///
     /// If key-order is strict:
-    ///   * We check if indexes are in sequence
+    ///   * We check if indices are in sequence
 
     // Check every element is there
     var hasAll = nodeKeys.hasAll(_keysToFind.keys);
 
     // If key order is strict, check if all elements are present in order
     if (_keysToFind.orderType == OrderType.strict && hasAll) {
-      // Create a map of all possible indexes
+      // Create a map of all possible indices
       final mapOfPossibleIndexes = nodeKeys.indexed.fold(
         <String, List<int>>{},
         (previousValue, element) {
@@ -87,7 +104,7 @@ class MagicalFinder extends Finder {
       hasAll = mapOfPossibleIndexes.values.satisfiesSequence();
     }
 
-    return hasAll ? nodeKeys : [];
+    return hasAll ? nodeKeys.toList() : [];
   }
 
   /// Check if any values are a match
@@ -138,7 +155,7 @@ class MagicalFinder extends Finder {
 }
 
 extension _CheckStrictOrderCandidate on Iterable<List<int>> {
-  /// Check if a map satisfies a sequence based on available indexes.
+  /// Check if a map satisfies a sequence based on available indices.
   ///
   /// A sequence differs just by one. The deeper we go, the smaller the list
   /// to match becomes or not.
