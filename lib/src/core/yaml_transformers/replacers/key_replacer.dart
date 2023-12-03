@@ -52,10 +52,16 @@ class MagicalRenamer extends Replacer {
       checkForKey: true,
     );
 
+    // Get path to last renameable key inclusive of last key
+    final pathToLastKey = [...matchedNodeData.getUptoLastRenameable()];
+
+    // Remove last which will act as our pseudo target
+    final target = pathToLastKey.removeLast();
+
     final updatedMap = modifiable.updateIndexedMap(
       null,
-      target: matchedNodeData.nodeData.key,
-      path: matchedNodeData.nodeData.precedingKeys,
+      target: target,
+      path: pathToLastKey,
       keyAndReplacement: replacementPair,
       value: null,
     );

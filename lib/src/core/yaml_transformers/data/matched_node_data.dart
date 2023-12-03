@@ -60,13 +60,19 @@ class MatchedNodeData {
     return (indexMap: indexMap, keys: keys);
   }
 
-  /// Get path of keys upto the last renameable key
-  String getPathToLastKey() {
+  /// Get list of keys upto the last renameable key
+  Iterable<Key> getUptoLastRenameable() {
+    // Get max
     final keyRecord = getMatchedKeysIndex();
-    final lastIndex = keyRecord.indexMap.values.max; // Get max
+    final lastIndex = keyRecord.indexMap.values.max;
 
     // Keys to be taken, include last index plus one
-    return keyRecord.keys.take(lastIndex + 1).join('/');
+    return keyRecord.keys.take(lastIndex + 1);
+  }
+
+  /// Get path of keys upto the last renameable key
+  String getPathToLastKey() {
+    return getUptoLastRenameable().join('/');
   }
 
   @override

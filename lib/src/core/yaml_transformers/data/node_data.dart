@@ -8,12 +8,34 @@ part of '../yaml_transformer.dart';
 class NodeData {
   const NodeData._(this.precedingKeys, this.key, this.value);
 
+  /// Create with default constructor
+  factory NodeData.skeleton({
+    required List<Key> precedingKeys,
+    required Key key,
+    required Value value,
+  }) {
+    return NodeData._(precedingKeys, key, value);
+  }
+
+  /// Create using List<String> path and key
+  factory NodeData.stringSkeleton({
+    required List<String> path,
+    required String key,
+    required String value,
+  }) {
+    return NodeData.skeleton(
+      precedingKeys: path.map((e) => createKey(value: e)).toList(),
+      key: createKey(value: key),
+      value: createValue(value: value),
+    );
+  }
+
   /// Create from the root anchor key
   factory NodeData.fromRoot({required String key, required dynamic value}) {
     return NodeData._(
       const [],
-      _createPairType<Key>(isKey: true, value: key),
-      _createPairType<Value>(isKey: false, value: value),
+      createKey(value: key),
+      createValue(value: value),
     );
   }
 
@@ -30,13 +52,8 @@ class NodeData {
   }) {
     return NodeData._(
       [...parent.precedingKeys, parent.key],
-      _createPairType<Key>(
-        isKey: true,
-        value: current.key,
-        level: indices.isEmpty ? Level.normal : Level.nested,
-        indices: indices,
-      ),
-      _createPairType<Value>(isKey: false, value: current.value),
+      createKey(value: current.key as String?, indices: indices),
+      createValue(value: current.value),
     );
   }
 
@@ -56,12 +73,7 @@ class NodeData {
     return NodeData._(
       [...parent.precedingKeys],
       parent.key,
-      _createPairType<Value>(
-        isKey: false,
-        value: terminalValue,
-        level: indices.isEmpty ? Level.normal : Level.nested,
-        indices: indices,
-      ),
+      createValue(value: terminalValue, indices: indices),
     );
   }
 
@@ -138,24 +150,4 @@ class NodeData {
       value.isNested() ||
       precedingKeys.isNotEmpty &&
           precedingKeys.any((element) => element.isNested());
-}
-
-/// Creates a specialized PairType
-T _createPairType<T extends PairType>({
-  required bool isKey,
-  required dynamic value,
-  Level? level,
-  List<int>? indices,
-}) {
-  return isKey
-      ? Key(
-          value: value as String,
-          level: level ?? Level.normal,
-          indices: indices ?? [],
-        ) as T
-      : Value(
-          value: isTerminal(value) ? value.toString() : value,
-          level: level ?? Level.normal,
-          indices: indices ?? [],
-        ) as T;
 }
