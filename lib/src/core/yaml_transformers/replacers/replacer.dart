@@ -8,6 +8,11 @@ import 'package:yaml/yaml.dart';
 part 'key_replacer.dart';
 part 'value_replacer.dart';
 
+typedef ReplacementOutput = ({
+  YamlMap updatedMap,
+  Map<String, String> mapping,
+});
+
 /// Abstract class for rename keys/replacing values
 ///
 /// [MagicalReplacer] & [MagicalRenamer] extend this
@@ -80,7 +85,7 @@ abstract class Replacer {
 
     // Just return the value instead as a string
     return _getReplacementCandidate(
-      matchedNodeData.nodeData.data as String,
+      matchedNodeData.data as String,
       useFirst: useFirst,
     ) as T;
   }
@@ -103,5 +108,8 @@ abstract class Replacer {
   void getTargets();
 
   /// Replaces a matched node in a yaml map and returns an updated yaml map
-  YamlMap replace(YamlMap yamlMap, {required MatchedNodeData matchedNodeData});
+  ReplacementOutput replace(
+    YamlMap yamlMap, {
+    required MatchedNodeData matchedNodeData,
+  });
 }

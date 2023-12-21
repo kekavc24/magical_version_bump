@@ -14,13 +14,13 @@ class MagicalRenamer extends Replacer {
   /// PS: Matches here will never have empty matched keys
   ///
   /// A node is usually indexed to the terminal value, in certain instances
-  /// various node values may be yielded from the same node with the same
-  /// keys, so we just replace all.
+  /// multiple node values may be yielded from the same node with the same
+  /// keys. This happens to values in a list along the same key path.
   ///
   /// Stick out point is, we only return the ideal path upto the last key
   /// to be renamed i.e the path to the last key being renamed. That guarantees
   /// a certain uniqueness that allows us to track and optimize for
-  /// unnecessary recursions for deeply nested keys
+  /// unnecessary recursions for deeply nested keys along the same path.
   ///
   String replaceDryRun(MatchedNodeData matchedNodeData) {
     // Get replacement pair
@@ -40,7 +40,7 @@ class MagicalRenamer extends Replacer {
   }
 
   @override
-  YamlMap replace(
+  ReplacementOutput replace(
     YamlMap yamlMap, {
     required MatchedNodeData matchedNodeData,
   }) {
@@ -52,7 +52,7 @@ class MagicalRenamer extends Replacer {
       checkForKey: true,
     );
 
-    // Get path to last renameable key inclusive of last key
+    // Get path to last renameable key inclusive of last key to be renamed
     final pathToLastKey = [...matchedNodeData.getUptoLastRenameable()];
 
     // Remove last which will act as our pseudo target
@@ -65,7 +65,10 @@ class MagicalRenamer extends Replacer {
       keyAndReplacement: replacementPair,
       value: null,
     );
-
-    return YamlMap.wrap(updatedMap);
+    
+    return (
+      mapping: replacementPair,
+      updatedMap: YamlMap.wrap(updatedMap),
+    );
   }
 }
