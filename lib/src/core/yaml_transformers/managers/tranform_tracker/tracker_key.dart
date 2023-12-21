@@ -1,6 +1,6 @@
 part of 'transform_tracker.dart';
 
-enum Origin { key, value, pair }
+enum Origin { key, value, pair, custom }
 
 @immutable
 class TrackerKey {
@@ -27,7 +27,8 @@ class DualTrackerKey extends TrackerKey {
   const DualTrackerKey._({
     required super.key,
     required this.value,
-  }) : super(origin: Origin.pair);
+    Origin? origin,
+  }) : super(origin: origin ?? Origin.pair);
 
   factory DualTrackerKey.fromMapEntry(MapEntry<String, String> entry) {
     return DualTrackerKey._(key: entry.key, value: entry.value);
