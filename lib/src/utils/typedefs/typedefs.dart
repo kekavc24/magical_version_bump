@@ -79,7 +79,8 @@ bool collectionsUnorderedMatch(dynamic e1, dynamic e2) =>
 /// each output
 typedef Aggregator = ({
   AggregateType type,
-  bool applyToEach,
+  bool applyToEachArg,
+  bool applyToEachFile,
   int? count,
   ConsoleViewFormat viewFormat,
 });

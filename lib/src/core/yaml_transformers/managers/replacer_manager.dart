@@ -4,58 +4,55 @@ class ReplacerManager extends TransformerManager {
   ReplacerManager._({
     required super.files,
     required super.aggregator,
+    required super.printer,
     required this.commandType,
     required this.replacer,
-    required this.generator,
-  });
+    required this.manager,
+  }) : assert(
+          !commandType.isFinder,
+          'Only replace and rename commands are allowed',
+        );
 
   factory ReplacerManager.create({
     required WalkSubCommandType commandType,
     required List<FileOutput> files,
     required Aggregator aggregator,
+    required ConsolePrinter printer,
     required List<ReplacementTargets> targets,
-    Iterable<FindManagerOutput>? generator,
-    Replacer? replacer,
   }) {
-    assert(
-      !commandType.isFinder,
-      'Only replace and rename commands are supported for now',
-    );
-
-    final replacerForManager = replacer ??
-        _getReplacer(
-          commandType,
-          targets: targets,
-        );
+    final replacer = _getReplacer(commandType, targets: targets);
 
     return ReplacerManager._(
       files: files,
       aggregator: aggregator,
+      printer: printer,
       commandType: commandType,
-      replacer: replacerForManager,
-      generator: generator ??
-          _getGenerator(
-            commandType,
-            files: files,
-            aggregator: aggregator,
-            replacer: replacerForManager,
-          ),
+      replacer: replacer,
+      manager: _getManager(
+        commandType,
+        files: files,
+        aggregator: aggregator,
+        printer: printer,
+        replacer: replacer,
+      ),
     );
   }
 
   final WalkSubCommandType commandType;
 
-  final Iterable<FindManagerOutput> generator;
+  final FinderManager manager;
 
   final Replacer replacer;
+
+  TransformTracker get finderTracker => manager.tracker;
 
   @override
   Future<void> transform() async {
     // Modifiable queue we can read and swap modifiable values back and forth
     final localQueue = QueueList.from(yamlQueue);
 
-    for (final output in generator) {
-      var file = localQueue[output.currentFile]; // Get yaml file
+    for (final match in manager.getGenerator()) {
+      var file = localQueue[match.currentFile]; // Get yaml file
 
       // Prevents unnecessary replacement for deeply nested keys
       var canReplace = true;
@@ -65,12 +62,12 @@ class ReplacerManager extends TransformerManager {
       /// keys already renamed! Caveat of indexing to terminal value
       if (commandType == WalkSubCommandType.rename) {
         final keyPath = (replacer as MagicalRenamer).replaceDryRun(
-          output.data,
+          match.data,
         );
 
         /// Store file number and key path. Guarantees some level of uniqueness
         /// and also ties it to a file
-        final keyInTracker = '${output.currentFile},$keyPath';
+        final keyInTracker = '${match.currentFile},$keyPath';
 
         // Make sure the key path has just 1 of it
         if (getCountOfValue(keyInTracker, origin: Origin.key) == 1) {
@@ -82,19 +79,26 @@ class ReplacerManager extends TransformerManager {
 
       // Replace if current value is not being tracked.
       if (canReplace) {
-        file = replacer.replace(file, matchedNodeData: output.data);
+        final output = replacer.replace(file, matchedNodeData: match.data);
 
         // Swap old file in queue with new one
         localQueue.replaceRange(
-          output.currentFile,
-          output.currentFile,
-          [file],
+          match.currentFile,
+          match.currentFile,
+          [output.updatedMap],
+        );
+
+        // Add to printer
+        _printer.addValuesReplaced(
+          match.currentFile,
+          origin: commandType == WalkSubCommandType.rename
+              ? Origin.key
+              : Origin.value,
+          replacements: output.mapping,
+          oldPath: match.data.getPath(),
         );
       }
     }
-
-    // TODO: Swap the old yaml map in file saved with new yaml map
-    // TODO: Add match formatter/aggregator
   }
 }
 
@@ -108,23 +112,26 @@ Replacer _getReplacer(
   };
 }
 
-Iterable<FindManagerOutput> _getGenerator(
+FinderManager _getManager(
   WalkSubCommandType commandType, {
   required List<FileOutput> files,
   required Aggregator aggregator,
+  required ConsolePrinter printer,
   required Replacer replacer,
 }) {
   final manager = commandType == WalkSubCommandType.rename
-      ? FinderManager.findeKeys(
+      ? FinderManager.findKeys(
           files: files,
           aggregator: aggregator,
+          printer: printer,
           keysToFind: (replacer as MagicalRenamer).getTargets(),
         )
       : FinderManager.findValues(
           files: files,
           aggregator: aggregator,
+          printer: printer,
           valuesToFind: (replacer as MagicalReplacer).getTargets(),
         );
 
-  return manager.getGenerator();
+  return manager;
 }

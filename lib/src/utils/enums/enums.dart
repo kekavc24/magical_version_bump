@@ -45,7 +45,16 @@ enum UpdateMode {
 }
 
 /// Type of subcommand that may have been triggered
-enum WalkSubCommandType { find, search, rename, replace }
+enum WalkSubCommandType {
+  find(isFinder: true),
+  search(isFinder: true),
+  rename(isFinder: false),
+  replace(isFinder: false);
+
+  const WalkSubCommandType({required this.isFinder});
+
+  final bool isFinder;
+}
 
 /// View format for printing values found by `Finder` or `MagicalReplacer`
 enum ConsoleViewFormat {
