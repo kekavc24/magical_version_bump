@@ -1,4 +1,5 @@
 import 'package:collection/collection.dart';
+import 'package:magical_version_bump/src/core/yaml_transformers/console_printer/console_printer.dart';
 import 'package:magical_version_bump/src/core/yaml_transformers/managers/tranform_tracker/transform_tracker.dart';
 import 'package:magical_version_bump/src/core/yaml_transformers/yaml_transformer.dart';
 import 'package:magical_version_bump/src/utils/enums/enums.dart';
@@ -14,7 +15,9 @@ abstract class TransformerManager {
   TransformerManager({
     required List<FileOutput> files,
     required Aggregator aggregator,
+    ConsolePrinter? printer,
   })  : _aggregator = aggregator,
+        _printer = printer ?? ConsolePrinter(format: aggregator.viewFormat),
         _yamlQueue = QueueList.from(files.map((e) => e.fileAsMap)),
         _tracker = TransformTracker(limit: aggregator.count);
 
@@ -23,6 +26,10 @@ abstract class TransformerManager {
 
   /// A custom Aggregator for this transformer
   final Aggregator _aggregator;
+
+  /// A console printer for each manager that will is called by each
+  /// command's handler to print to console all aggregated info
+  final ConsolePrinter _printer;
 
   /// Tracker for keeping track of transformations made.
   final TransformTracker _tracker;
@@ -35,6 +42,8 @@ abstract class TransformerManager {
 
   /// Tracker in use by this manager
   TransformTracker get tracker => _tracker;
+
+  ConsolePrinter get printer => _printer;
 
   /// Increments the count of a tracked value being transformed in the
   /// tracker using a [ String ]
@@ -56,7 +65,7 @@ abstract class TransformerManager {
   }
 
   /// Resets tracker and saves current state to history
-  void resetTracker() => _tracker.reset();
+  void resetTracker(int fileNumber) => _tracker.reset(fileNumber: fileNumber);
 
   /// Initializes transformer manager
   Future<void> transform();
@@ -83,9 +92,16 @@ abstract interface class ManageByCount {
   ///
   /// [ count ] - denotes number of values to extract
   ///
-  /// [ applyToEach ] - denotes whether each unique matcher should be
+  /// [ applyToEachArg ] - denotes whether each unique matcher should be
   /// transformed by this count
-  void transformByCount(int count, {required bool applyToEach});
+  ///
+  /// [ applyToEachFile ] - denotes whether each file should be transformed
+  /// by count
+  void transformByCount(
+    int count, {
+    required bool applyToEachArg,
+    required bool applyToEachFile,
+  });
 
   /// Transforms all
   void transformAll({required bool resetTracker});

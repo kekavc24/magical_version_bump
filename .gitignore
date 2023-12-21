@@ -8,6 +8,7 @@ pubspec.lock
 doc/api/
 
 # Files generated during & for tests
+.vscode/
 .test_coverage.dart
 coverage/
 .test_runner.dart

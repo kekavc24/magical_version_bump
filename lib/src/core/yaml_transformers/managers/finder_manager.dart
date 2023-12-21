@@ -12,68 +12,63 @@ class FinderManager extends TransformerManager implements ManageByCount {
   FinderManager._({
     required super.files,
     required super.aggregator,
+    required super.printer,
+    KeysToFind? keysToFind,
+    ValuesToFind? valuesToFind,
+    PairsToFind? pairsToFind,
+    FinderType? finderType,
+  })  : _finderType = finderType ?? FinderType.byValue,
+        _keysToFind = keysToFind ?? (keys: [], orderType: OrderType.loose),
+        _valuesToFind = valuesToFind ?? [],
+        _pairsToFind = pairsToFind ?? {};
+
+  FinderManager.fullSetup({
+    required List<FileOutput> files,
+    required Aggregator aggregator,
+    required ConsolePrinter printer,
     required KeysToFind keysToFind,
     required ValuesToFind valuesToFind,
     required PairsToFind pairsToFind,
     required FinderType finderType,
-  })  : _finderType = finderType,
-        _keysToFind = keysToFind,
-        _valuesToFind = valuesToFind,
-        _pairsToFind = pairsToFind;
+  }) : this._(
+          files: files,
+          aggregator: aggregator,
+          printer: printer,
+          keysToFind: keysToFind,
+          valuesToFind: valuesToFind,
+          pairsToFind: pairsToFind,
+          finderType: finderType,
+        );
 
-  factory FinderManager.forFinder({
+  FinderManager.findValues({
     required List<FileOutput> files,
     required Aggregator aggregator,
-    required KeysToFind keysToFind,
+    required ConsolePrinter printer,
     required ValuesToFind valuesToFind,
-    required PairsToFind pairsToFind,
-    FinderType? finderType,
-  }) {
-    return FinderManager._(
-      files: files,
-      aggregator: aggregator,
-      finderType: finderType ?? FinderType.byValue,
-      keysToFind: keysToFind,
-      valuesToFind: valuesToFind,
-      pairsToFind: pairsToFind,
-    );
-  }
+  }) : this._(
+          files: files,
+          aggregator: aggregator,
+          printer: printer,
+          valuesToFind: valuesToFind,
+        );
 
-  factory FinderManager.findValues({
+  FinderManager.findKeys({
     required List<FileOutput> files,
     required Aggregator aggregator,
-    required ValuesToFind valuesToFind,
-  }) {
-    return FinderManager._(
-      files: files,
-      aggregator: aggregator,
-      keysToFind: (keys: [], orderType: OrderType.loose),
-      valuesToFind: valuesToFind,
-      pairsToFind: {},
-      finderType: FinderType.byValue,
-    );
-  }
-
-  factory FinderManager.findeKeys({
-    required List<FileOutput> files,
-    required Aggregator aggregator,
+    required ConsolePrinter printer,
     required KeysToFind keysToFind,
-  }) {
-    return FinderManager._(
-      files: files,
-      aggregator: aggregator,
-      keysToFind: keysToFind,
-      valuesToFind: [],
-      pairsToFind: {},
-      finderType: FinderType.byValue,
-    );
-  }
+  }) : this._(
+          files: files,
+          aggregator: aggregator,
+          printer: printer,
+          keysToFind: keysToFind,
+        );
 
-  late FinderType _finderType;
+  final FinderType _finderType;
 
-  late KeysToFind _keysToFind;
-  late ValuesToFind _valuesToFind;
-  late PairsToFind _pairsToFind;
+  final KeysToFind _keysToFind;
+  final ValuesToFind _valuesToFind;
+  final PairsToFind _pairsToFind;
 
   /// Obtains the current generator to be used/ currently in use by
   /// this manager
@@ -82,36 +77,40 @@ class FinderManager extends TransformerManager implements ManageByCount {
         ? transformAll(resetTracker: true)
         : transformByCount(
             aggregator.count!,
-            applyToEach: aggregator.applyToEach,
+            applyToEachArg: aggregator.applyToEachArg,
+            applyToEachFile: aggregator.applyToEachFile,
           );
   }
 
   /// Prefills the tracker with keys for accurate value tracking
   void _prefillTracker() {
     for (final data in keysToPrefill()) {
+      if (data.keys.isEmpty) continue;
+
       _tracker.prefill(data.keys, origin: data.origin);
     }
   }
 
   @override
   Future<void> transform() async {
-    
-    // TODO: Add match formatter/aggregator
-    for (final match in getGenerator()) {}
+    // Loop all matches and add to printer
+    for (final match in getGenerator()) {
+      _printer.addValuesFound(match.currentFile, match.data);
+    }
   }
 
   @override
   Iterable<FindManagerOutput> transformByCount(
     int count, {
-    required bool applyToEach,
-    bool applyToEachFile = true,
+    required bool applyToEachArg,
+    required bool applyToEachFile,
   }) sync* {
     // Prefill tracker
     _prefillTracker();
 
     /// If we are not applying to each file and neither are we applying to
     /// to each argument. Return just count
-    if (!applyToEachFile && !applyToEach) {
+    if (!applyToEachFile && !applyToEachArg) {
       yield* transformAll(resetTracker: true).take(count);
     }
 
@@ -129,7 +128,7 @@ class FinderManager extends TransformerManager implements ManageByCount {
     ///
 
     // we never reset the tracker, terminate once arg conditions are met
-    else if (!applyToEachFile && applyToEach) {
+    else if (!applyToEachFile && applyToEachArg) {
       yield* transformAll(resetTracker: false).takeWhile(
         (value) => !value.reachedLimit,
       );
@@ -148,22 +147,18 @@ class FinderManager extends TransformerManager implements ManageByCount {
       var countForEachFile = <int, int>{};
 
       /// When `applyToEach` argument is true, we track current active file &
-      /// whether we reach the limit for count for each argument and yielded the
-      /// last value that triggered the match
+      /// whether we reached the limit for count for each argument and yielded
+      /// the last value that triggered the match
       var currentFile = 0;
 
       /// We create our custom queue with all files
       var customQueue = QueueList.from(yamlQueue);
 
       // Setup all our variables for tracking exiting current transformation
-      if (!applyToEach) {
-        countForEachFile = yamlQueue.asMap().keys.fold(
-          <int, int>{},
-          (previousValue, element) {
-            previousValue.addAll({element: 0});
-            return previousValue;
-          },
-        );
+      if (!applyToEachArg) {
+        countForEachFile = <int, int>{}..addEntries(
+            yamlQueue.mapIndexed((index, element) => MapEntry(index, 0)),
+          );
       }
 
       /// Our queue will act as the reference for controlling the loop
@@ -178,7 +173,7 @@ class FinderManager extends TransformerManager implements ManageByCount {
           ///
           /// When `applyToEach` argument is false, we break loop if count for
           /// matches generated for this file has been reached
-          if (!applyToEach) {
+          if (!applyToEachArg) {
             if (countForEachFile[match.currentFile] == count) break;
 
             // Increment its count if loop wasn't broken
@@ -233,15 +228,16 @@ class FinderManager extends TransformerManager implements ManageByCount {
     required bool resetTracker,
     QueueList<YamlMap>? customQueue,
   }) sync* {
+    final numOfFiles = yamlQueue.length;
     final localQueue = customQueue ?? QueueList.from(yamlQueue);
 
     do {
       // Index of current file
-      final currentFile = yamlQueue.length - localQueue.length;
+      final currentFile = numOfFiles - localQueue.length;
 
       // Reset tracker if not first run, since we havent completed it.
       if (localQueue.length != yamlQueue.length && resetTracker) {
-        super.resetTracker();
+        super.resetTracker(currentFile - 1);
       }
 
       final yamlMap = localQueue.removeFirst(); // Get file, remove from list
@@ -260,23 +256,18 @@ class FinderManager extends TransformerManager implements ManageByCount {
         );
       }
     } while (localQueue.isNotEmpty);
+
+    // Reset the tracker and put last tracker into the history
+    if (resetTracker) super.resetTracker(numOfFiles - 1);
   }
 
   @override
   List<PrefillData> keysToPrefill() {
-    final keys = <PrefillData>[];
-
-    if (_keysToFind.keys.isNotEmpty) {
-      keys.add((keys: _keysToFind.keys, origin: Origin.key));
-    }
-    if (_valuesToFind.isNotEmpty) {
-      keys.add((keys: _valuesToFind, origin: Origin.value));
-    }
-    if (_pairsToFind.isNotEmpty) {
-      keys.add((keys: _pairsToFind.entries.toList(), origin: null));
-    }
-
-    return keys;
+    return <PrefillData>[
+      (keys: _keysToFind.keys, origin: Origin.key),
+      (keys: _valuesToFind, origin: Origin.value),
+      (keys: _pairsToFind.entries.toList(), origin: null),
+    ];
   }
 
   /// Get finder for this manager
