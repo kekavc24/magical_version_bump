@@ -7,20 +7,23 @@ part 'tracker_key.dart';
 class TransformTracker {
   TransformTracker({required this.limit})
       : _countTracker = {},
-        _counterHistory = [];
+        _counterHistory = {};
+
+  /// Current file number that was being tracked
+  
 
   /// A tracker keeping count of each value being added to it
   final Map<TrackerKey, int> _countTracker;
 
   /// History of counters.
   ///
-  /// Order is based on tracking order
-  final List<Map<TrackerKey, int>> _counterHistory;
+  /// Order is based on file number
+  final Map<int, Map<TrackerKey, int>> _counterHistory;
 
   /// The max count required to allow additions
   final int? limit;
 
-  List<Map<TrackerKey, int>> get trackerHistory => _counterHistory;
+  Map<int, Map<TrackerKey, int>> get trackerHistory => _counterHistory;
 
   /// Set up all trackable keys.
   ///
@@ -96,14 +99,49 @@ class TransformTracker {
     final key = value is MapEntry<String, String>
         ? DualTrackerKey.fromMapEntry(value)
         : TrackerKey(key: value as String, origin: origin);
-    return _countTracker[key] ?? 0; // Return 0 if missing
+    return getCountFromKey(key);
+  }
+
+  int getCountFromKey(
+    TrackerKey key, {
+    bool useHistory = false,
+    int? fileIndex,
+  }) {
+    // A valid file index must be present
+    if (useHistory && fileIndex == null) {
+      throw MagicalException(violation: 'A valid file index is required');
+    }
+
+    int? count;
+
+    // The history should have this value
+    if (useHistory) {
+      final counter = _counterHistory[fileIndex];
+
+      if (counter == null) {
+        throw MagicalException(
+          violation: 'This file index is not being tracked!',
+        );
+      }
+
+      count = counter[key];
+    } else {
+      count = _countTracker[key];
+    }
+
+    return count ?? 0; // Return 0 if missing
   }
 
   /// Resets a tracker.
   ///
-  /// The last tracker state is saved to history.
-  void reset() {
-    _counterHistory.add({..._countTracker});
+  /// The last tracker state is saved to history. A file number is required
+  /// to link this file
+  void reset({required int fileNumber}) {
+    if (_counterHistory.containsKey(fileNumber)) {
+      throw MagicalException(violation: 'This file is already tracked!');
+    }
+
+    _counterHistory[fileNumber] = {..._countTracker};
     _countTracker.clear();
   }
 
