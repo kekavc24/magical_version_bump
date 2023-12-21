@@ -10,7 +10,7 @@ class MagicalReplacer extends Replacer {
   }
 
   @override
-  YamlMap replace(
+  ReplacementOutput replace(
     YamlMap yamlMap, {
     required MatchedNodeData matchedNodeData,
   }) {
@@ -24,12 +24,15 @@ class MagicalReplacer extends Replacer {
 
     final updatedMap = modifiable.updateIndexedMap(
       replacement,
-      target: matchedNodeData.nodeData.key,
-      path: matchedNodeData.nodeData.precedingKeys,
+      target: matchedNodeData.key,
+      path: matchedNodeData.precedingKeys,
       keyAndReplacement: {},
-      value: matchedNodeData.nodeData.value,
+      value: matchedNodeData.value,
     );
 
-    return YamlMap.wrap(updatedMap);
+    return (
+      mapping: {matchedNodeData.data as String: replacement},
+      updatedMap: YamlMap.wrap(updatedMap),
+    );
   }
 }
