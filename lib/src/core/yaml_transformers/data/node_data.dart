@@ -6,7 +6,7 @@ part of '../yaml_transformer.dart';
 /// map
 @immutable
 class NodeData {
-  const NodeData._(this.precedingKeys, this.key, this.value);
+  const NodeData(this.precedingKeys, this.key, this.value);
 
   /// Create with default constructor
   factory NodeData.skeleton({
@@ -14,7 +14,7 @@ class NodeData {
     required Key key,
     required Value value,
   }) {
-    return NodeData._(precedingKeys, key, value);
+    return NodeData(precedingKeys, key, value);
   }
 
   /// Create using List<String> path and key
@@ -32,7 +32,7 @@ class NodeData {
 
   /// Create from the root anchor key
   factory NodeData.fromRoot({required String key, required dynamic value}) {
-    return NodeData._(
+    return NodeData(
       const [],
       createKey(value: key),
       createValue(value: value),
@@ -50,7 +50,7 @@ class NodeData {
     required MapEntry<dynamic, dynamic> current,
     required List<int> indices,
   }) {
-    return NodeData._(
+    return NodeData(
       [...parent.precedingKeys, parent.key],
       createKey(value: current.key as String?, indices: indices),
       createValue(value: current.value),
@@ -70,7 +70,7 @@ class NodeData {
     required String terminalValue,
     required List<int> indices,
   }) {
-    return NodeData._(
+    return NodeData(
       [...parent.precedingKeys],
       parent.key,
       createValue(value: terminalValue, indices: indices),
@@ -121,14 +121,27 @@ class NodeData {
     return mapOfPairs;
   }
 
-  /// Get keys
+  /// Obtains the keys as they were indexed.
+  ///
+  /// Typically includes any indices if the key was nested in a list for
+  /// easy access when reading
   List<Key> getKeys() {
     return precedingKeys.isEmpty ? [key] : [...precedingKeys, key];
   }
 
+  /// Obtains the keys as string. Ignores any indices present
+  List<String> getKeysAsString() {
+    return getKeys().map((e) => e.value!).toList();
+  }
+
   /// Get key path for this node
   String getKeyPath() {
-    return getKeys().join('/');
+    return getKeysAsString().join('/');
+  }
+
+  /// Get full path to terminal value
+  String getPath() {
+    return "${getKeyPath()}${(data == null) ? '' : '/$data'}";
   }
 
   @override
