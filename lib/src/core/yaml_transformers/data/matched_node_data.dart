@@ -89,24 +89,4 @@ class MatchedNodeData extends NodeData {
         matchedPairs,
         matchedValue,
       ];
-
-  // @override
-  // bool operator ==(Object other) =>
-  //     other is MatchedNodeData &&
-  //     super == other &&
-  //     collectionsUnorderedMatch(matchedKeys, other.matchedKeys) &&
-  //     matchedValue == other.matchedValue &&
-  //     collectionsUnorderedMatch(matchedPairs, other.matchedPairs);
-
-  // @override
-  // int get hashCode {
-  //   return Object.hashAll([
-  //     super.precedingKeys,
-  //     super.key,
-  //     super.value,
-  //     matchedKeys,
-  //     matchedValue,
-  //     matchedPairs,
-  //   ]);
-  // }
 }

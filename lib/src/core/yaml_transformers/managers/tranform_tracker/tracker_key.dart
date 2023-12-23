@@ -3,7 +3,7 @@ part of 'transform_tracker.dart';
 enum Origin { key, value, pair, custom }
 
 @immutable
-class TrackerKey {
+class TrackerKey extends Equatable{
   const TrackerKey({required this.key, required this.origin});
 
   final String key;
@@ -11,12 +11,7 @@ class TrackerKey {
   final Origin origin;
 
   @override
-  bool operator ==(Object other) {
-    return other is TrackerKey && other.key == key && other.origin == origin;
-  }
-
-  @override
-  int get hashCode => Object.hashAll([key, origin]);
+  List<Object> get props => [key, origin];
 
   @override
   String toString() => key;
@@ -37,12 +32,7 @@ class DualTrackerKey extends TrackerKey {
   final String value;
 
   @override
-  bool operator ==(Object other) {
-    return other is DualTrackerKey && super == other && value == other.value;
-  }
-
-  @override
-  int get hashCode => Object.hashAll([super.key, value, super.origin]);
+  List<Object> get props => [...super.props, value];
 
   @override
   String toString() => '${super.toString()}:$value';

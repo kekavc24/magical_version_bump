@@ -1,3 +1,4 @@
+import 'package:equatable/equatable.dart';
 import 'package:magical_version_bump/src/core/yaml_transformers/yaml_transformer.dart';
 import 'package:magical_version_bump/src/utils/exceptions/command_exceptions.dart';
 import 'package:meta/meta.dart';
