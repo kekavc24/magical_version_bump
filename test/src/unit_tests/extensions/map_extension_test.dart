@@ -1,4 +1,4 @@
-import 'package:magical_version_bump/src/core/yaml_transformers/data/pair_definition/pair_definition.dart';
+import 'package:magical_version_bump/src/core/yaml_transformers/data/pair_definition/custom_pair_type.dart';
 import 'package:magical_version_bump/src/core/yaml_transformers/yaml_transformer.dart';
 import 'package:magical_version_bump/src/utils/enums/enums.dart';
 import 'package:magical_version_bump/src/utils/extensions/map_extensions.dart';
@@ -470,8 +470,12 @@ void main() {
         'nested key': 'updated key',
       };
 
-      final target = createKey(value: 'nested key', indices: [1]);
-      final path = ['key-with-list'].map((e) => createKey(value: e)).toList();
+      final target = createPair<Key>(value: 'nested key', indices: [1]);
+      final path = ['key-with-list']
+          .map(
+            (e) => createPair<Key>(value: e),
+          )
+          .toList();
 
       final expectedMap = {
         'key-with-list': [
@@ -499,9 +503,9 @@ void main() {
         },
       };
 
-      final target = createKey(value: 'deeper key');
-      final path = createListOfKeys(keys: ['deep key'], linkedIndices: {});
-      final value = createValue(value: 'value', indices: [0]);
+      final target = createPair<Key>(value: 'deeper key');
+      final path = createListOfPair<Key>(values: ['deep key'], indices: {});
+      final value = createPair<Value>(value: 'value', indices: [0]);
 
       final updatedMap = localMap.updateIndexedMap(
         'update',
@@ -531,9 +535,9 @@ void main() {
         },
       };
 
-      final target = createKey(value: 'deeper key');
-      final path = createListOfKeys(keys: ['deep key'], linkedIndices: {});
-      final value = createValue(value: 'one value', indices: [0]);
+      final target = createPair<Key>(value: 'deeper key');
+      final path = createListOfPair<Key>(values: ['deep key'], indices: {});
+      final value = createPair<Value>(value: 'one value', indices: [0]);
 
       final updatedMap = localMap.updateIndexedMap(
         'update',
@@ -567,9 +571,9 @@ void main() {
         },
       };
 
-      final target = createKey(value: 'deeper key');
-      final path = createListOfKeys(keys: ['deep key'], linkedIndices: {});
-      final value = createValue(value: 'value-in-list', indices: [2, 0]);
+      final target = createPair<Key>(value: 'deeper key');
+      final path = createListOfPair<Key>(values: ['deep key'], indices: {});
+      final value = createPair<Value>(value: 'value-in-list', indices: [2, 0]);
 
       final updatedMap = localMap.updateIndexedMap(
         'update',
