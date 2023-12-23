@@ -5,39 +5,34 @@ part of '../yaml_transformer.dart';
 /// Typically denotes a terminal node found while indexing a Yaml map or any
 /// map
 @immutable
-class NodeData {
+class NodeData extends Equatable {
   const NodeData(this.precedingKeys, this.key, this.value);
 
   /// Create with default constructor
-  factory NodeData.skeleton({
+  const NodeData.skeleton({
     required List<Key> precedingKeys,
     required Key key,
     required Value value,
-  }) {
-    return NodeData(precedingKeys, key, value);
-  }
+  }) : this(precedingKeys, key, value);
 
   /// Create using List<String> path and key
-  factory NodeData.stringSkeleton({
+  NodeData.stringSkeleton({
     required List<String> path,
     required String key,
     required String value,
-  }) {
-    return NodeData.skeleton(
-      precedingKeys: path.map((e) => createKey(value: e)).toList(),
-      key: createKey(value: key),
-      value: createValue(value: value),
-    );
-  }
+  }) : this.skeleton(
+          precedingKeys: path.map((e) => createPair<Key>(value: e)).toList(),
+          key: createPair<Key>(value: key),
+          value: createPair<Value>(value: value),
+        );
 
   /// Create from the root anchor key
-  factory NodeData.fromRoot({required String key, required dynamic value}) {
-    return NodeData(
-      const [],
-      createKey(value: key),
-      createValue(value: value),
-    );
-  }
+  NodeData.fromRoot({required dynamic key, required dynamic value})
+      : this.skeleton(
+          precedingKeys: const [],
+          key: createPair<Key>(value: key),
+          value: createPair<Value>(value: value),
+        );
 
   /// Creates from entry in map.
   ///
@@ -45,17 +40,15 @@ class NodeData {
   ///   the value.
   /// * This is because we recursed the list to reach this key rather than the
   ///   value.
-  factory NodeData.fromMapEntry({
+  NodeData.fromMapEntry({
     required NodeData parent,
     required MapEntry<dynamic, dynamic> current,
     required List<int> indices,
-  }) {
-    return NodeData(
-      [...parent.precedingKeys, parent.key],
-      createKey(value: current.key as String?, indices: indices),
-      createValue(value: current.value),
-    );
-  }
+  }) : this.skeleton(
+          precedingKeys: [...parent.precedingKeys, parent.key],
+          key: createPair<Key>(value: current.key, indices: indices),
+          value: createPair<Value>(value: current.value),
+        );
 
   /// Creates from terminal value at the end of a node
   ///
@@ -65,17 +58,15 @@ class NodeData {
   ///
   /// * The parent's key will be this terminal value's key too as it's the
   ///   nearest key linking this value to a map.
-  factory NodeData.atRootTerminal({
+  NodeData.atRootTerminal({
     required NodeData parent,
-    required String terminalValue,
+    required dynamic terminalValue,
     required List<int> indices,
-  }) {
-    return NodeData(
-      [...parent.precedingKeys],
-      parent.key,
-      createValue(value: terminalValue, indices: indices),
-    );
-  }
+  }) : this.skeleton(
+          precedingKeys: [...parent.precedingKeys],
+          key: parent.key,
+          value: createPair<Value>(value: terminalValue, indices: indices),
+        );
 
   /// Any preceding keys for this node
   final List<Key> precedingKeys;
@@ -86,21 +77,18 @@ class NodeData {
   /// Current data at this node
   final Value value;
 
-  /// Gets the actual value rather than the object storing it i.e.
-  ///
-  /// ```dart
-  /// Value.value
-  /// ```
-  dynamic get data => value.value;
+  /// Gets the actual value at terminal end as a string. A null value will be
+  /// returned as 'null'.
+  String get data => value.toString();
 
   /// Transform to key value pairs, based on this node data's path.
   ///
   /// Note: the terminal value must be a string
-  Map<String, String?> transformToPairs() {
+  Map<String, String> transformToPairs() {
     // Get length of list
     final lastIndex = precedingKeys.length - 1;
 
-    final mapOfPairs = <String, String?>{};
+    final mapOfPairs = <String, String>{};
 
     // Loop all and create keys in tandem
     for (final (index, candidate) in precedingKeys.indexed) {
@@ -117,7 +105,7 @@ class NodeData {
     }
 
     // Add key and value as last pair
-    mapOfPairs.addAll({key.toString(): data as String?});
+    mapOfPairs.addAll({key.toString(): data});
     return mapOfPairs;
   }
 
@@ -131,7 +119,7 @@ class NodeData {
 
   /// Obtains the keys as string. Ignores any indices present
   List<String> getKeysAsString() {
-    return getKeys().map((e) => e.value!).toList();
+    return getKeys().map((e) => e.toString()).toList();
   }
 
   /// Get key path for this node
@@ -139,26 +127,15 @@ class NodeData {
     return getKeysAsString().join('/');
   }
 
-  /// Get full path to terminal value
-  String getPath() {
-    return "${getKeyPath()}${(data == null) ? '' : '/$data'}";
-  }
-
   @override
-  bool operator ==(Object other) =>
-      other is NodeData &&
-      other.key == key &&
-      other.value == value &&
-      collectionsMatch(precedingKeys, other.precedingKeys);
+  List<Object> get props => [precedingKeys, key, value];
 
-  @override
-  int get hashCode => Object.hashAll([key, value, precedingKeys]);
-
+  /// Obtains full path to terminal value of this node
   @override
   String toString() => '${getKeyPath()}/$data';
 
   /// Checks whether this node is nested
-  bool isNested() =>
+  bool isNestedInList() =>
       key.isNested() ||
       value.isNested() ||
       precedingKeys.isNotEmpty &&

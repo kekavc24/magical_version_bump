@@ -59,7 +59,7 @@ class MagicalFinder extends Finder {
     final nodeKeys = [
       ...nodeData.precedingKeys,
       nodeData.key,
-    ].map((e) => e.value!);
+    ].map((e) => e.toString());
 
     // If not grouped, we check if any key we are searching for is present
     if (_keysToFind.orderType == OrderType.loose) {
@@ -114,7 +114,7 @@ class MagicalFinder extends Finder {
     if (valuesToFind == null || _valuesToFind.isEmpty) return '';
 
     return _valuesToFind.firstWhere(
-      (element) => element == nodeData.data.toString(),
+      (element) => element == nodeData.data,
       orElse: () => '',
     );
   }
