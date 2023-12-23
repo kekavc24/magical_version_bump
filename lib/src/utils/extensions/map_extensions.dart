@@ -1,4 +1,4 @@
-import 'package:magical_version_bump/src/core/yaml_transformers/data/pair_definition/pair_definition.dart';
+import 'package:magical_version_bump/src/core/yaml_transformers/data/pair_definition/custom_pair_type.dart';
 import 'package:magical_version_bump/src/utils/enums/enums.dart';
 import 'package:magical_version_bump/src/utils/exceptions/command_exceptions.dart';
 import 'package:magical_version_bump/src/utils/typedefs/typedefs.dart';
@@ -221,7 +221,7 @@ extension MapUtility on Map<dynamic, dynamic> {
     ///
     /// This will always be called on a map, not a list thus we won't
     /// need to recurse list
-    final keyFromPath = path.first.value!;
+    final keyFromPath = path.first.toString();
 
     // Attempt a swap. If replacement is null, no swap.
     final attemptedSwap = _attemptSwap(
@@ -280,7 +280,7 @@ extension MapUtility on Map<dynamic, dynamic> {
     required KeyAndReplacement keyAndReplacement,
     required Value? value,
   }) {
-    final candidate = target.value!; // Key that may change
+    final candidate = target.toString(); // Key that may change
 
     // Attempt a swap to have latest version of this map
     final attemptedSwap = _attemptSwap(

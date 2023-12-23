@@ -95,7 +95,7 @@ class ReplacerManager extends TransformerManager {
               ? Origin.key
               : Origin.value,
           replacements: output.mapping,
-          oldPath: match.data.getPath(),
+          oldPath: match.data.toString(),
         );
       }
     }

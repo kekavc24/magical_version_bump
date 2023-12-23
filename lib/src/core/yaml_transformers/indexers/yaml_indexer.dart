@@ -27,16 +27,19 @@ part of '../yaml_transformer.dart';
 /// marked as nested. See [ NodeData ]
 ///
 class MagicalIndexer {
-  MagicalIndexer(this._yamlMap);
+  MagicalIndexer._(this._map);
 
-  /// Instantiate with yaml
-  factory MagicalIndexer.forYaml(YamlMap yamlMap) => MagicalIndexer(yamlMap);
+  /// Instantiate with yaml map
+  MagicalIndexer.forYaml(YamlMap yamlMap) : this._(yamlMap);
+
+  /// Instantiate with dart map
+  MagicalIndexer.forDartMap(Map<dynamic, dynamic> map) : this._(map);
 
   /// Yaml map to search and index
-  final YamlMap _yamlMap;
+  final Map<dynamic, dynamic> _map;
 
   Iterable<NodeData> indexYaml() sync* {
-    for (final entry in _yamlMap.entries) {
+    for (final entry in _map.entries) {
       final setUpData = NodeData.fromRoot(
         key: entry.key as String,
         value: entry.value,
@@ -48,20 +51,20 @@ class MagicalIndexer {
 
   /// Entry point for indexing a node. Can be called recursively.
   Iterable<NodeData> _recursiveIndex(NodeData parent) sync* {
-    if (isTerminal(parent.data)) {
+    if (isTerminal(parent.value.rawValue)) {
       yield parent;
+    } else if (parent.value.rawValue is Map<dynamic, dynamic>) {
+      yield* _indexNestedMap(
+        parent: parent,
+        child: parent.value.rawValue as Map<dynamic, dynamic>,
+        indices: [],
+      );
     } else {
-      yield* parent.data is Map<dynamic, dynamic>
-          ? _indexNestedMap(
-              parent: parent,
-              child: parent.data as YamlMap,
-              indices: [],
-            )
-          : _indexNestedList(
-              parent: parent,
-              children: parent.data as List,
-              indices: [],
-            );
+      yield* _indexNestedList(
+        parent: parent,
+        children: parent.value.rawValue as List,
+        indices: [],
+      );
     }
   }
 
@@ -85,7 +88,7 @@ class MagicalIndexer {
       );
 
       /// If terminal, we return it as is
-      if (isTerminal(nestedData.data)) {
+      if (isTerminal(nestedData.value.rawValue)) {
         yield nestedData;
       }
 
@@ -105,7 +108,7 @@ class MagicalIndexer {
       else {
         yield* _indexNestedMap(
           parent: nestedData,
-          child: nestedData.data as Map<dynamic, dynamic>,
+          child: nestedData.value.rawValue as Map<dynamic, dynamic>,
           indices: [],
         );
       }
@@ -151,7 +154,7 @@ class MagicalIndexer {
       // If map, we call recursive map indexer
       yield* _indexNestedMap(
         parent: parent,
-        child: child as YamlMap,
+        child: child as Map<dynamic, dynamic>,
         indices: updatedIndices,
       );
     }

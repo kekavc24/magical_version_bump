@@ -93,7 +93,7 @@ base class ConsolePrinter {
     }.toList();
 
     // Wrap with ansicodes
-    final pathToTrack = wrapMatches(path: data.getPath(), matches: matches);
+    final pathToTrack = wrapMatches(path: data.toString(), matches: matches);
     final trackedPath = TrackedValue(key: pathToTrack, origin: Origin.custom);
 
     // Get all keys that where found at this path

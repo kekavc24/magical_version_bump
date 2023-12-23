@@ -78,26 +78,35 @@ class MatchedNodeData extends NodeData {
 
   /// Get path of keys upto the last renameable key
   String getPathToLastKey() {
-    return getUptoLastRenameable().map((e) => e.value!).join('/');
+    return getUptoLastRenameable().map((e) => e.toString()).join('/');
   }
 
-  /// 
-
+  ///
   @override
-  bool operator ==(Object other) =>
-      other is MatchedNodeData &&
-      super == other &&
-      collectionsUnorderedMatch(matchedKeys, other.matchedKeys) &&
-      matchedValue == other.matchedValue &&
-      collectionsUnorderedMatch(matchedPairs, other.matchedPairs);
-
-  @override
-  int get hashCode => Object.hashAll([
-        super.precedingKeys,
-        super.key,
-        super.value,
+  List<Object> get props => [
+        ...super.props,
         matchedKeys,
-        matchedValue,
         matchedPairs,
-      ]);
+        matchedValue,
+      ];
+
+  // @override
+  // bool operator ==(Object other) =>
+  //     other is MatchedNodeData &&
+  //     super == other &&
+  //     collectionsUnorderedMatch(matchedKeys, other.matchedKeys) &&
+  //     matchedValue == other.matchedValue &&
+  //     collectionsUnorderedMatch(matchedPairs, other.matchedPairs);
+
+  // @override
+  // int get hashCode {
+  //   return Object.hashAll([
+  //     super.precedingKeys,
+  //     super.key,
+  //     super.value,
+  //     matchedKeys,
+  //     matchedValue,
+  //     matchedPairs,
+  //   ]);
+  // }
 }
