@@ -1,5 +1,5 @@
 import 'package:collection/collection.dart';
-import 'package:magical_version_bump/src/core/yaml_transformers/managers/tranform_tracker/transform_tracker.dart';
+import 'package:magical_version_bump/src/core/yaml_transformers/tranform_counter/transform_counter.dart';
 import 'package:magical_version_bump/src/core/yaml_transformers/yaml_transformer.dart';
 import 'package:magical_version_bump/src/utils/enums/enums.dart';
 import 'package:magical_version_bump/src/utils/typedefs/typedefs.dart';
@@ -7,28 +7,8 @@ import 'package:mason_logger/mason_logger.dart';
 
 part 'printer_util.dart';
 
-/// Info to add via stream controller for [ConsolePrinter] to aggregate.
-///
-/// `tranformationType` - whether value was found/replaced. Each is handled
-/// differently. Available types are:
-///
-///   * 'found'
-///   * 'replaced'
-///   * 'terminate' - this includes a [TransformTracker] which has stored total
-///      the tracking stats.
-///
-/// `info` - includes DTO with info to be processed for display on console.
-///
-/// `path` -
-typedef InfoStream = ({
-  Origin origin,
-  String tranformationType,
-  dynamic info,
-  String path,
-});
-
-typedef TrackedValue = TrackerKey;
-typedef DualTrackedValue = DualTrackerKey;
+typedef TrackedValue = TrackerKey<String>;
+typedef DualTrackedValue = DualTrackerKey<String, String>;
 
 /// The `key` in this map denotes the value found/replaced in yaml/json
 /// based on its origin.
@@ -42,7 +22,7 @@ typedef DualTrackedValue = DualTrackerKey;
 /// For values found, a [TrackedValue] is used with one path whereas a
 /// [DualTrackedValue] is used for values replaced to store the old path
 /// and new path after value was replaced.
-typedef AggregatedFileInfo = Map<TrackerKey, List<TrackedValue>>;
+typedef AggregatedFileInfo = Map<TrackedValue, List<TrackedValue>>;
 
 /// Each file name reconciled with its logs for easy display in console
 typedef ReconciledLogs = Map<String, List<String>>;
@@ -64,7 +44,7 @@ base class ConsolePrinter {
   final Map<int, AggregatedFileInfo> _fileInfos = {};
 
   /// Save values to tracker based on file index
-  void _saveToTracker(int index, List<TrackerKey> keys, TrackedValue value) {
+  void _saveToTracker(int index, List<TrackedValue> keys, TrackedValue value) {
     // If console view format is live, print directly
     if (_format == ConsoleViewFormat.live) {
       _printToConsole(index, keys, value);
@@ -117,20 +97,21 @@ base class ConsolePrinter {
     );
 
     // Create tracker keys from replacement values
-    final keys = _extractKey<List<TrackerKey>>(
+    final keys = _extractKey<List<TrackedValue>>(
       origin: origin,
       value: replacements.keys,
     );
 
-    final trackedPaths = DualTrackedValue.fromMapEntry(
-      MapEntry(wrapped.oldPath, wrapped.updatedPath),
+    final trackedPaths = DualTrackedValue.fromValue(
+      key: wrapped.oldPath,
+      otherKey: wrapped.updatedPath,
     );
 
     // Save all
     _saveToTracker(index, keys, trackedPaths);
   }
 
-  void _printToConsole(int index, List<TrackerKey> keys, TrackedValue value) {
+  void _printToConsole(int index, List<TrackedValue> keys, TrackedValue value) {
     // Print direct to console with index since file names aren't reconciled yet
     final consoleBuffer = StringBuffer(
       createHeader(format: _format, fileInfo: index),
@@ -153,7 +134,7 @@ base class ConsolePrinter {
   ReconciledLogs _getLogs({
     required bool useHistory,
     required List<String> fileNames,
-    required TransformTracker tracker,
+    required ManagerTracker tracker,
   }) {
     final fileLogs = <int, List<String>>{}; // Logs for each file
 
@@ -167,11 +148,10 @@ base class ConsolePrinter {
         final logKey = logEntry.key;
 
         // Get count for tracker from its history
-        // TODO: Call reset after all files have been indexed
         final count = tracker.getCountFromKey(
           logKey,
           useHistory: useHistory,
-          fileIndex: fileIndex,
+          cursor: fileIndex,
         );
 
         final log = formatInfo(
@@ -201,7 +181,7 @@ base class ConsolePrinter {
   void aggregateInfo(
     Aggregator aggregator, {
     required List<String> fileNames,
-    required TransformTracker tracker,
+    required ManagerTracker tracker,
   }) {
     // Aggregated info buffer
     final aggregateBuffer = StringBuffer();

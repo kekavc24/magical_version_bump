@@ -44,7 +44,7 @@ class ReplacerManager extends TransformerManager {
 
   final Replacer replacer;
 
-  TransformTracker get finderTracker => manager.tracker;
+  ManagerTracker get finderTracker => manager.tracker;
 
   @override
   Future<void> transform() async {

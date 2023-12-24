@@ -91,3 +91,6 @@ enum AggregateType {
   /// Find all
   all;
 }
+
+/// Indicates origin of a value
+enum Origin { key, value, pair, custom }

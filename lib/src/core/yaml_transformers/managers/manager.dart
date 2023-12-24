@@ -1,6 +1,6 @@
 import 'package:collection/collection.dart';
 import 'package:magical_version_bump/src/core/yaml_transformers/console_printer/console_printer.dart';
-import 'package:magical_version_bump/src/core/yaml_transformers/managers/tranform_tracker/transform_tracker.dart';
+import 'package:magical_version_bump/src/core/yaml_transformers/tranform_counter/transform_counter.dart';
 import 'package:magical_version_bump/src/core/yaml_transformers/yaml_transformer.dart';
 import 'package:magical_version_bump/src/utils/enums/enums.dart';
 import 'package:magical_version_bump/src/utils/typedefs/typedefs.dart';
@@ -8,6 +8,7 @@ import 'package:yaml/yaml.dart';
 
 part 'finder_manager.dart';
 part 'replacer_manager.dart';
+part 'custom_tracker.dart';
 
 typedef PrefillData = ({List<dynamic> keys, Origin? origin});
 
@@ -19,7 +20,7 @@ abstract class TransformerManager {
   })  : _aggregator = aggregator,
         _printer = printer ?? ConsolePrinter(format: aggregator.viewFormat),
         _yamlQueue = QueueList.from(files.map((e) => e.fileAsMap)),
-        _tracker = TransformTracker(limit: aggregator.count);
+        _tracker = ManagerTracker(limit: aggregator.count);
 
   /// A queue of all yaml maps to run a transform operation on
   final QueueList<YamlMap> _yamlQueue;
@@ -32,7 +33,7 @@ abstract class TransformerManager {
   final ConsolePrinter _printer;
 
   /// Tracker for keeping track of transformations made.
-  final TransformTracker _tracker;
+  final ManagerTracker _tracker;
 
   /// Current queue with yaml files
   QueueList<YamlMap> get yamlQueue => _yamlQueue;
@@ -41,7 +42,7 @@ abstract class TransformerManager {
   Aggregator get aggregator => _aggregator;
 
   /// Tracker in use by this manager
-  TransformTracker get tracker => _tracker;
+  ManagerTracker get tracker => _tracker;
 
   ConsolePrinter get printer => _printer;
 
@@ -61,11 +62,11 @@ abstract class TransformerManager {
 
   /// Get count of a value in tracker
   int getCountOfValue(dynamic value, {required Origin origin}) {
-    return _tracker.getCount(value, origin: origin);
+    return _tracker.getCount(value as String, origin: origin);
   }
 
   /// Resets tracker and saves current state to history
-  void resetTracker(int fileNumber) => _tracker.reset(fileNumber: fileNumber);
+  void resetTracker(int fileNumber) => _tracker.reset(cursor: fileNumber);
 
   /// Initializes transformer manager
   Future<void> transform();

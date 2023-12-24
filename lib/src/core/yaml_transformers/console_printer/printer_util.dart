@@ -14,40 +14,40 @@ enum CharSet { utf8, ascii }
 T _extractKey<T>({required Origin origin, required dynamic value}) {
   // For value, return as is
   if (origin == Origin.value) {
-    return TrackerKey(key: value as String, origin: origin) as T;
+    return TrackedValue(key: value as String, origin: origin) as T;
   }
 
   // For key, we get a list of values
   if (origin == Origin.key) {
     return (value as Iterable<String>)
-        .map((e) => TrackerKey(key: e, origin: Origin.key))
+        .map((e) => TrackedValue(key: e, origin: Origin.key))
         .toList() as T;
   }
 
   // For pair, we have to save a dual key
   return (value as Map<String, String>)
       .entries
-      .map(DualTrackerKey.fromMapEntry)
+      .map((e) => DualTrackedValue.fromEntry(entry: e))
       .toList() as T;
 }
 
 /// Extracts all keys from
-List<TrackerKey> _getKeysFromMatch(MatchedNodeData matchedNodeData) {
-  return <TrackerKey>[
+List<TrackedValue> _getKeysFromMatch(MatchedNodeData matchedNodeData) {
+  return <TrackedValue>[
     // Extract sole key for value
-    _extractKey<TrackerKey>(
+    _extractKey<TrackedValue>(
       origin: Origin.value,
       value: matchedNodeData.matchedValue,
     ),
 
     // Extract list of keys from matched keys
-    ..._extractKey<List<TrackerKey>>(
+    ..._extractKey<List<TrackedValue>>(
       origin: Origin.key,
       value: matchedNodeData.matchedKeys,
     ),
 
     // Extract list of dual keys from map entry.
-    ..._extractKey<List<DualTrackerKey>>(
+    ..._extractKey<List<TrackedValue>>(
       origin: Origin.pair,
       value: matchedNodeData.matchedPairs,
     ),
@@ -203,7 +203,7 @@ String formatInfo({
 
     // Access value instead of key in replacemode
     final twigToUse =
-        isReplaceMode ? (value as DualTrackerKey).value : value.key;
+        isReplaceMode ? (value as DualTrackedValue).otherKey : value.key;
 
     final defaultBranch = getBranch(isLastChild: isLastChild);
 
