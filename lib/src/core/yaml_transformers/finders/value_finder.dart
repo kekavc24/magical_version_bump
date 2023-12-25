@@ -1,22 +1,24 @@
 part of 'finder.dart';
 
 /// Find the first value matching a condition
-class MagicalFinder extends Finder {
-  MagicalFinder._({
+base class ValueFinder extends Finder {
+  ValueFinder._({
     required super.indexer,
-    super.keysToFind,
-    super.valuesToFind,
-    super.pairsToFind,
-  });
+    KeysToFind? keysToFind,
+    ValuesToFind? valuesToFind,
+    PairsToFind? pairsToFind,
+  })  : _keysToFind = keysToFind ?? (keys: [], orderType: OrderType.loose),
+        _valuesToFind = valuesToFind ?? [],
+        _pairsToFind = pairsToFind ?? {};
 
   /// Setup everything that may need to found
-  factory MagicalFinder.findInYaml(
+  factory ValueFinder.findInYaml(
     YamlMap yamlMap, {
     required KeysToFind? keysToFind,
     required ValuesToFind? valuesToFind,
     required PairsToFind? pairsToFind,
   }) {
-    return MagicalFinder._(
+    return ValueFinder._(
       indexer: MagicalIndexer.forYaml(yamlMap),
       keysToFind: keysToFind,
       valuesToFind: valuesToFind,
@@ -25,18 +27,34 @@ class MagicalFinder extends Finder {
   }
 
   /// Set up with predefined indexer
-  factory MagicalFinder.findWithIndexer(
+  factory ValueFinder.findWithIndexer(
     MagicalIndexer indexer, {
     required KeysToFind? keysToFind,
     required ValuesToFind? valuesToFind,
     required PairsToFind? pairsToFind,
   }) {
-    return MagicalFinder._(
+    return ValueFinder._(
       indexer: indexer,
       keysToFind: keysToFind,
       valuesToFind: valuesToFind,
       pairsToFind: pairsToFind,
     );
+  }
+
+  /// Keys to find from indexed values
+  final KeysToFind _keysToFind;
+
+  /// Values to find at terminal end of node
+  final ValuesToFind _valuesToFind;
+
+  /// Key-value pairs to find. Will match all keys & terminal value to
+  final PairsToFind _pairsToFind;
+
+  @override
+  void _prefillCounter() {
+    counter!.prefill(_keysToFind.keys, origin: Origin.key);
+    counter!.prefill(_valuesToFind, origin: Origin.value);
+    counter!.prefill(_pairsToFind.entries.toList(), origin: Origin.pair);
   }
 
   @override
@@ -53,7 +71,7 @@ class MagicalFinder extends Finder {
   @protected
   List<String> getMatchingKeys(NodeData nodeData) {
     // If empty, just return null, as we can't match for it
-    if (keysToFind == null || _keysToFind.keys.isEmpty) return [];
+    if (_keysToFind.keys.isEmpty) return [];
 
     // Get all nodes keys together in order
     final nodeKeys = [
@@ -111,7 +129,7 @@ class MagicalFinder extends Finder {
   @protected
   String getFirstMachingValue(NodeData nodeData) {
     // No need to check if empty
-    if (valuesToFind == null || _valuesToFind.isEmpty) return '';
+    if (_valuesToFind.isEmpty) return '';
 
     return _valuesToFind.firstWhere(
       (element) => element == nodeData.data,
@@ -124,7 +142,7 @@ class MagicalFinder extends Finder {
   @protected
   Map<String, String> getMatchingPairs(NodeData nodeData) {
     // No need to check if empty
-    if (pairsToFind == null || _pairsToFind.isEmpty) return {};
+    if (_pairsToFind.isEmpty) return {};
 
     // Format the data to matching data type
     final nodeDataAsPairs = nodeData.transformToPairs();
