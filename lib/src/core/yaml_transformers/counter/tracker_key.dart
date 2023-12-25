@@ -23,7 +23,7 @@ base class TrackerKey<T> extends Equatable {
 
 /// Represents a customs key. Hold 2 values. Mostly used for pairs
 @immutable
-base class DualTrackerKey<T, U> extends TrackerKey<T> {
+final class DualTrackerKey<T, U> extends TrackerKey<T> {
   const DualTrackerKey({
     required super.key,
     required this.otherKey,
