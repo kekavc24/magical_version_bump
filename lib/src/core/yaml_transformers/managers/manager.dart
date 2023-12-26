@@ -1,6 +1,6 @@
 import 'package:collection/collection.dart';
 import 'package:magical_version_bump/src/core/yaml_transformers/console_printer/console_printer.dart';
-import 'package:magical_version_bump/src/core/yaml_transformers/tranform_counter/transform_counter.dart';
+import 'package:magical_version_bump/src/core/yaml_transformers/counter/transform_counter.dart';
 import 'package:magical_version_bump/src/core/yaml_transformers/yaml_transformer.dart';
 import 'package:magical_version_bump/src/utils/enums/enums.dart';
 import 'package:magical_version_bump/src/utils/typedefs/typedefs.dart';
@@ -10,7 +10,7 @@ part 'finder_manager.dart';
 part 'replacer_manager.dart';
 part 'custom_tracker.dart';
 
-typedef PrefillData = ({List<dynamic> keys, Origin? origin});
+typedef ManagerCounter = Counter<int>;
 
 abstract class TransformerManager {
   TransformerManager({
@@ -20,7 +20,7 @@ abstract class TransformerManager {
   })  : _aggregator = aggregator,
         _printer = printer ?? ConsolePrinter(format: aggregator.viewFormat),
         _yamlQueue = QueueList.from(files.map((e) => e.fileAsMap)),
-        _tracker = ManagerTracker(limit: aggregator.count);
+        _managerCounter = ManagerCounter();
 
   /// A queue of all yaml maps to run a transform operation on
   final QueueList<YamlMap> _yamlQueue;
@@ -33,7 +33,7 @@ abstract class TransformerManager {
   final ConsolePrinter _printer;
 
   /// Tracker for keeping track of transformations made.
-  final ManagerTracker _tracker;
+  final ManagerCounter _managerCounter;
 
   /// Current queue with yaml files
   QueueList<YamlMap> get yamlQueue => _yamlQueue;
@@ -42,68 +42,16 @@ abstract class TransformerManager {
   Aggregator get aggregator => _aggregator;
 
   /// Tracker in use by this manager
-  ManagerTracker get tracker => _tracker;
+  ManagerCounter get counter => _managerCounter;
+
 
   ConsolePrinter get printer => _printer;
 
-  /// Increments the count of a tracked value being transformed in the
-  /// tracker using a [ String ]
-  void incrementWithStrings(List<dynamic> values, {required Origin origin}) {
-    _tracker.increment(values, origin: origin);
+  /// Adds a specified file index to a [Counter] in this manager
+  void _incrementFileIndex(int fileIndex) {
+    return _managerCounter.increment([fileIndex], origin: Origin.custom);
   }
-
-  /// Increments the count of a tracked value being transformed in the
-  /// tracker using a [ MatchedNodeData ] object
-  ///
-  /// Return true if limit is reached.
-  bool incrementWithMatch(MatchedNodeData data) {
-    return _tracker.incrementUsingMatch(data);
-  }
-
-  /// Get count of a value in tracker
-  int getCountOfValue(dynamic value, {required Origin origin}) {
-    return _tracker.getCount(value as String, origin: origin);
-  }
-
-  /// Resets tracker and saves current state to history
-  void resetTracker(int fileNumber) => _tracker.reset(cursor: fileNumber);
 
   /// Initializes transformer manager
   Future<void> transform();
-}
-
-/// Interface class for implementing by count. This is intended for the
-/// [ FinderManager ] that does the heavy lifting (as it should). Finding
-/// a match is always the tricky part!
-///
-/// This allows for a light & fairly straighforward implementation for
-/// [ ReplacerManager ]
-abstract interface class ManageByCount {
-  /// Generates keys to prefill.
-  ///
-  /// [ FinderManager ] implements this to preset any values inside the
-  /// [ TransformTracker ] ensuring we always know the count of each value
-  /// instead of waiting for it to be added later.
-  ///
-  /// Prefilling helps tracker give the accurate status if the count needs to
-  /// be within the limit.
-  List<PrefillData> keysToPrefill();
-
-  /// Transforms based a specified count of requirements.
-  ///
-  /// [ count ] - denotes number of values to extract
-  ///
-  /// [ applyToEachArg ] - denotes whether each unique matcher should be
-  /// transformed by this count
-  ///
-  /// [ applyToEachFile ] - denotes whether each file should be transformed
-  /// by count
-  void transformByCount(
-    int count, {
-    required bool applyToEachArg,
-    required bool applyToEachFile,
-  });
-
-  /// Transforms all
-  void transformAll({required bool resetTracker});
 }

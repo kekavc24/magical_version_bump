@@ -5,281 +5,201 @@ enum FinderType { byValue, bySearch, both }
 typedef FindManagerOutput = ({
   int currentFile,
   MatchedNodeData data,
-  bool reachedLimit,
 });
 
-class FinderManager extends TransformerManager implements ManageByCount {
+class FinderManager extends TransformerManager {
   FinderManager._({
     required super.files,
     required super.aggregator,
     required super.printer,
-    KeysToFind? keysToFind,
-    ValuesToFind? valuesToFind,
-    PairsToFind? pairsToFind,
-    FinderType? finderType,
-  })  : _finderType = finderType ?? FinderType.byValue,
-        _keysToFind = keysToFind ?? (keys: [], orderType: OrderType.loose),
-        _valuesToFind = valuesToFind ?? [],
-        _pairsToFind = pairsToFind ?? {};
+  });
 
-  FinderManager.fullSetup({
+  factory FinderManager.fullSetup({
     required List<FileOutput> files,
     required Aggregator aggregator,
     required ConsolePrinter printer,
-    required KeysToFind keysToFind,
-    required ValuesToFind valuesToFind,
-    required PairsToFind pairsToFind,
     required FinderType finderType,
-  }) : this._(
-          files: files,
-          aggregator: aggregator,
-          printer: printer,
-          keysToFind: keysToFind,
-          valuesToFind: valuesToFind,
-          pairsToFind: pairsToFind,
-          finderType: finderType,
-        );
+    required KeysToFind? keysToFind,
+    required ValuesToFind? valuesToFind,
+    required PairsToFind? pairsToFind,
+  }) {
+    /// Save history when, [!applyToEachFile && applyToEachArg] is false
+    final saveCounterHistory =
+        !(!aggregator.applyToEachFile && aggregator.applyToEachArg);
 
-  FinderManager.findValues({
-    required List<FileOutput> files,
-    required Aggregator aggregator,
-    required ConsolePrinter printer,
-    required ValuesToFind valuesToFind,
-  }) : this._(
-          files: files,
-          aggregator: aggregator,
-          printer: printer,
-          valuesToFind: valuesToFind,
-        );
+    _finder = _setUpFinder(
+      files.first.fileAsMap,
+      saveCounterToHistory: saveCounterHistory,
+      finderType: finderType,
+      keysToFind: keysToFind,
+      valuesToFind: valuesToFind,
+      pairsToFind: pairsToFind,
+    );
 
-  FinderManager.findKeys({
-    required List<FileOutput> files,
-    required Aggregator aggregator,
-    required ConsolePrinter printer,
-    required KeysToFind keysToFind,
-  }) : this._(
-          files: files,
-          aggregator: aggregator,
-          printer: printer,
-          keysToFind: keysToFind,
-        );
-
-  final FinderType _finderType;
-
-  final KeysToFind _keysToFind;
-  final ValuesToFind _valuesToFind;
-  final PairsToFind _pairsToFind;
-
-  /// Obtains the current generator to be used/ currently in use by
-  /// this manager
-  Iterable<FindManagerOutput> getGenerator() {
-    return aggregator.type == AggregateType.all
-        ? transformAll(resetTracker: true)
-        : transformByCount(
-            aggregator.count!,
-            applyToEachArg: aggregator.applyToEachArg,
-            applyToEachFile: aggregator.applyToEachFile,
-          );
+    return FinderManager._(
+      files: files,
+      aggregator: aggregator,
+      printer: printer,
+    );
   }
 
-  /// Prefills the tracker with keys for accurate value tracking
-  void _prefillTracker() {
-    for (final data in keysToPrefill()) {
-      if (data.keys.isEmpty) continue;
+  factory FinderManager.findValues({
+    required List<FileOutput> files,
+    required Aggregator aggregator,
+    required ConsolePrinter printer,
+    required ValuesToFind valuesToFind,
+  }) {
+    return FinderManager.fullSetup(
+      files: files,
+      aggregator: aggregator,
+      printer: printer,
+      keysToFind: null,
+      valuesToFind: valuesToFind,
+      pairsToFind: null,
+      finderType: FinderType.byValue,
+    );
+  }
 
-      _tracker.prefill(data.keys, origin: data.origin);
-    }
+  factory FinderManager.findKeys({
+    required List<FileOutput> files,
+    required Aggregator aggregator,
+    required ConsolePrinter printer,
+    required KeysToFind keysToFind,
+  }) {
+    return FinderManager.fullSetup(
+      files: files,
+      aggregator: aggregator,
+      printer: printer,
+      finderType: FinderType.byValue,
+      keysToFind: keysToFind,
+      valuesToFind: null,
+      pairsToFind: null,
+    );
+  }
+
+  static late Finder _finder;
+
+  ///
+  Iterable<FinderOutput> _internalGenerator() {
+    return _finder.find(
+      aggregateType: aggregator.type,
+      applyToEach: aggregator.applyToEachArg,
+      count: aggregator.count,
+    );
   }
 
   @override
   Future<void> transform() async {
     // Loop all matches and add to printer
-    for (final match in getGenerator()) {
-      _printer.addValuesFound(match.currentFile, match.data);
+    for (final output in generate()) {
+      _printer.addValuesFound(output.currentFile, output.data);
     }
   }
 
-  @override
-  Iterable<FindManagerOutput> transformByCount(
-    int count, {
-    required bool applyToEachArg,
-    required bool applyToEachFile,
-  }) sync* {
-    // Prefill tracker
-    _prefillTracker();
+  Iterable<FindManagerOutput> generate() sync* {
+    final applyToEachFile = super._aggregator.applyToEachFile;
+    final applyToEachArg = super._aggregator.applyToEachArg;
+    final count = super._aggregator.count!;
 
-    /// If we are not applying to each file and neither are we applying to
-    /// to each argument. Return just count
-    if (!applyToEachFile && !applyToEachArg) {
-      yield* transformAll(resetTracker: true).take(count);
-    }
-
+    /// Finding values is the hardest part.
     ///
-    /// For remaining conditions:
-    /// * `applyToEachFile` && `!applyToEach` - for each file we take
-    ///    the specified count
+    /// Rules for each condition of the [Aggregator] based on:
+    ///   * [applyToEachFile] - applies conditions to each file
+    ///   * [applyToEachArg] - applies to each argument to find. This is
+    ///      handled seamlessly by the [Finder] itself
     ///
-    /// * `!applyToEachFile` && `applyToEach` - we never reset the tracker,
-    ///   and we terminate once all our arguments each reach specified count
+    /// This manager handles [applyToEachFile].
     ///
-    /// * `applyToEachFile` && `applyToEach` - each file gets equal chance to
-    ///   reach the number of specified args even if we end up recursing the
-    ///   whole file!
+    /// When [applyToEachFile] is [false] and :
     ///
-
-    // we never reset the tracker, terminate once arg conditions are met
-    else if (!applyToEachFile && applyToEachArg) {
-      yield* transformAll(resetTracker: false).takeWhile(
-        (value) => !value.reachedLimit,
-      );
-    }
-
+    ///   * [applyToEachArg] is [false] - Always peek the count of values
+    ///     obtained so far for each file at the end of the loop iteration and
+    ///     terminate when count is reached for surety. [Finder] ensures we
+    ///     never exceed count for each argument but may return less which will
+    ///     require us to look in the next file.
     ///
-    /// All conditions below fall under `applyToEachFile`
+    ///   * [applyToEachArg] is [true] - Arguments get a wildcard.
+    ///     Only condition that never uses [CounterWithHistory] functionality
+    ///     of [Finder]. Each argument gets an equal chance to get to specified
+    ///     count when not [AggregateType.all]. Even if we have to index
+    ///     every file & check!
     ///
-    /// When `applyToEachFile` is true, it is imperative to optimize
-    /// transformations, saving on "time", even some few milliseconds.
+    /// When [applyToEachFile] is [true] and :
     ///
-    /// We interrupt current transformation and skip to next file manually.
+    ///   * [applyToEachArg] is [false] - for each file we take a
+    ///     specified count when not [AggregateType.all]. [Finder] handles the
+    ///     trivial `!applyToEach` which guarantees exact or less based on
+    ///     file passed.
     ///
-    else if (applyToEachFile) {
-      /// When `applyToEach` argument is false, we keep count per file
-      var countForEachFile = <int, int>{};
+    ///   * [applyToEachArg] is [true] - Files get a wildcard. Each
+    ///     file gets equal chance to reach the count of each argument when
+    ///     not [AggregateType.all]. Even if we have to index the whole file!
 
-      /// When `applyToEach` argument is true, we track current active file &
-      /// whether we reached the limit for count for each argument and yielded
-      /// the last value that triggered the match
-      var currentFile = 0;
-
-      /// We create our custom queue with all files
-      var customQueue = QueueList.from(yamlQueue);
-
-      // Setup all our variables for tracking exiting current transformation
-      if (!applyToEachArg) {
-        countForEachFile = <int, int>{}..addEntries(
-            yamlQueue.mapIndexed((index, element) => MapEntry(index, 0)),
-          );
-      }
-
-      /// Our queue will act as the reference for controlling the loop
-      while (customQueue.isNotEmpty) {
-        final generator = transformAll(
-          resetTracker: true,
-          customQueue: customQueue,
-        );
-
-        // Start transformation
-        for (final match in generator) {
-          ///
-          /// When `applyToEach` argument is false, we break loop if count for
-          /// matches generated for this file has been reached
-          if (!applyToEachArg) {
-            if (countForEachFile[match.currentFile] == count) break;
-
-            // Increment its count if loop wasn't broken
-            countForEachFile.update(match.currentFile, (value) => value + 1);
-          }
-
-          ///
-          /// When `applyToEach` argument is true, we break loop if current
-          /// file limit has been reached for all arguments
-          else {
-            if (currentFile == match.currentFile && match.reachedLimit) {
-              // Yield match that triggered limit and break
-              yield match;
-              break;
-            }
-          }
-
-          /// If generator moved on to another file, update current file.
-          ///
-          /// This occurs when the file has not met the threshold for any of
-          /// the above conditions
-          ///
-          /// OR
-          ///
-          /// It did, and the generator continued. A generator just generates!
-          if (currentFile != match.currentFile) {
-            currentFile = match.currentFile;
-          }
-
-          // Always yield match
-          yield match;
-        }
-
-        /// If loop was terminated, we modify custom queue and skip files
-        /// that were touched. This given by:
-        ///
-        /// currentFile + 1, which will be our start index
-        ///
-        /// If by chance the loop just ended, then we'll skip all elements. This
-        /// renders our custom queue empty thus controller loop will be
-        /// terminated!
-        ///
-        currentFile += 1;
-
-        customQueue = QueueList.from(yamlQueue.skip(currentFile));
-      }
-    }
-  }
-
-  @override
-  Iterable<FindManagerOutput> transformAll({
-    required bool resetTracker,
-    QueueList<YamlMap>? customQueue,
-  }) sync* {
     final numOfFiles = yamlQueue.length;
-    final localQueue = customQueue ?? QueueList.from(yamlQueue);
+    final localQueue = QueueList.from(yamlQueue); // Local editable queue
 
+    /// Label for our loop queueing file for [Finder]
+    fileLooper:
     do {
-      // Index of current file
-      final currentFile = numOfFiles - localQueue.length;
+      final fileIndex = numOfFiles - localQueue.length; // File index
+      final yamlMap = localQueue.removeFirst(); // Current file
 
-      // Reset tracker if not first run, since we havent completed it.
-      if (localQueue.length != yamlQueue.length && resetTracker) {
-        super.resetTracker(currentFile - 1);
+      // Add yaml if we are not starting. Finder always has the first file
+      // TODO : Add first file to finder
+      if (fileIndex != 0) {
+        // Swap and use previous file.
+        _finder.swapMap(yamlMap, cursor: fileIndex - 1);
       }
 
-      final yamlMap = localQueue.removeFirst(); // Get file, remove from list
+      // Loop all matches
+      for (final output in _internalGenerator()) {
+        // Yield value first before checking conditions.
+        yield (currentFile: fileIndex, data: output.data);
 
-      /// If first run, use current yaml map to initialize.
-      ///
-      /// New files just set a new yaml indexer
-      final finder = _setUpFinder(yamlMap); // Get finder
+        super._incrementFileIndex(fileIndex);
 
-      // Now generate, and append current file number
-      for (final match in finder.findAllSync()) {
-        yield (
-          currentFile: currentFile,
-          data: match,
-          reachedLimit: super.incrementWithMatch(match),
-        );
+        /// If we are finding all, just increment file count and continue.
+        ///
+        /// [Finder] handles everything if each file gets equal chance when
+        /// [applyToEachFile] is [true]
+        ///
+        if (aggregator.type == AggregateType.all || applyToEachFile) continue;
+
+        ///
+        /// When [applyToEachFile] is [false], we break loop only when:
+        ///
+        /// * [applyToEach] is [true] and output limit was reached since
+        ///   the counter state is never reset. [MatchCounter] unknowingly
+        ///   returns true while still matching a new file.
+        ///
+        /// * [applyToEach] is [false] just uses the file counter for this
+        ///   [FindManager] which tracks how many values where found in each
+        ///   file
+        ///
+        if ((applyToEachArg && output.reachedLimit) ||
+            (!applyToEachArg && _managerCounter.getSumOfCount() == count)) {
+          break fileLooper;
+        }
       }
     } while (localQueue.isNotEmpty);
-
-    // Reset the tracker and put last tracker into the history
-    if (resetTracker) super.resetTracker(numOfFiles - 1);
   }
+}
 
-  @override
-  List<PrefillData> keysToPrefill() {
-    return <PrefillData>[
-      (keys: _keysToFind.keys, origin: Origin.key),
-      (keys: _valuesToFind, origin: Origin.value),
-      (keys: _pairsToFind.entries.toList(), origin: null),
-    ];
-  }
-
-  /// Get finder for this manager
-  Finder _setUpFinder(YamlMap yamlMap) {
-    /// Currently just returns only the [MagicalFinder] for now
-    return switch (_finderType) {
-      _ => MagicalFinder.findInYaml(
-          yamlMap,
-          keysToFind: _keysToFind,
-          valuesToFind: _valuesToFind,
-          pairsToFind: _pairsToFind,
-        ),
-    };
-  }
+F _setUpFinder<F extends Finder>(
+  YamlMap yamlMap, {
+  required FinderType finderType,
+  required bool saveCounterToHistory,
+  KeysToFind? keysToFind,
+  ValuesToFind? valuesToFind,
+  PairsToFind? pairsToFind,
+}) {
+  return switch (finderType) {
+    _ => ValueFinder.findInYaml(
+        yamlMap,
+        saveCounterToHistory: saveCounterToHistory,
+        keysToFind: keysToFind,
+        valuesToFind: valuesToFind,
+        pairsToFind: pairsToFind,
+      ) as F,
+  };
 }
