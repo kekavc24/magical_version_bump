@@ -4,6 +4,7 @@ part of 'finder.dart';
 base class ValueFinder extends Finder {
   ValueFinder._({
     required super.indexer,
+    super.saveCounterToHistory,
     KeysToFind? keysToFind,
     ValuesToFind? valuesToFind,
     PairsToFind? pairsToFind,
@@ -14,12 +15,14 @@ base class ValueFinder extends Finder {
   /// Setup everything that may need to found
   factory ValueFinder.findInYaml(
     YamlMap yamlMap, {
+    required bool saveCounterToHistory,
     required KeysToFind? keysToFind,
     required ValuesToFind? valuesToFind,
     required PairsToFind? pairsToFind,
   }) {
     return ValueFinder._(
       indexer: MagicalIndexer.forYaml(yamlMap),
+      saveCounterToHistory: saveCounterToHistory,
       keysToFind: keysToFind,
       valuesToFind: valuesToFind,
       pairsToFind: pairsToFind,
@@ -29,12 +32,14 @@ base class ValueFinder extends Finder {
   /// Set up with predefined indexer
   factory ValueFinder.findWithIndexer(
     MagicalIndexer indexer, {
+    required bool saveCounterToHistory,
     required KeysToFind? keysToFind,
     required ValuesToFind? valuesToFind,
     required PairsToFind? pairsToFind,
   }) {
     return ValueFinder._(
       indexer: indexer,
+      saveCounterToHistory: saveCounterToHistory,
       keysToFind: keysToFind,
       valuesToFind: valuesToFind,
       pairsToFind: pairsToFind,

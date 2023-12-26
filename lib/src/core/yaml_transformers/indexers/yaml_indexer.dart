@@ -27,7 +27,7 @@ part of '../yaml_transformer.dart';
 /// marked as nested. See [ NodeData ]
 ///
 class MagicalIndexer {
-  MagicalIndexer._(this._map);
+  MagicalIndexer._(this.map);
 
   /// Instantiate with yaml map
   MagicalIndexer.forYaml(YamlMap yamlMap) : this._(yamlMap);
@@ -36,10 +36,12 @@ class MagicalIndexer {
   MagicalIndexer.forDartMap(Map<dynamic, dynamic> map) : this._(map);
 
   /// Yaml map to search and index
-  final Map<dynamic, dynamic> _map;
+  Map<dynamic, dynamic> map;
 
+  /// Triggers this indexer to generate any terminal values found in a 
+  /// yaml/json map
   Iterable<NodeData> indexYaml() sync* {
-    for (final entry in _map.entries) {
+    for (final entry in map.entries) {
       final setUpData = NodeData.fromRoot(
         key: entry.key as String,
         value: entry.value,
@@ -68,7 +70,7 @@ class MagicalIndexer {
     }
   }
 
-  /// Recursively index a map and yield any terminal values found.
+  /// Recursively indexes a map and yield any terminal values found.
   ///
   /// A recursion on the map always resets the list of indices for any further
   /// recursive calls we may make as we are no longer in a list but a map.
@@ -115,7 +117,7 @@ class MagicalIndexer {
     }
   }
 
-  /// Recursively index nested list and yield any terminal values found.
+  /// Recursively indexes a nested list and yields any terminal values found.
   ///
   /// A list will always generate new indices for a key, value or map,
   /// forcing all [ NodeData ] key/value to be marked as nested with indices

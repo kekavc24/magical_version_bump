@@ -16,19 +16,29 @@ typedef FinderOutput = ({bool reachedLimit, MatchedNodeData data});
 ///
 /// Both [ValueFinder] & ValueSearcher will extend this
 abstract base class Finder {
-  Finder({required MagicalIndexer? indexer}) : _indexer = indexer;
+  Finder({
+    required this.indexer,
+    bool? saveCounterToHistory,
+  }) : _saveCounterToHistory = saveCounterToHistory ?? true;
 
-  /// An indexer that recurses through the [ YamlMap ] and spits out terminal
+  /// An indexer that recurses through the map and spits out terminal
   /// values sequentially.
-  final MagicalIndexer? _indexer;
+  MagicalIndexer indexer;
+
+  /// Indicates whether to save the current counter to history when a
+  /// map to be indexed is swapped
+  final bool _saveCounterToHistory;
 
   /// A tracker to keep track of aggregated values. May be null if not
   /// initialized yet.
   MatchCounter? counter;
 
-  /// Adds limit to [MatchCounter] only when [Finder.find] is called
+  /// Adds limit to [MatchCounter] only when [Finder.find] is called.
+  ///
+  /// [Finder.findAllSync] may call this if called directly or indirectly via
+  /// [Finder.findByCountSync]
   void _setUp(int? count) {
-    counter = MatchCounter(limit: count);
+    counter ??= MatchCounter(limit: count);
   }
 
   /// Prefill counter with values to find for accurate counting
@@ -36,30 +46,49 @@ abstract base class Finder {
   /// All subclasses must override this method.
   void _prefillCounter();
 
-  /// An on-demand generator that is indexing the file.
-  Iterable<NodeData> get _generator {
-    if (_indexer == null) {
-      throw MagicalException(violation: 'Magical Indexer cannot be null');
+  /// Swaps the map currently being indexed by the [MagicalIndexer] tied to
+  /// this [Finder] and returns the current counter state. Throws an error if
+  /// [MatchCounter] is still null when swapping.
+  ///
+  /// May be null if [Finder.find] or [Finder.findByCountSync] or
+  /// [Finder.findAllSync] were never called at all.
+  ///
+  /// Try swapping manually or calling the methods specified above.
+  MatchCounter? swapMap(Map<dynamic, dynamic> map, {int? cursor}) {
+    indexer.map = map;
+
+    /// If [_saveCounterToHistory] is true, a cursor must be provided
+    if (_saveCounterToHistory) {
+      if (cursor == null || counter == null) {
+        throw MagicalException(
+          violation: 'Neither cursor/counter should be null',
+        );
+      }
+      counter!.reset(cursor: cursor);
     }
 
-    return _indexer!.indexYaml();
+    return counter;
   }
 
-  /// Default entry point for finding values. Finds values based on 
+  /// An on-demand generator that is indexing a map.
+  Iterable<NodeData> get _generator => indexer.indexYaml();
+
+  /// Default entry point for finding values. Finds values based on
   /// [AggregateType] specified.
-  /// 
+  ///
   /// Internally uses [Finder.findByCountSync] & [Finder.findAllSync] based on
   /// [AggregateType].
-  /// 
+  ///
   /// If [AggregateType.all], count is ignored. For any other [AggregateType],
   /// count `MUST` be specified.
-  /// 
+  ///
   Iterable<FinderOutput> find({
     required AggregateType aggregateType,
     required bool applyToEach,
     int? count,
   }) sync* {
-    _setUp(count); // Set up counter ready for use
+    // Set up counter ready for use if null
+    _setUp(count);
 
     // For AggregateType.all
     if (aggregateType == AggregateType.all) {
@@ -73,7 +102,10 @@ abstract base class Finder {
       );
     }
 
-    yield* findByCountSync(count, applyToEach: applyToEach);
+    yield* findByCountSync(
+      count,
+      applyToEach: applyToEach,
+    );
   }
 
   /// Find by count synchronously, value by value
@@ -81,9 +113,6 @@ abstract base class Finder {
     int count, {
     required bool applyToEach,
   }) sync* {
-    /// Incase this method is called directly instead of [Finder.find]
-    if (counter == null) _setUp(count);
-
     // Prefill tracker with everything being tracked.
     _prefillCounter();
 
@@ -104,6 +133,10 @@ abstract base class Finder {
 
   /// Find all matches synchronously
   Iterable<FinderOutput> findAllSync() sync* {
+    /// Incase this method is called directly instead of [Finder.find] or
+    /// indirectly via [Finder.findByCountSync]
+    _setUp(null);
+
     for (final nodeData in _generator) {
       // Generate matched node data
       final matchedNodeData = generateMatch(nodeData);
