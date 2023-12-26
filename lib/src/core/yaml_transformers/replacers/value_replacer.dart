@@ -31,7 +31,7 @@ class MagicalReplacer extends Replacer {
     );
 
     return (
-      mapping: {matchedNodeData.data as String: replacement},
+      mapping: {matchedNodeData.data: replacement},
       updatedMap: YamlMap.wrap(updatedMap),
     );
   }

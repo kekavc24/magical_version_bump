@@ -77,7 +77,16 @@ class FinderManager extends TransformerManager {
     );
   }
 
+  /// Indicates a finder used by this manager to generate matches.
+  /// 
+  /// This manager just queues file based on some conditions.
   static late Finder _finder;
+
+  /// Accesses the counter used by the finder in this [FinderManager].
+  /// 
+  /// Accessing this before ever calling [Finder.find] may result in a 
+  /// null exception being thrown.
+  MatchCounter get matchCounter => _finder.counter!;
 
   ///
   Iterable<FinderOutput> _internalGenerator() {
@@ -99,7 +108,7 @@ class FinderManager extends TransformerManager {
   Iterable<FindManagerOutput> generate() sync* {
     final applyToEachFile = super._aggregator.applyToEachFile;
     final applyToEachArg = super._aggregator.applyToEachArg;
-    final count = super._aggregator.count!;
+    final count = super._aggregator.count;
 
     /// Finding values is the hardest part.
     ///
@@ -138,14 +147,17 @@ class FinderManager extends TransformerManager {
     final numOfFiles = yamlQueue.length;
     final localQueue = QueueList.from(yamlQueue); // Local editable queue
 
+    /// Keep track of file index to use as a cursor. We use it to reset the
+    /// last counter state to history. For easy access by [ConsolePrinter]
+    var fileIndex = 0;
+
     /// Label for our loop queueing file for [Finder]
     fileLooper:
     do {
-      final fileIndex = numOfFiles - localQueue.length; // File index
+      fileIndex = numOfFiles - localQueue.length; // File index
       final yamlMap = localQueue.removeFirst(); // Current file
 
       // Add yaml if we are not starting. Finder always has the first file
-      // TODO : Add first file to finder
       if (fileIndex != 0) {
         // Swap and use previous file.
         _finder.swapMap(yamlMap, cursor: fileIndex - 1);
@@ -182,6 +194,12 @@ class FinderManager extends TransformerManager {
         }
       }
     } while (localQueue.isNotEmpty);
+
+    /// Reset counter with current file index to history.
+    ///
+    /// This index denotes the file whose counter is active. No need to
+    /// subtract "1" to go back to previous file.
+    _finder.counter!.reset(cursor: fileIndex);
   }
 }
 
