@@ -61,10 +61,16 @@ base class Counter<T> {
 
   /// Obtains count based on a [TrackerKey] wrapping the value. Returns zero if
   /// [TrackerKey] is not being tracked or its count is zero.
-  /// 
-  /// Internally used by [Counter.getCount] which wraps a value with a 
+  ///
+  /// Internally used by [Counter.getCount] which wraps a value with a
   /// [TrackerKey] before obtaining the count use this method.
   int getCountFromKey(TrackerKey<T> key) {
     return _counter[key] ?? 0; // Return 0 if missing
+  }
+
+  /// Obtains the sum of all counts of values being counted
+  int getSumOfCount() {
+    if (_counter.isEmpty) return 0;
+    return _counter.values.reduce((value, element) => value + element);
   }
 }

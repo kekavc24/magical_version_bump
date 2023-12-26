@@ -19,7 +19,7 @@ base class CounterWithHistory<C, T> extends Counter<T> {
   /// Order is based on file number
   final Map<C, Map<TrackerKey<T>, int>> _counterHistory;
 
-  Map<C, Map<TrackerKey<T>, int>> get trackerHistory => _counterHistory;
+  Map<C, Map<TrackerKey<T>, int>> get counterHistory => _counterHistory;
 
   @override
   int getCountFromKey(
@@ -29,7 +29,7 @@ base class CounterWithHistory<C, T> extends Counter<T> {
   }) {
     // A valid cursor used as an index must be present
     if (useHistory && cursor == null) {
-      throw MagicalException(violation: 'A valid file index is required');
+      throw MagicalException(violation: 'A valid cursor is required');
     }
 
     int? count;
@@ -39,9 +39,7 @@ base class CounterWithHistory<C, T> extends Counter<T> {
       final counterFromHistory = _counterHistory[cursor];
 
       if (counterFromHistory == null) {
-        throw MagicalException(
-          violation: 'This file index is not being tracked!',
-        );
+        throw MagicalException(violation: 'This cursor is not being tracked!');
       }
 
       count = counterFromHistory[key];
@@ -52,17 +50,21 @@ base class CounterWithHistory<C, T> extends Counter<T> {
     return count ?? 0; // Return 0 if missing
   }
 
-  /// Resets a tracker.
+  /// Resets a tracker and returns the state save to history.
   ///
   /// The last tracker state is saved to history. A file number is required
-  /// to link this file
-  void reset({required C cursor}) {
+  /// to link this file.
+  ///
+  ///
+  Map<TrackerKey<T>, int> reset({required C cursor}) {
     if (_counterHistory.containsKey(cursor)) {
-      throw MagicalException(violation: 'This file is already tracked!');
+      throw MagicalException(violation: 'This cursor is already tracked!');
     }
 
-    _counterHistory[cursor] = {..._counter};
+    final stateToSave = {..._counter};
+    _counterHistory[cursor] = stateToSave;
     _counter.clear();
+    return stateToSave;
   }
 
   @override
