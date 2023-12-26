@@ -21,33 +21,16 @@ base class CounterWithHistory<C, T> extends Counter<T> {
 
   Map<C, Map<TrackerKey<T>, int>> get counterHistory => _counterHistory;
 
-  @override
-  int getCountFromKey(
-    TrackerKey<T> key, {
-    bool useHistory = false,
-    C? cursor,
-  }) {
-    // A valid cursor used as an index must be present
-    if (useHistory && cursor == null) {
-      throw MagicalException(violation: 'A valid cursor is required');
+  int? getCountFromHistory(C cursor, T value, Origin origin) {
+    // Get history of this cursor
+    final counterFromHistory = _counterHistory[cursor];
+
+    if (counterFromHistory != null) {
+      final key = createKey(value, origin: origin);
+      return counterFromHistory[key];
     }
 
-    int? count;
-
-    // The history should have this value
-    if (useHistory) {
-      final counterFromHistory = _counterHistory[cursor];
-
-      if (counterFromHistory == null) {
-        throw MagicalException(violation: 'This cursor is not being tracked!');
-      }
-
-      count = counterFromHistory[key];
-    } else {
-      count = _counter[key];
-    }
-
-    return count ?? 0; // Return 0 if missing
+    return null;
   }
 
   /// Resets a tracker and returns the state save to history.

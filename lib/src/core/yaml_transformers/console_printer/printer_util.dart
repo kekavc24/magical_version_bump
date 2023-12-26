@@ -11,16 +11,20 @@ enum CharSet { utf8, ascii }
 /// The [Origin] guarantees that a value will be unique and prevent duplication
 /// as various keys/values/pairs may have been found/replaced from different
 /// keys.
-T _extractKey<T>({required Origin origin, required dynamic value}) {
+T _extractKey<T>({
+  required Origin origin,
+  required dynamic value,
+  bool isReplacement = false,
+}) {
   // For value, return as is
-  if (origin == Origin.value) {
+  if (origin == Origin.value && !isReplacement) {
     return TrackedValue(key: value as String, origin: origin) as T;
   }
 
   // For key, we get a list of values
-  if (origin == Origin.key) {
+  if (origin == Origin.key || isReplacement) {
     return (value as Iterable<String>)
-        .map((e) => TrackedValue(key: e, origin: Origin.key))
+        .map((e) => TrackedValue(key: e, origin: origin))
         .toList() as T;
   }
 
@@ -152,19 +156,16 @@ String getBranch({
 String createHeader({
   required ConsoleViewFormat format,
   required dynamic fileInfo,
-  bool? useFileName,
+  int? fileMatches,
 }) {
-  var header = '';
-
   if (format == ConsoleViewFormat.live) {
-    header = '\n-- File at index -> $fileInfo --';
-  } else {
-    useFileName ??= false;
-    header =
-        "\n-- Aggregated Info for : ${useFileName ? '$fileInfo' : 'all files'}";
+    return magenta.wrap('\n-- File at index -> $fileInfo --\n')!;
   }
 
-  return lightMagenta.wrap('$header\n')!;
+  final header =
+      """\n-- Aggregated Info for : '$fileInfo'. ${styleUnderlined.wrap('Found $fileMatches matches')!}""";
+
+  return magenta.wrap('$header\n')!;
 }
 
 /// A tree-like string deno
@@ -172,14 +173,20 @@ String createHeader({
 String formatInfo({
   required String key,
   required List<TrackedValue> trackedValues,
-  required bool showCount,
-  int? count,
+  required int foundCount,
+  int? replacedCount,
 }) {
   // Format buffer
   final formatBuffer = StringBuffer();
 
   // Value used as anchor
-  final anchor = showCount ? '$key ${_countSeparator()} ${count ?? 1}' : key;
+  var anchor = '$key ${_countSeparator()} Found $foundCount';
+
+  if (replacedCount != null) {
+    anchor += ', Replaced $replacedCount';
+  }
+
+  //
   final indexOfLast = trackedValues.length - 1; // Index of last element
 
   /// Check if in replace mode. Replace mode stores value in a

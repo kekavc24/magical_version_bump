@@ -55,7 +55,7 @@ base class Counter<T> {
   /// Obtains count based on a value being being tracked. Returns zero if
   /// value is not being tracked or its count is zero.
   int getCount(T value, {required Origin origin}) {
-    final key = createKey(value); // Key to get count using
+    final key = createKey(value, origin: origin); // Key to get count using
     return getCountFromKey(key);
   }
 

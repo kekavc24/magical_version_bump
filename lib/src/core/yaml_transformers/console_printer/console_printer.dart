@@ -1,5 +1,5 @@
 import 'package:collection/collection.dart';
-import 'package:magical_version_bump/src/core/yaml_transformers/tranform_counter/transform_counter.dart';
+import 'package:magical_version_bump/src/core/yaml_transformers/counter/transform_counter.dart';
 import 'package:magical_version_bump/src/core/yaml_transformers/yaml_transformer.dart';
 import 'package:magical_version_bump/src/utils/enums/enums.dart';
 import 'package:magical_version_bump/src/utils/typedefs/typedefs.dart';
@@ -100,6 +100,7 @@ base class ConsolePrinter {
     final keys = _extractKey<List<TrackedValue>>(
       origin: origin,
       value: replacements.keys,
+      isReplacement: true,
     );
 
     final trackedPaths = DualTrackedValue.fromValue(
@@ -122,7 +123,7 @@ base class ConsolePrinter {
       final keyInfo = formatInfo(
         key: key.toString(),
         trackedValues: [value],
-        showCount: false,
+        foundCount: 1,
       );
 
       consoleBuffer.write(keyInfo);
@@ -134,7 +135,9 @@ base class ConsolePrinter {
   ReconciledLogs _getLogs({
     required bool useHistory,
     required List<String> fileNames,
-    required ManagerTracker tracker,
+    
+    required MatchCounter matchCounter,
+    required bool isReplace,
   }) {
     final fileLogs = <int, List<String>>{}; // Logs for each file
 
@@ -146,19 +149,25 @@ base class ConsolePrinter {
       // Loop entries linked to a file number
       for (final logEntry in fileEntry.value.entries) {
         final logKey = logEntry.key;
+        final logValue = logEntry.value;
 
-        // Get count for tracker from its history
-        final count = tracker.getCountFromKey(
-          logKey,
-          useHistory: useHistory,
-          cursor: fileIndex,
-        );
+        int? foundCount;
+
+        if (isReplace) {
+          foundCount = matchCounter.getCountFromHistory(
+            fileIndex,
+            logKey.key,
+            logKey.origin,
+          );
+        } else {
+          foundCount = logValue.length;
+        }
 
         final log = formatInfo(
           key: logKey.toString(),
-          trackedValues: logEntry.value,
-          showCount: useHistory,
-          count: count,
+          trackedValues: logValue,
+          foundCount: foundCount ?? 0,
+          replacedCount: isReplace ? logValue.length : null,
         );
 
         formattedLogs.add(log);
@@ -181,7 +190,9 @@ base class ConsolePrinter {
   void aggregateInfo(
     Aggregator aggregator, {
     required List<String> fileNames,
-    required ManagerTracker tracker,
+    required ManagerCounter managerCounter,
+    required MatchCounter matchCounter,
+    required bool isReplace,
   }) {
     // Aggregated info buffer
     final aggregateBuffer = StringBuffer();
@@ -198,15 +209,16 @@ base class ConsolePrinter {
     final linkedLogs = _getLogs(
       useHistory: useHistory,
       fileNames: fileNames,
-      tracker: tracker,
+      matchCounter: matchCounter,
+      isReplace: isReplace,
     );
 
     // Loop all logs linked to a file
-    for (final log in linkedLogs.entries) {
+    for (final (index, log) in linkedLogs.entries.indexed) {
       final header = createHeader(
         format: _format,
         fileInfo: log.key,
-        useFileName: useHistory,
+        fileMatches: managerCounter.getCount(index, origin: Origin.custom),
       );
 
       // Add to buffer
