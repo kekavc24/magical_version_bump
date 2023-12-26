@@ -93,19 +93,19 @@ abstract base class Finder {
     // For AggregateType.all
     if (aggregateType == AggregateType.all) {
       yield* findAllSync();
-    }
+    } else {
+      // Count must be valid going forward. First &
+      if (count == null || count < 0) {
+        throw MagicalException(
+          violation: 'Count must be a value equal/greater than 1',
+        );
+      }
 
-    // Count must be valid going forward. First &
-    if (count == null || count < 0) {
-      throw MagicalException(
-        violation: 'Count must be a value equal/greater than 1',
+      yield* findByCountSync(
+        count,
+        applyToEach: applyToEach,
       );
     }
-
-    yield* findByCountSync(
-      count,
-      applyToEach: applyToEach,
-    );
   }
 
   /// Find by count synchronously, value by value
