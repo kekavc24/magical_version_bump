@@ -21,8 +21,13 @@ base class Counter<T> {
   Map<TrackerKey<T>, int> get counterstate => _counter;
 
   /// Creates a tracker key tracking
-  TrackerKey<T> createKey(T value, {Origin? origin}) {
-    return TrackerKey<T>.fromValue(value, origin!);
+  TrackerKey<T> createKey(T value, {required Origin origin}) {
+    if (value is MapEntry) {
+      return DualTrackerKey<T, dynamic>.fromEntry(
+        entry: value,
+      );
+    }
+    return TrackerKey<T>.fromValue(value, origin);
   }
 
   /// Adds a key if missing and increments the count if present.
@@ -36,7 +41,7 @@ base class Counter<T> {
 
   /// Prefills counter with values we need to accurately keep count of. Use
   /// when you know each value being counted before hand.
-  void prefill(List<dynamic>? keys, {Origin? origin}) {
+  void prefill(List<dynamic>? keys, {required Origin origin}) {
     if (keys == null) return;
     for (final value in keys) {
       final key = createKey(value as T, origin: origin);
@@ -45,7 +50,7 @@ base class Counter<T> {
   }
 
   /// Increments count with dynamic value
-  void increment(Iterable<dynamic> values, {Origin? origin}) {
+  void increment(Iterable<dynamic> values, {required Origin origin}) {
     for (final candidate in values) {
       final key = createKey(candidate as T, origin: origin);
       _addKey(key);
@@ -73,4 +78,7 @@ base class Counter<T> {
     if (_counter.isEmpty) return 0;
     return _counter.values.reduce((value, element) => value + element);
   }
+
+  @override
+  String toString() => _counter.toString();
 }

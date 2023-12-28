@@ -49,7 +49,4 @@ base class CounterWithHistory<C, T> extends Counter<T> {
     _counter.clear();
     return stateToSave;
   }
-
-  @override
-  String toString() => _counter.toString();
 }
