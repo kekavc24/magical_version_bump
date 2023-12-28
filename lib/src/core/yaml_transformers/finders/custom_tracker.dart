@@ -27,7 +27,7 @@ final class MatchCounter extends CounterWithHistory<int, dynamic> {
 
     // Add all pairs
     if (data.matchedPairs.isNotEmpty) {
-      increment(data.matchedPairs.entries);
+      increment(data.matchedPairs.entries, origin: Origin.pair);
     }
 
     /// All must be equal or greater than limit. Other keys may have

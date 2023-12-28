@@ -12,39 +12,49 @@ base class ValueFinder extends Finder {
         _valuesToFind = valuesToFind ?? [],
         _pairsToFind = pairsToFind ?? {};
 
-  /// Setup everything that may need to found
-  factory ValueFinder.findInYaml(
-    YamlMap yamlMap, {
-    required bool saveCounterToHistory,
-    required KeysToFind? keysToFind,
-    required ValuesToFind? valuesToFind,
-    required PairsToFind? pairsToFind,
-  }) {
-    return ValueFinder._(
-      indexer: MagicalIndexer.forYaml(yamlMap),
-      saveCounterToHistory: saveCounterToHistory,
-      keysToFind: keysToFind,
-      valuesToFind: valuesToFind,
-      pairsToFind: pairsToFind,
-    );
-  }
-
   /// Set up with predefined indexer
-  factory ValueFinder.findWithIndexer(
+  ValueFinder.findWithIndexer(
     MagicalIndexer indexer, {
     required bool saveCounterToHistory,
     required KeysToFind? keysToFind,
     required ValuesToFind? valuesToFind,
     required PairsToFind? pairsToFind,
-  }) {
-    return ValueFinder._(
-      indexer: indexer,
-      saveCounterToHistory: saveCounterToHistory,
-      keysToFind: keysToFind,
-      valuesToFind: valuesToFind,
-      pairsToFind: pairsToFind,
-    );
-  }
+  }) : this._(
+          indexer: indexer,
+          saveCounterToHistory: saveCounterToHistory,
+          keysToFind: keysToFind,
+          valuesToFind: valuesToFind,
+          pairsToFind: pairsToFind,
+        );
+
+  ValueFinder.findInMap(
+    Map<dynamic, dynamic> map, {
+    required bool saveCounterToHistory,
+    required KeysToFind? keysToFind,
+    required ValuesToFind? valuesToFind,
+    required PairsToFind? pairsToFind,
+  }) : this.findWithIndexer(
+          MagicalIndexer.forDartMap(map),
+          saveCounterToHistory: saveCounterToHistory,
+          keysToFind: keysToFind,
+          valuesToFind: valuesToFind,
+          pairsToFind: pairsToFind,
+        );
+
+  /// Setup everything that may need to found
+  ValueFinder.findInYaml(
+    YamlMap yamlMap, {
+    required bool saveCounterToHistory,
+    required KeysToFind? keysToFind,
+    required ValuesToFind? valuesToFind,
+    required PairsToFind? pairsToFind,
+  }) : this.findInMap(
+          yamlMap,
+          saveCounterToHistory: saveCounterToHistory,
+          keysToFind: keysToFind,
+          valuesToFind: valuesToFind,
+          pairsToFind: pairsToFind,
+        );
 
   /// Keys to find from indexed values
   final KeysToFind _keysToFind;
@@ -79,10 +89,7 @@ base class ValueFinder extends Finder {
     if (_keysToFind.keys.isEmpty) return [];
 
     // Get all nodes keys together in order
-    final nodeKeys = [
-      ...nodeData.precedingKeys,
-      nodeData.key,
-    ].map((e) => e.toString());
+    final nodeKeys = nodeData.getKeysAsString();
 
     // If not grouped, we check if any key we are searching for is present
     if (_keysToFind.orderType == OrderType.loose) {

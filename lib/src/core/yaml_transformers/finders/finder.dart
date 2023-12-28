@@ -33,12 +33,16 @@ abstract base class Finder {
   /// initialized yet.
   MatchCounter? counter;
 
-  /// Adds limit to [MatchCounter] only when [Finder.find] is called.
+  /// Adds limit to [MatchCounter] only when [Finder.findAllSync] or
+  /// [Finder.findByCountSync] is called.
   ///
-  /// [Finder.findAllSync] may call this if called directly or indirectly via
-  /// [Finder.findByCountSync]
-  void _setUp(int? count) {
-    counter ??= MatchCounter(limit: count);
+  /// Will always be called if this finder's `saveCounterToHistory` was set
+  /// to false. And is reused to by swapping map via [Finder.swapMap].
+  void _setUpCounter(int? count) {
+    // If history was false, setup again to ensure count accuracy.
+    if (counter == null || counter != null && !_saveCounterToHistory) {
+      counter = MatchCounter(limit: count);
+    }
   }
 
   /// Prefill counter with values to find for accurate counting
@@ -53,7 +57,8 @@ abstract base class Finder {
   /// May be null if [Finder.find] or [Finder.findByCountSync] or
   /// [Finder.findAllSync] were never called at all.
   ///
-  /// Try swapping manually or calling the methods specified above.
+  /// Try swapping manually or calling the methods specified above if you want
+  /// to avoid the error.
   MatchCounter? swapMap(Map<dynamic, dynamic> map, {int? cursor}) {
     indexer.map = map;
 
@@ -87,14 +92,11 @@ abstract base class Finder {
     required bool applyToEach,
     int? count,
   }) sync* {
-    // Set up counter ready for use if null
-    _setUp(count);
-
     // For AggregateType.all
     if (aggregateType == AggregateType.all) {
       yield* findAllSync();
     } else {
-      // Count must be valid going forward. First &
+      // Count must be valid going forward.
       if (count == null || count < 0) {
         throw MagicalException(
           violation: 'Count must be a value equal/greater than 1',
@@ -113,17 +115,31 @@ abstract base class Finder {
     int count, {
     required bool applyToEach,
   }) sync* {
+    /// Incase this method is called directly instead of [Finder.find]
+    _setUpCounter(count);
+
     // Prefill tracker with everything being tracked.
     _prefillCounter();
 
     /// If we are not applying to each argument. Take count as is
     if (!applyToEach) {
-      yield* findAllSync().take(count);
+      yield* findAllSync(prefilledCounter: true).take(count);
     }
 
     /// If not take as until limit is reached
     else {
-      yield* findAllSync().takeWhile((value) => !value.reachedLimit);
+      FinderOutput? lastValue;
+
+      yield* findAllSync(prefilledCounter: true).takeWhile(
+        (value) {
+          /// Last value may be ignored. Last value itself causes the limit
+          /// to be reached. The limit is never reaches before.
+          if (value.reachedLimit) lastValue = value;
+          return !value.reachedLimit;
+        },
+      );
+
+      if (lastValue != null) yield lastValue!;
     }
   }
 
@@ -132,10 +148,12 @@ abstract base class Finder {
       findAllSync().toList().map((output) => output.data).toList();
 
   /// Find all matches synchronously
-  Iterable<FinderOutput> findAllSync() sync* {
-    /// Incase this method is called directly instead of [Finder.find] or
-    /// indirectly via [Finder.findByCountSync]
-    _setUp(null);
+  Iterable<FinderOutput> findAllSync({bool prefilledCounter = false}) sync* {
+    /// Incase this method is called indirectly via [Finder.find]
+    ///
+    /// [Finder.findByCount] always prefills the counter thus always
+    /// sets up the [MatchCounter]
+    if (!prefilledCounter) _setUpCounter(null);
 
     for (final nodeData in _generator) {
       // Generate matched node data
