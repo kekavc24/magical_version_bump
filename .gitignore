@@ -12,7 +12,7 @@ doc/api/
 .test_coverage.dart
 coverage/
 .test_runner.dart
-fake.dart
+fake*.dart
 fake.yaml
 fake.json
 mock_data.json

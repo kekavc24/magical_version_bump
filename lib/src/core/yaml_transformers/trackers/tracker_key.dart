@@ -1,4 +1,4 @@
-part of 'transform_counter.dart';
+part of 'tracker.dart';
 
 /// Represents a custom key to use as a tracker. It holds a single value.
 @immutable
