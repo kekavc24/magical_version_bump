@@ -1,4 +1,9 @@
-part of 'manager.dart';
+import 'package:collection/collection.dart';
+import 'package:magical_version_bump/src/core/yaml_transformers/console_printer/console_printer.dart';
+import 'package:magical_version_bump/src/core/yaml_transformers/yaml_transformer.dart';
+import 'package:magical_version_bump/src/utils/enums/enums.dart';
+import 'package:magical_version_bump/src/utils/typedefs/typedefs.dart';
+import 'package:yaml/yaml.dart';
 
 enum FinderType { byValue, bySearch, both }
 
@@ -11,13 +16,13 @@ class FinderManager extends TransformerManager {
   FinderManager._({
     required super.files,
     required super.aggregator,
-    required super.printer,
+    super.printer,
   });
 
   factory FinderManager.fullSetup({
     required List<FileOutput> files,
     required Aggregator aggregator,
-    required ConsolePrinter printer,
+    ConsolePrinter? printer,
     required FinderType finderType,
     required KeysToFind? keysToFind,
     required ValuesToFind? valuesToFind,
@@ -46,7 +51,7 @@ class FinderManager extends TransformerManager {
   factory FinderManager.findValues({
     required List<FileOutput> files,
     required Aggregator aggregator,
-    required ConsolePrinter printer,
+    ConsolePrinter? printer,
     required ValuesToFind valuesToFind,
   }) {
     return FinderManager.fullSetup(
@@ -63,7 +68,7 @@ class FinderManager extends TransformerManager {
   factory FinderManager.findKeys({
     required List<FileOutput> files,
     required Aggregator aggregator,
-    required ConsolePrinter printer,
+    ConsolePrinter? printer,
     required KeysToFind keysToFind,
   }) {
     return FinderManager.fullSetup(
@@ -78,13 +83,13 @@ class FinderManager extends TransformerManager {
   }
 
   /// Indicates a finder used by this manager to generate matches.
-  /// 
+  ///
   /// This manager just queues file based on some conditions.
   static late Finder _finder;
 
   /// Accesses the counter used by the finder in this [FinderManager].
-  /// 
-  /// Accessing this before ever calling [Finder.find] may result in a 
+  ///
+  /// Accessing this before ever calling [Finder.find] may result in a
   /// null exception being thrown.
   MatchCounter get matchCounter => _finder.counter!;
 
@@ -101,15 +106,11 @@ class FinderManager extends TransformerManager {
   Future<void> transform() async {
     // Loop all matches and add to printer
     for (final output in generate()) {
-      _printer.addValuesFound(output.currentFile, output.data);
+      super.printer.addValuesFound(output.currentFile, output.data);
     }
   }
 
   Iterable<FindManagerOutput> generate() sync* {
-    final applyToEachFile = super._aggregator.applyToEachFile;
-    final applyToEachArg = super._aggregator.applyToEachArg;
-    final count = super._aggregator.count;
-
     /// Finding values is the hardest part.
     ///
     /// Rules for each condition of the [Aggregator] based on:
@@ -168,14 +169,17 @@ class FinderManager extends TransformerManager {
         // Yield value first before checking conditions.
         yield (currentFile: fileIndex, data: output.data);
 
-        super._incrementFileIndex(fileIndex);
+        super.incrementFileIndex(fileIndex);
 
         /// If we are finding all, just increment file count and continue.
         ///
         /// [Finder] handles everything if each file gets equal chance when
         /// [applyToEachFile] is [true]
         ///
-        if (aggregator.type == AggregateType.all || applyToEachFile) continue;
+        if (aggregator.type == AggregateType.all ||
+            aggregator.applyToEachFile) {
+          continue;
+        }
 
         ///
         /// When [applyToEachFile] is [false], we break loop only when:
@@ -188,8 +192,9 @@ class FinderManager extends TransformerManager {
         ///   [FindManager] which tracks how many values where found in each
         ///   file
         ///
-        if ((applyToEachArg && output.reachedLimit) ||
-            (!applyToEachArg && _managerCounter.getSumOfCount() == count)) {
+        if ((aggregator.applyToEachArg && output.reachedLimit) ||
+            (!aggregator.applyToEachArg &&
+                counter.getSumOfCount() == aggregator.count)) {
           break fileLooper;
         }
       }

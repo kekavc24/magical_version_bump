@@ -1,10 +1,16 @@
-part of 'manager.dart';
+import 'package:magical_version_bump/src/core/yaml_transformers/console_printer/console_printer.dart';
+import 'package:magical_version_bump/src/core/yaml_transformers/trackers/tracker.dart';
+import 'package:magical_version_bump/src/core/yaml_transformers/yaml_transformer.dart';
+import 'package:magical_version_bump/src/utils/enums/enums.dart';
+import 'package:magical_version_bump/src/utils/typedefs/typedefs.dart';
+
+part 'replacer_tracker.dart';
 
 class ReplacerManager extends TransformerManager {
   ReplacerManager._({
     required super.files,
     required super.aggregator,
-    required super.printer,
+    super.printer,
     required this.commandType,
   }) : assert(
           !commandType.isFinder,
@@ -15,7 +21,7 @@ class ReplacerManager extends TransformerManager {
     required WalkSubCommandType commandType,
     required List<FileOutput> files,
     required Aggregator aggregator,
-    required ConsolePrinter printer,
+    ConsolePrinter? printer,
     required List<ReplacementTargets> targets,
   }) {
     _replacer = _getReplacer(commandType, targets: targets);
@@ -56,56 +62,56 @@ class ReplacerManager extends TransformerManager {
     // Modifiable queue we can read and swap modifiable values back and forth
     final localQueue = [...yamlQueue];
 
-    /// Create a local tracker used only by the [Renamer] to prevent
-    /// unnecessary recursions on same path for a single key already replaced
-    final localCounter = Counter<String>();
+    /// Accumulate all matches from [FinderManager]
+    final matches = _manager.generate().toList();
 
-    for (final match in _manager.generate()) {
-      final file = localQueue[match.currentFile]; // Get yaml file
+    // TODO: Add implementations if matches are missing
+    if (matches.isEmpty) {}
 
-      // Prevents unnecessary replacement for deeply nested keys
-      var canReplace = true;
+    var targets = <TrackerOutput>[];
 
-      ///
-      /// For key rename, we check to prevent any unnecessary recursion on
-      /// keys already renamed! Caveat of indexing to terminal value
-      if (commandType == WalkSubCommandType.rename) {
-        final keyPath = (_replacer as MagicalRenamer).replaceDryRun(
-          match.data,
-        );
+    if (commandType == WalkSubCommandType.rename) {
+      final tracker = ReplacerTracker()..addAll(matches);
 
-        /// Store file number and key path. Guarantees some level of uniqueness
-        /// and also ties it to a file
-        final keyInTracker = '${match.currentFile},$keyPath';
+      targets.addAll(tracker.getMatches());
+    } else {
+      targets = matches
+          .fold(<int, List<MatchedNodeData>>{}, (previousValue, element) {
+            previousValue.update(
+              element.currentFile,
+              (value) => [...value, element.data],
+              ifAbsent: () => [element.data],
+            );
+            return previousValue;
+          })
+          .entries
+          .map((e) => (fileNumber: e.key, matches: e.value))
+          .toList();
+    }
 
-        // Make sure the key path has just 1 of it
-        if (localCounter.getCount(keyInTracker, origin: Origin.key) == 1) {
-          canReplace = false;
-        } else {
-          localCounter.increment([keyInTracker], origin: Origin.key);
-        }
-      }
+    for (final target in targets) {
+      var file = localQueue[target.fileNumber]; // File to edit
 
-      // Replace if current value is not being tracked.
-      if (canReplace) {
-        final output = _replacer.replace(file, matchedNodeData: match.data);
+      for (final match in target.matches) {
+        final modifiedFile = _replacer.replace(file, matchedNodeData: match);
 
-        // Swap old file in queue with new one
-        localQueue[match.currentFile] = output.updatedMap;
+        file = modifiedFile.updatedMap;
 
-        /// Add to counter for replacements in file
-        super._incrementFileIndex(match.currentFile);
-
-        // Add to printer
-        _printer.addValuesReplaced(
-          match.currentFile,
+        // TODO: Add to console format
+        printer.addValuesReplaced(
+          target.fileNumber,
           origin: commandType == WalkSubCommandType.rename
               ? Origin.key
               : Origin.value,
-          replacements: output.mapping,
-          oldPath: match.data.toString(),
+          replacements: modifiedFile.mapping,
+          oldPath: match.toString(),
         );
+
+        // Track current count of replacements
+        super.incrementFileIndex(target.fileNumber);
       }
+
+      localQueue[target.fileNumber] = file; // Swap with updated
     }
   }
 }
@@ -115,8 +121,8 @@ Replacer _getReplacer(
   required List<ReplacementTargets> targets,
 }) {
   return switch (commandType) {
-    WalkSubCommandType.rename => MagicalRenamer(targets),
-    _ => MagicalReplacer(targets),
+    WalkSubCommandType.rename => KeySwapper(targets),
+    _ => ValueReplacer(targets),
   };
 }
 
@@ -124,7 +130,7 @@ FinderManager _getManager(
   WalkSubCommandType commandType, {
   required List<FileOutput> files,
   required Aggregator aggregator,
-  required ConsolePrinter printer,
+  ConsolePrinter? printer,
   required Replacer replacer,
 }) {
   final manager = commandType == WalkSubCommandType.rename
@@ -132,13 +138,13 @@ FinderManager _getManager(
           files: files,
           aggregator: aggregator,
           printer: printer,
-          keysToFind: (replacer as MagicalRenamer).getTargets(),
+          keysToFind: replacer.getTargets() as KeysToFind,
         )
       : FinderManager.findValues(
           files: files,
           aggregator: aggregator,
           printer: printer,
-          valuesToFind: (replacer as MagicalReplacer).getTargets(),
+          valuesToFind: replacer.getTargets() as ValuesToFind,
         );
 
   return manager;

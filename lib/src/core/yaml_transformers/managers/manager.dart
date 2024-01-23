@@ -1,16 +1,13 @@
 import 'package:collection/collection.dart';
 import 'package:magical_version_bump/src/core/yaml_transformers/console_printer/console_printer.dart';
-import 'package:magical_version_bump/src/core/yaml_transformers/counter/transform_counter.dart';
-import 'package:magical_version_bump/src/core/yaml_transformers/yaml_transformer.dart';
+import 'package:magical_version_bump/src/core/yaml_transformers/trackers/counter/generic_counter.dart';
 import 'package:magical_version_bump/src/utils/enums/enums.dart';
 import 'package:magical_version_bump/src/utils/typedefs/typedefs.dart';
+import 'package:meta/meta.dart';
 import 'package:yaml/yaml.dart';
 
-part 'finder_manager.dart';
-part 'replacer_manager.dart';
-part 'custom_tracker.dart';
-
-typedef ManagerCounter = Counter<int>;
+export 'finder_manager/finder_manager.dart';
+export 'replacer_manager/replacer_manager.dart';
 
 abstract class TransformerManager {
   TransformerManager({
@@ -20,7 +17,7 @@ abstract class TransformerManager {
   })  : _aggregator = aggregator,
         _printer = printer ?? ConsolePrinter(format: aggregator.viewFormat),
         _yamlQueue = QueueList.from(files.map((e) => e.fileAsMap)),
-        _managerCounter = ManagerCounter();
+        _managerCounter = Counter<int, int>();
 
   /// A queue of all yaml maps to run a transform operation on
   final QueueList<YamlMap> _yamlQueue;
@@ -32,8 +29,8 @@ abstract class TransformerManager {
   /// command's handler to print to console all aggregated info
   final ConsolePrinter _printer;
 
-  /// Tracker for keeping track of transformations made.
-  final ManagerCounter _managerCounter;
+  /// Tracker for keeping track of transformations made for each file
+  final Counter<int, int> _managerCounter;
 
   /// Current queue with yaml files
   QueueList<YamlMap> get yamlQueue => _yamlQueue;
@@ -42,13 +39,13 @@ abstract class TransformerManager {
   Aggregator get aggregator => _aggregator;
 
   /// Tracker in use by this manager
-  ManagerCounter get counter => _managerCounter;
-
+  Counter<int, int> get counter => _managerCounter;
 
   ConsolePrinter get printer => _printer;
 
   /// Adds a specified file index to a [Counter] in this manager
-  void _incrementFileIndex(int fileIndex) {
+  @protected
+  void incrementFileIndex(int fileIndex) {
     return _managerCounter.increment([fileIndex], origin: Origin.custom);
   }
 

@@ -64,8 +64,15 @@ abstract base class DualTracker<K, L, V> extends SingleValueTracker<K, V> {
 /// [C] - denotes the cursor type. Think of it as a key linking any tracker
 /// state stored. Can be any data type as long as you make it unique
 ///
-/// [H] - denotes the [Map] whose state is being saved
-base mixin MapHistory<C, K, L, V> on DualTracker<K, L, V> {
+/// [K] - denotes the value being tracked. Acts as a key to the map used
+/// internally. It is wrapped with a [TrackerKey] for equality & hashing ease.
+///
+/// [L] - denotes an optional type incase a [MapEntry] is passed. In which
+/// case, the value of [K] & [L] are both wrapped in a [DualTrackerKey].
+///
+/// [V] - denotes the tracking info. Stored as is.
+base mixin MapHistory<C, K, L, V>
+    on SingleValueTracker<K, V> {
   /// Stores the current
   final Map<C, Map<TrackerKey<K>, V>> _history = {};
 
