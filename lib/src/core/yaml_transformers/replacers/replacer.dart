@@ -5,7 +5,7 @@ import 'package:magical_version_bump/src/utils/typedefs/typedefs.dart';
 import 'package:meta/meta.dart';
 import 'package:yaml/yaml.dart';
 
-part 'key_replacer.dart';
+part 'key_swapper.dart';
 part 'value_replacer.dart';
 
 typedef ReplacementOutput = ({
@@ -13,9 +13,9 @@ typedef ReplacementOutput = ({
   Map<String, String> mapping,
 });
 
-/// Abstract class for rename keys/replacing values
+/// Abstract class for renaming keys/replacing values
 ///
-/// [MagicalReplacer] & [MagicalRenamer] extend this
+/// [ValueReplacer] & [KeySwapper] extend this.
 abstract class Replacer {
   Replacer({
     required List<ReplacementTargets> targets,
@@ -105,7 +105,7 @@ abstract class Replacer {
   }
 
   /// Gets the corresponding targets for all subclasses of this type
-  void getTargets();
+  T getTargets<T>();
 
   /// Replaces a matched node in a yaml map and returns an updated yaml map
   ReplacementOutput replace(

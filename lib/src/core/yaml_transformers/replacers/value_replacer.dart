@@ -1,12 +1,12 @@
 part of 'replacer.dart';
 
 /// Exclusively replaces values
-class MagicalReplacer extends Replacer {
-  MagicalReplacer(List<ReplacementTargets> targets) : super(targets: targets);
+class ValueReplacer extends Replacer {
+  ValueReplacer(List<ReplacementTargets> targets) : super(targets: targets);
 
   @override
-  ValuesToFind getTargets() {
-    return super.generateTargets<ValuesToFind>(areKeys: false);
+  T getTargets<T>() {
+    return super.generateTargets<ValuesToFind>(areKeys: false) as T;
   }
 
   @override
