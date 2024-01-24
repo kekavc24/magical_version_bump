@@ -44,8 +44,8 @@ final class ReplacerTracker extends SingleValueTracker<String, MatchedNodeData>
 
     if (_isRename && trackerState.containsKey(path)) return;
 
-    addKey(
-      createKey<TrackerKey<String>>(path, origin: Origin.custom),
+    trackerState.update(
+      createKey(path, origin: Origin.custom),
       (match) => matchedNode,
       ifAbsent: () => matchedNode,
     );

@@ -15,7 +15,7 @@ part 'counter_with_history.dart';
 base class Counter<K, L> extends DualTracker<K, L, int> {
   /// Adds a key if missing and increments the count if present.
   void _addKey(TrackerKey<K> key, {bool isStartingTracker = false}) {
-    addKey(
+    trackerState.update(
       key,
       (value) => ++value,
       ifAbsent: () => isStartingTracker ? 0 : 1,
@@ -27,7 +27,7 @@ base class Counter<K, L> extends DualTracker<K, L, int> {
   void prefill(List<dynamic>? keys, {required Origin origin}) {
     if (keys == null) return;
     for (final value in keys) {
-      final key = createKey<TrackerKey<K>>(value, origin: origin);
+      final key = createKey(value, origin: origin);
       _addKey(key, isStartingTracker: true);
     }
   }
@@ -35,7 +35,7 @@ base class Counter<K, L> extends DualTracker<K, L, int> {
   /// Increments count with dynamic value
   void increment(Iterable<dynamic> values, {required Origin origin}) {
     for (final candidate in values) {
-      final key = createKey<TrackerKey<K>>(candidate, origin: origin);
+      final key = createKey(candidate, origin: origin);
       _addKey(key);
     }
   }
@@ -43,7 +43,7 @@ base class Counter<K, L> extends DualTracker<K, L, int> {
   /// Obtains count based on a value being being tracked. Returns zero if
   /// value is not being tracked or its count is zero.
   int getCount(dynamic value, {required Origin origin}) {
-    final key = createKey<TrackerKey<K>>(value, origin: origin);
+    final key = createKey(value, origin: origin);
     return getCountFromKey(key);
   }
 

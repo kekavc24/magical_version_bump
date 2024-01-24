@@ -11,28 +11,16 @@ part 'tracker_key.dart';
 /// internally. It is wrapped with a [TrackerKey] for equality & hashing ease.
 ///
 /// [V] - denotes the tracking info. Stored as is.
-abstract base class SingleValueTracker<K, V> {
+base class SingleValueTracker<K, V> {
   final Map<TrackerKey<K>, V> _tracker = {};
 
   /// Obtains the current state of the tracker
   Map<TrackerKey<K>, V> get trackerState => _tracker;
 
-  /// Clear map backing this tracker
-  void clearTracker() => _tracker.clear();
-
   /// Creates a tracker key tracking a value
-  T createKey<T>(dynamic value, {required Origin origin}) {
-    return TrackerKey<K>.fromValue(value, origin) as T;
-  }
-
-  /// Add a key to the map backing this tracker
   @protected
-  void addKey(
-    TrackerKey<K> key,
-    V Function(V) update, {
-    V Function()? ifAbsent,
-  }) {
-    _tracker.update(key, update, ifAbsent: ifAbsent);
+  TrackerKey<K> createKey(dynamic value, {required Origin origin}) {
+    return TrackerKey<K>.fromValue(value, origin);
   }
 }
 
@@ -47,11 +35,12 @@ abstract base class SingleValueTracker<K, V> {
 ///
 /// [V] - denotes the tracking info. Stored as is.
 ///
-abstract base class DualTracker<K, L, V> extends SingleValueTracker<K, V> {
+base class DualTracker<K, L, V> extends SingleValueTracker<K, V> {
   @override
-  T createKey<T>(dynamic value, {required Origin origin}) {
+  @protected
+  TrackerKey<K> createKey(dynamic value, {required Origin origin}) {
     if (value is MapEntry) {
-      return DualTrackerKey<K, L>.fromEntry(entry: value, origin: origin) as T;
+      return DualTrackerKey<K, L>.fromEntry(entry: value, origin: origin);
     }
 
     return super.createKey(value, origin: origin);
@@ -71,8 +60,7 @@ abstract base class DualTracker<K, L, V> extends SingleValueTracker<K, V> {
 /// case, the value of [K] & [L] are both wrapped in a [DualTrackerKey].
 ///
 /// [V] - denotes the tracking info. Stored as is.
-base mixin MapHistory<C, K, L, V>
-    on SingleValueTracker<K, V> {
+base mixin MapHistory<C, K, L, V> on SingleValueTracker<K, V> {
   /// Stores the current
   final Map<C, Map<TrackerKey<K>, V>> _history = {};
 
@@ -82,8 +70,8 @@ base mixin MapHistory<C, K, L, V>
   /// Obtains the tracker state linked to this [cursor] from history.
   Map<TrackerKey<K>, V>? getFromHistory(C cursor) => _history[cursor];
 
-  /// Stores a Map linked to a cursor and returns a map just before it was
-  /// cleared/reset for next cycle.
+  /// Stores a Map linked to a cursor and returns current map/tracker state
+  /// before clearing it.
   ///
   /// Throws an exception if cursor already exists.
   Map<TrackerKey<K>, V> reset({required C cursor}) {
@@ -93,7 +81,12 @@ base mixin MapHistory<C, K, L, V>
 
     final stateToSave = Map<TrackerKey<K>, V>.from(_tracker);
     history[cursor] = stateToSave;
-    clearTracker();
+    _tracker.clear();
     return stateToSave;
+  }
+
+  /// Removes cursor from history together with any data present
+  void dropCursor(C cursor) {
+    _history.remove(cursor);
   }
 }

@@ -16,7 +16,7 @@ part of 'generic_counter.dart';
 base class CounterWithHistory<C, K, L> extends Counter<K, L>
     with MapHistory<C, K, L, int> {
   int? getCountFromHistory(C cursor, dynamic value, Origin origin) {
-    final key = createKey<TrackerKey<K>>(value, origin: origin);
+    final key = createKey(value, origin: origin);
     return getFromHistory(cursor)?[key];
   }
 }
