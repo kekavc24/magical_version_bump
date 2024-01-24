@@ -1,8 +1,10 @@
 import 'package:collection/collection.dart';
-import 'package:magical_version_bump/src/core/yaml_transformers/console_printer/console_printer.dart';
+import 'package:magical_version_bump/src/core/yaml_transformers/managers/finder_manager/finder_formatter.dart';
+import 'package:magical_version_bump/src/core/yaml_transformers/trackers/tracker.dart';
 import 'package:magical_version_bump/src/core/yaml_transformers/yaml_transformer.dart';
 import 'package:magical_version_bump/src/utils/enums/enums.dart';
 import 'package:magical_version_bump/src/utils/typedefs/typedefs.dart';
+import 'package:mason_logger/mason_logger.dart';
 import 'package:yaml/yaml.dart';
 
 enum FinderType { byValue, bySearch, both }
@@ -12,17 +14,18 @@ typedef FindManagerOutput = ({
   MatchedNodeData data,
 });
 
-class FinderManager extends TransformerManager {
+class FinderManager
+    extends TransformerManager<TrackerKey<String>, MatchedNodeData> {
   FinderManager._({
     required super.files,
     required super.aggregator,
-    super.printer,
-  });
+    super.logger,
+  }) : super(formatter: FinderFormatter());
 
   factory FinderManager.fullSetup({
     required List<FileOutput> files,
     required Aggregator aggregator,
-    ConsolePrinter? printer,
+    required Logger? logger,
     required FinderType finderType,
     required KeysToFind? keysToFind,
     required ValuesToFind? valuesToFind,
@@ -32,7 +35,7 @@ class FinderManager extends TransformerManager {
     final saveCounterHistory =
         !(!aggregator.applyToEachFile && aggregator.applyToEachArg);
 
-    _finder = _setUpFinder(
+    finder = _setUpFinder(
       files.first.fileAsMap,
       saveCounterToHistory: saveCounterHistory,
       finderType: finderType,
@@ -44,20 +47,19 @@ class FinderManager extends TransformerManager {
     return FinderManager._(
       files: files,
       aggregator: aggregator,
-      printer: printer,
+      logger: logger,
     );
   }
 
   factory FinderManager.findValues({
     required List<FileOutput> files,
     required Aggregator aggregator,
-    ConsolePrinter? printer,
     required ValuesToFind valuesToFind,
   }) {
     return FinderManager.fullSetup(
       files: files,
       aggregator: aggregator,
-      printer: printer,
+      logger: null,
       keysToFind: null,
       valuesToFind: valuesToFind,
       pairsToFind: null,
@@ -68,13 +70,12 @@ class FinderManager extends TransformerManager {
   factory FinderManager.findKeys({
     required List<FileOutput> files,
     required Aggregator aggregator,
-    ConsolePrinter? printer,
     required KeysToFind keysToFind,
   }) {
     return FinderManager.fullSetup(
       files: files,
       aggregator: aggregator,
-      printer: printer,
+      logger: null,
       finderType: FinderType.byValue,
       keysToFind: keysToFind,
       valuesToFind: null,
@@ -85,17 +86,11 @@ class FinderManager extends TransformerManager {
   /// Indicates a finder used by this manager to generate matches.
   ///
   /// This manager just queues file based on some conditions.
-  static late Finder _finder;
-
-  /// Accesses the counter used by the finder in this [FinderManager].
-  ///
-  /// Accessing this before ever calling [Finder.find] may result in a
-  /// null exception being thrown.
-  MatchCounter get matchCounter => _finder.counter!;
+  static late Finder finder;
 
   ///
   Iterable<FinderOutput> _internalGenerator() {
-    return _finder.find(
+    return finder.find(
       aggregateType: aggregator.type,
       applyToEach: aggregator.applyToEachArg,
       count: aggregator.count,
@@ -104,10 +99,31 @@ class FinderManager extends TransformerManager {
 
   @override
   Future<void> transform() async {
-    // Loop all matches and add to printer
-    for (final output in generate()) {
-      super.printer.addValuesFound(output.currentFile, output.data);
+    final finderProgress = showProgress(ManagerProgress.findingMatches);
+
+    // Accumulate all values
+    final matches = generate().toList().fold(
+      <int, List<MatchedNodeData>>{},
+      (previousValue, element) {
+        previousValue.update(
+          element.currentFile,
+          (value) => [...value, element.data],
+          ifAbsent: () => [element.data],
+        );
+        return previousValue;
+      },
+    );
+
+    if (matches.isEmpty) {
+      finderProgress.fail('No matches found');
+      return;
     }
+
+    formatter.addAll(
+      matches.entries.map((element) => (element.key, element.value)).toList(),
+    ); // Add matches to formatter
+
+    finderProgress.complete('Found matches in ${matches.length} files(s)');
   }
 
   Iterable<FindManagerOutput> generate() sync* {
@@ -161,7 +177,7 @@ class FinderManager extends TransformerManager {
       // Add yaml if we are not starting. Finder always has the first file
       if (fileIndex != 0) {
         // Swap and use previous file.
-        _finder.swapMap(yamlMap, cursor: fileIndex - 1);
+        finder.swapMap(yamlMap, cursor: fileIndex - 1);
       }
 
       // Loop all matches
@@ -194,7 +210,7 @@ class FinderManager extends TransformerManager {
         ///
         if ((aggregator.applyToEachArg && output.reachedLimit) ||
             (!aggregator.applyToEachArg &&
-                counter.getSumOfCount() == aggregator.count)) {
+                managerCounter.getSumOfCount() == aggregator.count)) {
           break fileLooper;
         }
       }
@@ -204,11 +220,11 @@ class FinderManager extends TransformerManager {
     ///
     /// This index denotes the file whose counter is active. No need to
     /// subtract "1" to go back to previous file.
-    _finder.counter!.reset(cursor: fileIndex);
+    finder.counter!.reset(cursor: fileIndex);
   }
 }
 
-F _setUpFinder<F extends Finder>(
+Finder _setUpFinder(
   YamlMap yamlMap, {
   required FinderType finderType,
   required bool saveCounterToHistory,
@@ -223,6 +239,6 @@ F _setUpFinder<F extends Finder>(
         keysToFind: keysToFind,
         valuesToFind: valuesToFind,
         pairsToFind: pairsToFind,
-      ) as F,
+      ),
   };
 }

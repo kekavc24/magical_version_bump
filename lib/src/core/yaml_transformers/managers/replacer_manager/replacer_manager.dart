@@ -1,27 +1,33 @@
-import 'package:magical_version_bump/src/core/yaml_transformers/console_printer/console_printer.dart';
+import 'package:magical_version_bump/src/core/yaml_transformers/managers/replacer_manager/replacer_formatter.dart';
 import 'package:magical_version_bump/src/core/yaml_transformers/trackers/tracker.dart';
 import 'package:magical_version_bump/src/core/yaml_transformers/yaml_transformer.dart';
 import 'package:magical_version_bump/src/utils/enums/enums.dart';
 import 'package:magical_version_bump/src/utils/typedefs/typedefs.dart';
+import 'package:mason_logger/mason_logger.dart';
 
 part 'replacer_tracker.dart';
 
-class ReplacerManager extends TransformerManager {
+typedef ReplaceManagerOutput = ({
+  Origin origin,
+  Map<String, String> mapping,
+  String oldPath,
+});
+
+class ReplacerManager extends TransformerManager<DualTrackerKey<String, String>,
+    ReplaceManagerOutput> {
   ReplacerManager._({
     required super.files,
     required super.aggregator,
-    super.printer,
+    required super.logger,
     required this.commandType,
-  }) : assert(
-          !commandType.isFinder,
-          'Only replace and rename commands are allowed',
-        );
+  })  : assert(!commandType.isFinder, 'Find command not allowed'),
+        super(formatter: ReplacerFormatter());
 
   factory ReplacerManager.create({
     required WalkSubCommandType commandType,
     required List<FileOutput> files,
     required Aggregator aggregator,
-    ConsolePrinter? printer,
+    required Logger logger,
     required List<ReplacementTargets> targets,
   }) {
     _replacer = _getReplacer(commandType, targets: targets);
@@ -30,14 +36,13 @@ class ReplacerManager extends TransformerManager {
       commandType,
       files: files,
       aggregator: aggregator,
-      printer: printer,
       replacer: _replacer,
     );
 
     return ReplacerManager._(
       files: files,
       aggregator: aggregator,
-      printer: printer,
+      logger: logger,
       commandType: commandType,
     );
   }
@@ -53,20 +58,29 @@ class ReplacerManager extends TransformerManager {
   /// values.
   static late Replacer _replacer;
 
-  /// Accesses the [MatchCounter] used by the [FinderManager] generating
-  /// matches for this [ReplacerManager]
-  MatchCounter get finderCounter => _manager.matchCounter;
+  FinderManager get currentFinderManager => _manager;
 
   @override
   Future<void> transform() async {
+    final finderProgress = showProgress(
+      ManagerProgress.findingMatches,
+      info: 'Finding matches to replace',
+    );
+
     // Modifiable queue we can read and swap modifiable values back and forth
     final localQueue = [...yamlQueue];
 
     /// Accumulate all matches from [FinderManager]
     final matches = _manager.generate().toList();
 
-    // TODO: Add implementations if matches are missing
-    if (matches.isEmpty) {}
+    if (matches.isEmpty) {
+      finderProgress.fail('No matches found');
+      return;
+    }
+
+    finderProgress.complete();
+
+    final replacerProgress = showProgress(ManagerProgress.replacingValues);
 
     var targets = <TrackerOutput>[];
 
@@ -89,6 +103,8 @@ class ReplacerManager extends TransformerManager {
           .toList();
     }
 
+    final accumulator = <int, List<ReplaceManagerOutput>>{};
+
     for (final target in targets) {
       var file = localQueue[target.fileNumber]; // File to edit
 
@@ -97,22 +113,36 @@ class ReplacerManager extends TransformerManager {
 
         file = modifiedFile.updatedMap;
 
-        // TODO: Add to console format
-        printer.addValuesReplaced(
-          target.fileNumber,
+        final output = (
           origin: commandType == WalkSubCommandType.rename
               ? Origin.key
               : Origin.value,
-          replacements: modifiedFile.mapping,
+          mapping: modifiedFile.mapping,
           oldPath: match.toString(),
         );
 
-        // Track current count of replacements
+        accumulator.update(
+          target.fileNumber,
+          (current) => [...current, output],
+          ifAbsent: () => [output],
+        );
+
+        // Track current count of replacements for each file
         super.incrementFileIndex(target.fileNumber);
       }
 
       localQueue[target.fileNumber] = file; // Swap with updated
     }
+
+    formatter.addAll(
+      accumulator.entries
+          .map((element) => (element.key, element.value))
+          .toList(),
+    );
+
+    replacerProgress.complete(
+      'Replaced matches in ${accumulator.length} file(s)',
+    );
   }
 }
 
@@ -130,20 +160,17 @@ FinderManager _getManager(
   WalkSubCommandType commandType, {
   required List<FileOutput> files,
   required Aggregator aggregator,
-  ConsolePrinter? printer,
   required Replacer replacer,
 }) {
   final manager = commandType == WalkSubCommandType.rename
       ? FinderManager.findKeys(
           files: files,
           aggregator: aggregator,
-          printer: printer,
           keysToFind: replacer.getTargets() as KeysToFind,
         )
       : FinderManager.findValues(
           files: files,
           aggregator: aggregator,
-          printer: printer,
           valuesToFind: replacer.getTargets() as ValuesToFind,
         );
 

@@ -53,8 +53,8 @@ class NodeData extends Equatable {
   /// Creates from terminal value at the end of a node
   ///
   /// * By default, the level & index will apply to the value rather than
-  ///   the key as we recursed the list to reach this key rather than the
-  ///   value.
+  ///   the key as we recursed the list to reach this value rather than the
+  ///   key.
   ///
   /// * The parent's key will be this terminal value's key too as it's the
   ///   nearest key linking this value to a map.

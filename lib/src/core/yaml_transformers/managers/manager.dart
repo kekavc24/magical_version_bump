@@ -1,52 +1,54 @@
 import 'package:collection/collection.dart';
-import 'package:magical_version_bump/src/core/yaml_transformers/console_printer/console_printer.dart';
+import 'package:magical_version_bump/src/core/yaml_transformers/formatter/formatter.dart';
 import 'package:magical_version_bump/src/core/yaml_transformers/trackers/counter/generic_counter.dart';
+import 'package:magical_version_bump/src/core/yaml_transformers/trackers/tracker.dart';
 import 'package:magical_version_bump/src/utils/enums/enums.dart';
 import 'package:magical_version_bump/src/utils/typedefs/typedefs.dart';
+import 'package:mason_logger/mason_logger.dart';
 import 'package:meta/meta.dart';
 import 'package:yaml/yaml.dart';
 
 export 'finder_manager/finder_manager.dart';
 export 'replacer_manager/replacer_manager.dart';
 
-abstract class TransformerManager {
+enum ManagerProgress { findingMatches, replacingValues }
+
+abstract class TransformerManager<FormatT extends TrackerKey<String>, OutputT> {
   TransformerManager({
     required List<FileOutput> files,
-    required Aggregator aggregator,
-    ConsolePrinter? printer,
-  })  : _aggregator = aggregator,
-        _printer = printer ?? ConsolePrinter(format: aggregator.viewFormat),
-        _yamlQueue = QueueList.from(files.map((e) => e.fileAsMap)),
-        _managerCounter = Counter<int, int>();
+    required this.aggregator,
+    required this.formatter,
+    this.logger,
+  }) : yamlQueue = QueueList.from(files.map((e) => e.fileAsMap));
 
   /// A queue of all yaml maps to run a transform operation on
-  final QueueList<YamlMap> _yamlQueue;
+  final QueueList<YamlMap> yamlQueue;
 
   /// A custom Aggregator for this transformer
-  final Aggregator _aggregator;
-
-  /// A console printer for each manager that will is called by each
-  /// command's handler to print to console all aggregated info
-  final ConsolePrinter _printer;
+  final Aggregator aggregator;
 
   /// Tracker for keeping track of transformations made for each file
-  final Counter<int, int> _managerCounter;
+  final managerCounter = Counter<int, int>();
 
-  /// Current queue with yaml files
-  QueueList<YamlMap> get yamlQueue => _yamlQueue;
+  /// Path formatter for tree like format
+  final NodePathFormatter<FormatT, OutputT> formatter;
 
-  /// Aggregator in use by this manager
-  Aggregator get aggregator => _aggregator;
-
-  /// Tracker in use by this manager
-  Counter<int, int> get counter => _managerCounter;
-
-  ConsolePrinter get printer => _printer;
+  final Logger? logger;
 
   /// Adds a specified file index to a [Counter] in this manager
   @protected
   void incrementFileIndex(int fileIndex) {
-    return _managerCounter.increment([fileIndex], origin: Origin.custom);
+    return managerCounter.increment([fileIndex], origin: Origin.custom);
+  }
+
+  @protected
+  Progress showProgress(ManagerProgress managerProgress, {String? info}) {
+    return switch (managerProgress) {
+      ManagerProgress.findingMatches => logger!.progress(
+          info ?? 'Finding matches',
+        ),
+      ManagerProgress.replacingValues => logger!.progress('Replacing matches')
+    };
   }
 
   /// Initializes transformer manager
