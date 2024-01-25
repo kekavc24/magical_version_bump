@@ -54,19 +54,6 @@ typedef ReplacementTargets = ({
 /// Normalized form of [ReplacementTargets]
 typedef ReplacementsToFind = Map<String, List<String>>;
 
-/// Output based on replaced values
-typedef ReplacementInfo = ({
-  bool replacedAll,
-  YamlMap updatedMap,
-  ReplacementInfoStats infoStats,
-});
-
-/// Denotes lists of both successful/failed info stats
-typedef ReplacementInfoStats = ({
-  List<String> successful,
-  List<String> failed,
-});
-
 /// Check if collections match. Check for order too.
 bool collectionsMatch(dynamic e1, dynamic e2) =>
     const DeepCollectionEquality().equals(e1, e2);
@@ -82,7 +69,6 @@ typedef Aggregator = ({
   bool applyToEachArg,
   bool applyToEachFile,
   int? count,
-  ConsoleViewFormat viewFormat,
 });
 
 /// List of values in arguments

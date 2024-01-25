@@ -1,6 +1,6 @@
 import 'package:magical_version_bump/src/core/yaml_transformers/data/pair_definition/custom_pair_type.dart';
 import 'package:magical_version_bump/src/utils/enums/enums.dart';
-import 'package:magical_version_bump/src/utils/exceptions/command_exceptions.dart';
+import 'package:magical_version_bump/src/utils/exceptions/magical_exception.dart';
 import 'package:magical_version_bump/src/utils/typedefs/typedefs.dart';
 
 part 'helpers/map_extension/recursive_helper.dart';
@@ -60,7 +60,7 @@ extension MapUtility on Map<dynamic, dynamic> {
     // Throw error if replace
     if (updateMode == UpdateMode.replace) {
       throw MagicalException(
-        violation:
+        message:
             '''This update mode is not supported. Use the "updateIndexedMap()" method instead''',
       );
     }
@@ -116,7 +116,7 @@ extension MapUtility on Map<dynamic, dynamic> {
         valueAtKey is String &&
         updateMode == UpdateMode.append) {
       throw MagicalException(
-        violation:
+        message:
             '''Cannot append new values due to an existing value at "$currentKey". You need to overwrite this path key.''',
       );
     }

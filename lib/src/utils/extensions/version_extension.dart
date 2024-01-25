@@ -1,4 +1,4 @@
-import 'package:pub_semver/pub_semver.dart';
+part of 'extensions.dart';
 
 extension VersionExtension on Version {
   /// Set prerelease and build-number

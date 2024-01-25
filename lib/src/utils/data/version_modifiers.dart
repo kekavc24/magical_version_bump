@@ -17,7 +17,7 @@ class VersionModifiers {
     bool initializePreset = true,
   }) {
     version = argResults.setVersion;
-    if (initializePreset) presetType = _sortPreset(argResults);
+    if (initializePreset) presetType = _initializePreset(argResults);
     prerelease = argResults.setPrerelease;
     build = argResults.setBuild;
     keepPre = argResults.keepPre;
@@ -51,19 +51,20 @@ class VersionModifiers {
 
   /// Modify Strategy
   late final ModifyStrategy strategy;
+}
 
-  static PresetType _sortPreset(ArgResults argResults) {
-    final currentPreset = argResults.checkPreset(ignoreFlag: true);
+/// Initialized preset for any `Modify` subcommand other than `Bump`
+/// subcommand
+PresetType _initializePreset(ArgResults argResults) {
+  final currentPreset = argResults.checkPreset(ignoreFlag: true);
 
-    // If preset is none or version, confirm if any of build or prerelease was
-    // set
-    if (currentPreset == PresetType.none ||
-        currentPreset == PresetType.version) {
-      return argResults.setBuild != null || argResults.setPrerelease != null
-          ? PresetType.all
-          : currentPreset;
-    }
-
-    return currentPreset;
+  // If preset is none or version, confirm if any of build or prerelease was
+  // set
+  if (currentPreset == PresetType.none || currentPreset == PresetType.version) {
+    return argResults.setBuild != null || argResults.setPrerelease != null
+        ? PresetType.all
+        : currentPreset;
   }
+
+  return currentPreset;
 }

@@ -1,41 +1,18 @@
-import 'package:magical_version_bump/src/utils/enums/enums.dart';
-import 'package:magical_version_bump/src/utils/extensions/string_extensions.dart';
+part of 'extensions.dart';
 
-extension Operations on Iterable<String> {
+extension IterableOperations on Iterable<String> {
   /// Get target that will be used to update whole version relative to its
   /// position. Affinity/preference in descending order is:
   ///
   /// major > minor > patch
   ///
   List<String> getRelative() {
-    final targets = <String>[];
+    // Sort aphabetically to order them naturally/ascending order
+    final targets = <String>[
+      ...where((element) => element != 'build-number'),
+    ]..sort();
 
-    // Assign weights
-    final weighted = fold(<String, int>{}, (previousValue, element) {
-      final score = element == 'major'
-          ? 20
-          : element == 'minor'
-              ? 10
-              : element == 'patch'
-                  ? 5
-                  : 0;
-
-      previousValue.addEntries([MapEntry(element, score)]);
-
-      return previousValue;
-    });
-
-    final maxWeight = weighted.entries.reduce(
-      (value, element) => value.value > element.value ? value : element,
-    );
-
-    targets.add(maxWeight.key);
-
-    if (contains('build-number')) {
-      targets.add('build-number');
-    }
-
-    return targets;
+    return [targets.first, if (contains('build-number')) 'build-number'];
   }
 
   /// Retain non-empty values
@@ -108,10 +85,5 @@ extension Operations on Iterable<String> {
   /// Has all values found in another list
   bool hasAll(Iterable<String> other) {
     return every(other.contains) && (length == other.length);
-  }
-
-  /// Has any value found in another list
-  bool hasAny(Iterable<String> other) {
-    return any(other.contains);
   }
 }

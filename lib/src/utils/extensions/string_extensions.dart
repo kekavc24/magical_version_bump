@@ -1,4 +1,4 @@
-import 'package:magical_version_bump/src/utils/enums/enums.dart';
+part of 'extensions.dart';
 
 extension StringExtension on String {
   /// Get file type

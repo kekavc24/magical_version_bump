@@ -103,7 +103,7 @@ RecursiveListOutput _recurseNestedList(
       // We cannot append, only overwrite
       if (updateMode == UpdateMode.append) {
         throw MagicalException(
-          violation:
+          message:
               '''Cannot append new values at "$valueInList". You need to overwrite this value as it is nested in a list.''',
         );
       }

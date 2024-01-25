@@ -56,18 +56,6 @@ enum WalkSubCommandType {
   final bool isFinder;
 }
 
-/// View format for printing values found by `Finder` or `MagicalReplacer`
-enum ConsoleViewFormat {
-  /// Grouped by value found or by value replaced
-  grouped,
-
-  /// Live preview as they are found/replaced
-  live,
-
-  /// Hide output. Only available when replacing values
-  hide
-}
-
 /// Type of ordering based on a list of targets
 enum OrderType {
   /// At least one of any
@@ -92,5 +80,5 @@ enum AggregateType {
   all;
 }
 
-/// Indicates origin of a value
+/// Indicates a custom origin of a value
 enum Origin { key, value, pair, custom }

@@ -72,10 +72,6 @@ extension VersionModifierResults on ArgResults {
 
 /// Extension for obtaining walker results
 extension WalkerResults on ArgResults {
-  /// Get the format to use while printing to console
-  ConsoleViewFormat get viewFormat =>
-      ConsoleViewFormat.values.byName(getValue('view-format'));
-
   /// Get aggregator type
   AggregateType get _aggregatorType =>
       AggregateType.values.byName(getValue('aggregate'));
@@ -109,7 +105,7 @@ extension WalkerResults on ArgResults {
     // If Aggregator is count and limit is null, throw
     if (_aggregatorType == AggregateType.count && _limit == null) {
       throw MagicalException(
-        violation: 'A valid count is required for "limit-to"',
+        message: 'A valid count is required for "limit-to"',
       );
     }
 
@@ -118,7 +114,6 @@ extension WalkerResults on ArgResults {
       applyToEachArg: true,
       applyToEachFile: true,
       count: _aggregatorType == AggregateType.first ? 1 : _limit,
-      viewFormat: viewFormat,
     );
   }
 }
