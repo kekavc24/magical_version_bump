@@ -13,10 +13,9 @@ final class ReplacerArgumentsNormalizer extends ArgumentsNormalizer {
 
   @override
   ({bool isValid, InvalidReason? reason}) customValidate() {
-    // Get replacements
-    final replacementCandidates = argResults!.replacementCandidates;
+    _replacementCandidates = argResults!.replacementCandidates;
 
-    if (replacementCandidates.isEmpty) {
+    if (_replacementCandidates.isEmpty) {
       return (
         isValid: false,
         reason: const InvalidReason(
@@ -27,10 +26,10 @@ final class ReplacerArgumentsNormalizer extends ArgumentsNormalizer {
     }
 
     // Get targets based on Replacer Type
-    final targetCandidates =
+    _targetCandidates =
         isRename ? argResults!.targetKeys : argResults!.targetValues;
 
-    if (targetCandidates.isEmpty) {
+    if (_targetCandidates.isEmpty) {
       return (
         isValid: false,
         reason: InvalidReason(
@@ -39,9 +38,6 @@ final class ReplacerArgumentsNormalizer extends ArgumentsNormalizer {
         ),
       );
     }
-
-    setCandidates(replacementCandidates, targetCandidates);
-
     return super.customValidate(); // Defaults to success
   }
 
@@ -64,28 +60,21 @@ final class ReplacerArgumentsNormalizer extends ArgumentsNormalizer {
       // Get replacement. If empty, use last key in linked map
       final replacement = replacementCandidates.firstOrNull ?? linked.keys.last;
 
-      final update = linked.containsKey(replacement)
-          ? [...linked[replacement]!, ...candidate]
-          : candidate;
-
-      linked.update(replacement, (value) => update, ifAbsent: () => update);
+      linked.update(
+        replacement,
+        (current) => [...current, ...candidate],
+        ifAbsent: () => candidate,
+      );
 
       // Remove candidate from list
       if (replacementCandidates.isNotEmpty) replacementCandidates.removeAt(0);
     }
 
-    final targets = linked.entries
-        .map((e) => (areKeys: isRename, replacement: e.key, targets: e.value))
-        .toList();
-
     return (
       aggregator: argResults!.getAggregator(),
-      targets: targets,
+      targets: linked.entries
+          .map((e) => (areKeys: isRename, replacement: e.key, targets: e.value))
+          .toList(),
     );
-  }
-
-  void setCandidates(ParsedValues replacements, ListOfParsedValues targets) {
-    _replacementCandidates = replacements;
-    _targetCandidates = targets;
   }
 }

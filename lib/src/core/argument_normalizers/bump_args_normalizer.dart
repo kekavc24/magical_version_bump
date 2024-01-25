@@ -9,9 +9,9 @@ final class BumpArgumentsNormalizer extends ArgumentsNormalizer {
   @override
   ({bool isValid, InvalidReason? reason}) customValidate() {
     // Get targets
-    final targets = argResults!.targets;
+    _targets = argResults!.targets;
 
-    if (targets.isEmpty) {
+    if (_targets.isEmpty) {
       return (
         isValid: false,
         reason: const InvalidReason(
@@ -20,8 +20,6 @@ final class BumpArgumentsNormalizer extends ArgumentsNormalizer {
         ),
       );
     }
-
-    _targets = targets;
     return super.customValidate();
   }
 

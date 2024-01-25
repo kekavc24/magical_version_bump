@@ -1,7 +1,7 @@
 import 'package:magical_version_bump/src/core/yaml_transformers/trackers/counter/generic_counter.dart';
 import 'package:magical_version_bump/src/core/yaml_transformers/yaml_transformer.dart';
 import 'package:magical_version_bump/src/utils/enums/enums.dart';
-import 'package:magical_version_bump/src/utils/exceptions/command_exceptions.dart';
+import 'package:magical_version_bump/src/utils/exceptions/magical_exception.dart';
 import 'package:magical_version_bump/src/utils/extensions/extensions.dart';
 import 'package:magical_version_bump/src/utils/typedefs/typedefs.dart';
 import 'package:meta/meta.dart';
@@ -66,7 +66,7 @@ abstract base class Finder {
     if (_saveCounterToHistory) {
       if (cursor == null || counter == null) {
         throw MagicalException(
-          violation: 'Neither cursor/counter should be null',
+          message: 'Neither cursor/counter should be null',
         );
       }
       counter!.reset(cursor: cursor);
@@ -99,7 +99,7 @@ abstract base class Finder {
       // Count must be valid going forward.
       if (count == null || count < 0) {
         throw MagicalException(
-          violation: 'Count must be a value equal/greater than 1',
+          message: 'Count must be a value equal/greater than 1',
         );
       }
 

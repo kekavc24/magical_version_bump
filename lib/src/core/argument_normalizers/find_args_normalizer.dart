@@ -3,17 +3,17 @@ part of 'arg_normalizer.dart';
 final class FindArgumentsNormalizer extends ArgumentsNormalizer {
   FindArgumentsNormalizer({required super.argResults});
 
-  late ValuesToFind _keys;
+  late ValuesToFind _keysToFind;
   late ValuesToFind _valuesToFind;
   late PairsToFind _pairsToFind;
 
   @override
   ({bool isValid, InvalidReason? reason}) customValidate() {
-    final keys = extractKeyOrValue(argResults!, extractKeys: true);
-    final values = extractKeyOrValue(argResults!, extractKeys: false);
-    final pairs = extractPairs(argResults!);
+    _keysToFind = _extractKeyOrValue(argResults!, extractKeys: true);
+    _valuesToFind = _extractKeyOrValue(argResults!, extractKeys: false);
+    _pairsToFind = extractPairs(argResults!);
 
-    if (keys.isEmpty && values.isEmpty && pairs.isEmpty) {
+    if (_keysToFind.isEmpty && _valuesToFind.isEmpty && _pairsToFind.isEmpty) {
       return (
         isValid: false,
         reason: const InvalidReason(
@@ -22,8 +22,6 @@ final class FindArgumentsNormalizer extends ArgumentsNormalizer {
         ),
       );
     }
-
-    setCandidates(keys, values, pairs);
     return super.customValidate();
   }
 
@@ -36,61 +34,45 @@ final class FindArgumentsNormalizer extends ArgumentsNormalizer {
   }) prepArgs() {
     return (
       aggregator: argResults!.getAggregator(),
-      keysToFind: (keys: _keys, orderType: argResults!.keyOrder),
+      keysToFind: (keys: _keysToFind, orderType: argResults!.keyOrder),
       valuesToFind: _valuesToFind,
       pairsToFind: _pairsToFind,
     );
   }
 
   /// Extracts keys/value in argument results
-  List<String> extractKeyOrValue(
+  List<String> _extractKeyOrValue(
     ArgResults argResults, {
     required bool extractKeys,
   }) {
     // Remove duplicates
-    return (extractKeys
-            ? argResults.mapKeys.toSet()
-            : argResults.mapValues.toSet())
-        .toList();
+    return Set<String>.from(
+      extractKeys ? argResults.mapKeys : argResults.mapValues,
+    ).toList();
   }
 
   /// Extracts pairs.
   ///
   /// Throws error when a pair is not complete
   PairsToFind extractPairs(ArgResults argResults) {
-    final listOfValues = argResults.mapPairs;
+    final listOfPairs = argResults.mapPairs.flattened;
 
-    if (listOfValues.isEmpty) return {};
-
-    // Join all lists
-    final joinedPairs = listOfValues.reduce(
-      (value, element) => [...value, ...element],
-    );
+    if (listOfPairs.isEmpty) return {};
 
     final pairsToFind = <String, String>{};
 
     // No pair should have a missing partner, throw error if so
-    for (final pair in joinedPairs) {
+    for (final pair in listOfPairs) {
       final keyAndPair = pair.splitAndTrim(':'); // Separated by ":"
 
       if (keyAndPair.length != 2) {
         throw MagicalException(
-          violation: 'Invalid pair parsed and found at $pair ',
+          message: 'Invalid pair parsed and found at $pair ',
         );
       }
 
       pairsToFind.addAll({keyAndPair.first: keyAndPair.last});
     }
     return pairsToFind;
-  }
-
-  void setCandidates(
-    ValuesToFind keys,
-    ValuesToFind values,
-    PairsToFind pairs,
-  ) {
-    _keys = keys;
-    _valuesToFind = values;
-    _pairsToFind = pairs;
   }
 }

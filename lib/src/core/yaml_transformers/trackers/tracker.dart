@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:magical_version_bump/src/utils/enums/enums.dart';
-import 'package:magical_version_bump/src/utils/exceptions/command_exceptions.dart';
+import 'package:magical_version_bump/src/utils/exceptions/magical_exception.dart';
 import 'package:meta/meta.dart';
 
 part 'tracker_key.dart';
@@ -76,7 +76,7 @@ base mixin MapHistory<C, K, L, V> on SingleValueTracker<K, V> {
   /// Throws an exception if cursor already exists.
   Map<TrackerKey<K>, V> reset({required C cursor}) {
     if (_history.containsKey(cursor)) {
-      throw MagicalException(violation: 'This cursor is already tracked!');
+      throw MagicalException(message: 'This cursor is already tracked!');
     }
 
     final stateToSave = Map<TrackerKey<K>, V>.from(_tracker);

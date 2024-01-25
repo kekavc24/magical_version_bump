@@ -12,15 +12,15 @@ extension IterableOperations on Iterable<String> {
       ...where((element) => element != 'build-number'),
     ]..sort();
 
-    return [targets.first, if (contains('build-number')) 'build-number'];
+    return [
+      if (targets.isNotEmpty) targets.first,
+      if (contains('build-number')) 'build-number',
+    ];
   }
 
   /// Retain non-empty values
   List<String> retainNonEmpty() {
-    final retainedList = [...this]..retainWhere(
-        (element) => element.isNotEmpty,
-      );
-    return retainedList;
+    return where((element) => element.isNotEmpty).toList();
   }
 
   /// Check how many values match a condition of search string

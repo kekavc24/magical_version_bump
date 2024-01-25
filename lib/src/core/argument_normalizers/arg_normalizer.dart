@@ -1,10 +1,12 @@
 import 'package:args/args.dart';
+import 'package:collection/collection.dart';
 
 import 'package:magical_version_bump/src/utils/data/version_modifiers.dart';
 import 'package:magical_version_bump/src/utils/enums/enums.dart';
-import 'package:magical_version_bump/src/utils/exceptions/command_exceptions.dart';
+import 'package:magical_version_bump/src/utils/exceptions/magical_exception.dart';
 import 'package:magical_version_bump/src/utils/extensions/extensions.dart';
 import 'package:magical_version_bump/src/utils/typedefs/typedefs.dart';
+import 'package:meta/meta.dart';
 
 part 'bump_args_normalizer.dart';
 part 'find_args_normalizer.dart';
@@ -36,10 +38,10 @@ abstract class ArgumentsNormalizer {
         ),
       );
     }
-
     return customValidate();
   }
 
+  @protected
   ({bool isValid, InvalidReason? reason}) customValidate() => (
         isValid: true,
         reason: null,

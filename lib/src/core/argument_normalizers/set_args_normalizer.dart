@@ -5,33 +5,15 @@ final class SetArgumentsNormalizer extends ArgumentsNormalizer {
 
   /// Prep dictionaries
   @override
-  ({
-    VersionModifiers modifiers,
-    List<Dictionary> dictionaries,
-  }) prepArgs() {
-    final dictionaries = <Dictionary>[];
-
-    // Get dictionaries to add/overwrite first
-    final dictsToAdd = argResults!['dictionary'] as List<String>;
-
-    if (dictsToAdd.isNotEmpty) {
-      for (final result in dictsToAdd) {
-        final dict = extractDictionary(result, append: false);
-
-        dictionaries.add(dict);
-      }
-    }
-
-    // Get dictionaries to append to
-    final dictsToAppendTo = argResults!['add'] as List<String>;
-
-    if (dictsToAppendTo.isNotEmpty) {
-      for (final result in dictsToAppendTo) {
-        final dict = extractDictionary(result, append: true);
-
-        dictionaries.add(dict);
-      }
-    }
+  ({VersionModifiers modifiers, List<Dictionary> dictionaries}) prepArgs() {
+    final dictionaries = <Dictionary>[
+      ...argResults!
+          .parsedValues('dictionary')
+          .map((result) => extractDictionary(result, append: false)),
+      ...argResults!
+          .parsedValues('add')
+          .map((result) => extractDictionary(result, append: true)),
+    ];
 
     return (
       modifiers: VersionModifiers.fromArgResults(argResults!),
@@ -47,17 +29,16 @@ final class SetArgumentsNormalizer extends ArgumentsNormalizer {
     /// Should never be empty
     if (parsedValue.isEmpty) {
       throw MagicalException(
-        violation: 'The root key cannot be empty/null',
+        message: 'The root key cannot be empty/null',
       );
     }
 
     // Must have 2 values, the keys & value(s)
-    final keysAndValue = parsedValue.splitAndTrim('=');
-    final hasNoBlanks = keysAndValue.every((element) => element.isNotEmpty);
+    final keysAndValue = parsedValue.splitAndTrim('=').retainNonEmpty();
 
-    if (keysAndValue.length != 2 || !hasNoBlanks) {
+    if (keysAndValue.length != 2) {
       throw MagicalException(
-        violation: 'Invalid keys and value pair at "$parsedValue"',
+        message: 'Invalid keys and value pair at "$parsedValue"',
       );
     }
 
