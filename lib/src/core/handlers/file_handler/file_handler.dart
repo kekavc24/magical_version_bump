@@ -9,7 +9,7 @@ import 'package:mason_logger/mason_logger.dart';
 import 'package:meta/meta.dart';
 import 'package:yaml/yaml.dart';
 
-typedef FilePathsAndTypes = Map<String, FileType>;
+part 'file_handler_util.dart';
 
 class FileHandler {
   FileHandler();
@@ -30,15 +30,14 @@ class FileHandler {
   }
 
   /// Whether to use path from args/request path
-  @protected
   late bool requestPath;
 
   /// File paths and their file types
-  @protected
-  late FilePathsAndTypes files;
+  late Map<String, FileType> files;
+
+  List<String> get filePaths => files.keys.toList();
 
   /// Logger for interacting with Command line
-  @protected
   late Logger fileLogger;
 
   /// Read first file only. Used by handlers for commands that read from a
@@ -119,17 +118,6 @@ class FileHandler {
     final encoder = JsonEncoder.withIndent(indent);
 
     return encoder.convert(yamlMap);
-  }
-
-  /// Store each file with partner file type
-  @protected
-  static FilePathsAndTypes getFileTypes(List<String> paths) {
-    return paths.fold({}, (previousValue, path) {
-      previousValue.addAll(
-        {path: path.split('.').last.toLowerCase().fileType},
-      );
-      return previousValue;
-    });
   }
 
   /// Request file paths from user
