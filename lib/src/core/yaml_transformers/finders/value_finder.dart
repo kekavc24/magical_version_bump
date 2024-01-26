@@ -116,16 +116,11 @@ base class ValueFinder extends Finder {
           // Just ignore if not present
           if (!_keysToFind.keys.contains(element.$2)) return previousValue;
 
-          // Attempt to read the value
-          final nullableValue = previousValue[element];
-
-          // Update
           previousValue.update(
             element.$2,
-            (value) => [...nullableValue!, element.$1],
+            (value) => [...value, element.$1],
             ifAbsent: () => [element.$1],
           );
-
           return previousValue;
         },
       );
@@ -194,12 +189,10 @@ extension _CheckStrictOrderCandidate on Iterable<List<int>> {
   /// differ by based on preceding list. This rule excludes the first element.
   bool satisfiesSequence() {
     // Get the value at first index, since it determines the start
-    final startingValue = first;
+    var previousListToMatch = first;
 
     // Get all remaining entries
     final tailValues = skip(1).toList();
-
-    var previousListToMatch = startingValue;
 
     // Loop all and look for any that dont satisfy sequence
     for (final tail in tailValues) {

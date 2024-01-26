@@ -127,17 +127,17 @@ class NodeData extends Equatable {
     return getKeysAsString().join('/');
   }
 
-  @override
-  List<Object> get props => [precedingKeys, key, value];
-
   /// Obtains full path to terminal value of this node
   @override
   String toString() => '${getKeyPath()}/$data';
 
-  /// Checks whether this node is nested
+  /// Checks whether this node is nested in a list
   bool isNestedInList() =>
       key.isNested() ||
       value.isNested() ||
       precedingKeys.isNotEmpty &&
           precedingKeys.any((element) => element.isNested());
+
+  @override
+  List<Object> get props => [precedingKeys, key, value];
 }

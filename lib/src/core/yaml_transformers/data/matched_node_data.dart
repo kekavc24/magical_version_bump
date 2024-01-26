@@ -1,7 +1,7 @@
 part of '../yaml_transformer.dart';
 
-/// Data object with specifically created when a `Finder`
-/// finds it based on some predefined condition
+/// Data object specifically created when a `Finder` finds it based on some 
+/// predefined condition
 @immutable
 class MatchedNodeData extends NodeData {
   const MatchedNodeData(
@@ -46,31 +46,10 @@ class MatchedNodeData extends NodeData {
         matchedPairs.isNotEmpty;
   }
 
-  /// Get a map of the last index of each matched key and the list of keys.
-  ///
-  /// Keys matched must not be empty
-  Map<String, int> getMatchedKeysIndex() {
-    // Get keys
-    final keys = super.getKeysAsString();
-
-    final indexMap = matchedKeys.fold(
-      <String, int>{},
-      (previousValue, element) {
-        previousValue.addAll(
-          {element: keys.lastIndexOf(element)},
-        );
-        return previousValue;
-      },
-    );
-
-    return indexMap;
-  }
-
   /// Get list of keys upto the last renameable key
   Iterable<Key> getUptoLastRenameable() {
-    // Get max
-    final indexMap = getMatchedKeysIndex();
-    final lastIndex = indexMap.values.max;
+    final keys = super.getKeysAsString();
+    final lastIndex = matchedKeys.map(keys.lastIndexOf).max;
 
     // Keys to be taken, include last index plus one
     return super.getKeys().take(lastIndex + 1);
@@ -78,10 +57,9 @@ class MatchedNodeData extends NodeData {
 
   /// Get path of keys upto the last renameable key
   String getPathToLastKey() {
-    return getUptoLastRenameable().map((e) => e.toString()).join('/');
+    return getUptoLastRenameable().map((key) => key.toString()).join('/');
   }
-
-  ///
+  
   @override
   List<Object> get props => [
         ...super.props,

@@ -2,15 +2,15 @@ part of 'tracker.dart';
 
 /// Represents a custom key to use as a tracker. It holds a single value.
 @immutable
-base class TrackerKey<T> extends Equatable {
+base class TrackerKey<KeyT> extends Equatable {
   const TrackerKey({required this.key, required this.origin});
 
   const TrackerKey.fromValue(
     dynamic value,
     Origin origin,
-  ) : this(key: value as T, origin: origin);
+  ) : this(key: value as KeyT, origin: origin);
 
-  final T key;
+  final KeyT key;
 
   final Origin origin;
 
@@ -23,7 +23,7 @@ base class TrackerKey<T> extends Equatable {
 
 /// Represents a customs key. Hold 2 values. Mostly used for pairs
 @immutable
-final class DualTrackerKey<T, U> extends TrackerKey<T> {
+final class DualTrackerKey<KeyT, OtherKeyT> extends TrackerKey<KeyT> {
   const DualTrackerKey({
     required super.key,
     required this.otherKey,
@@ -34,14 +34,18 @@ final class DualTrackerKey<T, U> extends TrackerKey<T> {
     required dynamic key,
     required dynamic otherKey,
     Origin? origin,
-  }) : this(key: key as T, otherKey: otherKey as U, origin: origin);
+  }) : this(key: key as KeyT, otherKey: otherKey as OtherKeyT, origin: origin);
 
   DualTrackerKey.fromEntry({
     required MapEntry<dynamic, dynamic> entry,
     Origin? origin,
-  }) : this(key: entry.key as T, otherKey: entry.value as U, origin: origin);
+  }) : this(
+          key: entry.key as KeyT,
+          otherKey: entry.value as OtherKeyT,
+          origin: origin,
+        );
 
-  final U otherKey;
+  final OtherKeyT otherKey;
 
   @override
   List<Object> get props => [...super.props, otherKey as Object];
