@@ -2,10 +2,10 @@ part of 'replacer.dart';
 
 /// Exclusively renames keys
 class KeySwapper extends Replacer {
-  KeySwapper(List<ReplacementTargets> targets) : super(targets: targets);
+  KeySwapper(super.substituteToMatchers);
 
   @override
-  T getTargets<T>() { 
+  T getTargets<T>() {
     return super.generateTargets<KeysToFind>(areKeys: true) as T;
   }
 
@@ -35,7 +35,7 @@ class KeySwapper extends Replacer {
       keyAndReplacement: replacementPair,
       value: null,
     );
-    
+
     return (
       mapping: replacementPair,
       updatedMap: YamlMap.wrap(updatedMap),

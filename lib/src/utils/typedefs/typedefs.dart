@@ -44,16 +44,6 @@ typedef KeyAndReplacement = PairsToFind;
 /// An output from recursive function call on a list
 typedef RecursiveListOutput = ({bool didModify, List<dynamic> modified});
 
-/// List of targets linked to a replacement
-typedef ReplacementTargets = ({
-  bool areKeys,
-  String replacement,
-  List<String> targets,
-});
-
-/// Normalized form of [ReplacementTargets]
-typedef ReplacementsToFind = Map<String, List<String>>;
-
 /// Check if collections match. Check for order too.
 bool collectionsMatch(dynamic e1, dynamic e2) =>
     const DeepCollectionEquality().equals(e1, e2);

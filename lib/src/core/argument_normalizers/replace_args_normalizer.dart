@@ -42,7 +42,10 @@ final class ReplacerArgumentsNormalizer extends ArgumentsNormalizer {
   }
 
   @override
-  ({Aggregator aggregator, List<ReplacementTargets> targets}) prepArgs() {
+  ({
+    Aggregator aggregator,
+    Map<String, List<String>> substituteToMatchers,
+  }) prepArgs() {
     // Create modifiable list
     final replacementCandidates = [..._replacementCandidates];
 
@@ -54,13 +57,14 @@ final class ReplacerArgumentsNormalizer extends ArgumentsNormalizer {
     ///
     /// If length is less, last replacement value will act as the replacement
     /// for others
-    final linked = <String, List<String>>{};
+    final substituteToMatchers = <String, List<String>>{};
 
     for (final candidate in _targetCandidates) {
       // Get replacement. If empty, use last key in linked map
-      final replacement = replacementCandidates.firstOrNull ?? linked.keys.last;
+      final replacement =
+          replacementCandidates.firstOrNull ?? substituteToMatchers.keys.last;
 
-      linked.update(
+      substituteToMatchers.update(
         replacement,
         (current) => [...current, ...candidate],
         ifAbsent: () => candidate,
@@ -72,9 +76,7 @@ final class ReplacerArgumentsNormalizer extends ArgumentsNormalizer {
 
     return (
       aggregator: argResults!.getAggregator(),
-      targets: linked.entries
-          .map((e) => (areKeys: isRename, replacement: e.key, targets: e.value))
-          .toList(),
+      substituteToMatchers: substituteToMatchers,
     );
   }
 }

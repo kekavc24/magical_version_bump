@@ -2,7 +2,7 @@ part of 'replacer.dart';
 
 /// Exclusively replaces values
 class ValueReplacer extends Replacer {
-  ValueReplacer(List<ReplacementTargets> targets) : super(targets: targets);
+  ValueReplacer(super.substituteToMatchers);
 
   @override
   T getTargets<T>() {

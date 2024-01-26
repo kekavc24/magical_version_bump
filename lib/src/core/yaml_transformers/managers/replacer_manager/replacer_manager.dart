@@ -28,9 +28,9 @@ class ReplacerManager extends TransformerManager<DualTrackerKey<String, String>,
     required List<FileOutput> files,
     required Aggregator aggregator,
     required Logger logger,
-    required List<ReplacementTargets> targets,
+    required Map<String, List<String>> substituteToMatchers,
   }) {
-    _replacer = _getReplacer(commandType, targets: targets);
+    _replacer = _getReplacer(commandType, substituteToMatchers: substituteToMatchers,);
 
     _manager = _getManager(
       commandType,
@@ -148,11 +148,11 @@ class ReplacerManager extends TransformerManager<DualTrackerKey<String, String>,
 
 Replacer _getReplacer(
   WalkSubCommandType commandType, {
-  required List<ReplacementTargets> targets,
+  required Map<String, List<String>> substituteToMatchers,
 }) {
   return switch (commandType) {
-    WalkSubCommandType.rename => KeySwapper(targets),
-    _ => ValueReplacer(targets),
+    WalkSubCommandType.rename => KeySwapper(substituteToMatchers),
+    _ => ValueReplacer(substituteToMatchers),
   };
 }
 

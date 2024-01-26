@@ -17,14 +17,10 @@ typedef ReplacementOutput = ({
 ///
 /// [ValueReplacer] & [KeySwapper] extend this.
 abstract class Replacer {
-  Replacer({
-    required List<ReplacementTargets> targets,
-  }) {
-    _replacementsToFind = normalizeReplacements(targets);
-  }
+  Replacer(this.substituteToMatchers);
 
   /// Targets to find and their replacements as keys
-  late ReplacementsToFind _replacementsToFind;
+  final Map<String, List<String>> substituteToMatchers;
 
   /// Join all targets that need to be replaced for a `Finder` to find
   @protected
@@ -32,7 +28,7 @@ abstract class Replacer {
     required bool areKeys,
   }) {
     // Get values
-    final values = _replacementsToFind.values;
+    final values = substituteToMatchers.values;
 
     // Get all keys with no duplicates
     final targets = <String>{for (final value in values) ...value}.toList();
@@ -40,16 +36,6 @@ abstract class Replacer {
       return (keys: targets, orderType: OrderType.loose) as T;
     }
     return targets as T;
-  }
-
-  /// Transforms replacement targets to `Map` where the replacement is the
-  /// key while targets are the value
-  @protected
-  ReplacementsToFind normalizeReplacements(
-    List<ReplacementTargets> targets,
-  ) {
-    final entries = targets.map((e) => MapEntry(e.replacement, e.targets));
-    return <String, List<String>>{}..addEntries(entries);
   }
 
   /// Gets the matching replacements for a matched node.
@@ -96,7 +82,7 @@ abstract class Replacer {
     required bool useFirst,
   }) {
     // Get all matches
-    final candidates = _replacementsToFind.entries.where(
+    final candidates = substituteToMatchers.entries.where(
       (element) => element.value.contains(matcher),
     );
 
