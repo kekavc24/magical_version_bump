@@ -21,7 +21,7 @@ class _FakeFileHandler extends FileHandler {
     final handler = _FakeFileHandler()
       ..requestPath = requestPath
       ..fileLogger = logger;
-    if (!requestPath) handler.files = FileHandler.getFileTypes([path]);
+    if (!requestPath) handler.files = getFileTypes([path]);
     return handler;
   }
 
@@ -36,7 +36,7 @@ class _FakeFileHandler extends FileHandler {
     );
   }
 
-  String getPath(int index) => files.keys.elementAt(index);
+  String getPath(int index) => getAllPaths()[index];
 
   List<String> getAllPaths() => files.keys.toList();
 }

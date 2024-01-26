@@ -15,7 +15,7 @@ void main() {
         presetType: PresetType.none,
       );
 
-      final versionFromPreset = MagicalSEMVER.addPresets(
+      final versionFromPreset = addPresets(
         versionFromFile,
         modifiers: modifier,
       );
@@ -29,7 +29,7 @@ void main() {
         version: '1.0.0',
       );
 
-      final versionFromPreset = MagicalSEMVER.addPresets(
+      final versionFromPreset = addPresets(
         versionFromFile,
         modifiers: modifier,
       );
@@ -42,7 +42,7 @@ void main() {
         presetType: PresetType.version,
       );
 
-      final versionFromPreset = MagicalSEMVER.addPresets(
+      final versionFromPreset = addPresets(
         versionFromFile,
         modifiers: modifier,
       );
@@ -58,7 +58,7 @@ void main() {
         build: '1',
       );
 
-      final versionFromPreset = MagicalSEMVER.addPresets(
+      final versionFromPreset = addPresets(
         versionFromFile,
         modifiers: modifier,
       );
@@ -74,7 +74,7 @@ void main() {
         keepPre: true,
       );
 
-      final versionFromPreset = MagicalSEMVER.addPresets(
+      final versionFromPreset = addPresets(
         versionFromFile,
         modifiers: modifier,
       );
@@ -92,7 +92,7 @@ void main() {
           keepBuild: true,
         );
 
-        final versionFromPreset = MagicalSEMVER.addPresets(
+        final versionFromPreset = addPresets(
           versionFromFile,
           modifiers: modifier,
         );
@@ -111,7 +111,7 @@ void main() {
           build: '1',
         );
 
-        final versionFromPreset = MagicalSEMVER.addPresets(
+        final versionFromPreset = addPresets(
           versionFromFile,
           modifiers: modifier,
         );
@@ -127,7 +127,7 @@ void main() {
         presetType: PresetType.all,
       );
 
-      final completeVersion = MagicalSEMVER.appendPreAndBuild(
+      final completeVersion = appendPreAndBuild(
         versionFromFile,
         modifiers: modifier,
       );
@@ -142,7 +142,7 @@ void main() {
           presetType: PresetType.none,
         );
 
-        final completeVersion = MagicalSEMVER.appendPreAndBuild(
+        final completeVersion = appendPreAndBuild(
           versionFromFile,
           modifiers: modifier,
         );
@@ -158,7 +158,7 @@ void main() {
         build: '1',
       );
 
-      final completeVersion = MagicalSEMVER.appendPreAndBuild(
+      final completeVersion = appendPreAndBuild(
         versionFromFile,
         modifiers: modifier,
       );
@@ -171,7 +171,7 @@ void main() {
     test('bumps major version', () {
       const expectedBumpedVersion = '11.0.0+21';
 
-      final bumpedVersion = MagicalSEMVER.bumpVersion(
+      final bumpedVersion = bumpVersion(
         version,
         versionTargets: ['major'],
         strategy: ModifyStrategy.relative,
@@ -183,7 +183,7 @@ void main() {
     test('bumps minor version', () {
       const expectedBumpedVersion = '10.11.0+21';
 
-      final bumpedVersion = MagicalSEMVER.bumpVersion(
+      final bumpedVersion = bumpVersion(
         version,
         versionTargets: ['minor'],
         strategy: ModifyStrategy.relative,
@@ -195,7 +195,7 @@ void main() {
     test('bumps patch version', () {
       const expectedBumpedVersion = '10.10.10+21';
 
-      final bumpedVersion = MagicalSEMVER.bumpVersion(
+      final bumpedVersion = bumpVersion(
         version,
         versionTargets: ['patch'],
         strategy: ModifyStrategy.relative,
@@ -207,7 +207,7 @@ void main() {
     test('bumps build number', () {
       const expectedBumpedVersion = '10.10.10-prerelease+22';
 
-      final bumpedVersion = MagicalSEMVER.bumpVersion(
+      final bumpedVersion = bumpVersion(
         version,
         versionTargets: ['build-number'],
         strategy: ModifyStrategy.relative,
@@ -217,7 +217,7 @@ void main() {
     });
 
     test('ignores custom build numbers', () {
-      final bumpedVersion = MagicalSEMVER.bumpVersion(
+      final bumpedVersion = bumpVersion(
         versionWithCustomBuild,
         versionTargets: ['build-number'],
         strategy: ModifyStrategy.relative,
@@ -228,7 +228,7 @@ void main() {
 
     test('throws error if more than one target is passed in', () {
       expect(
-        () => MagicalSEMVER.bumpVersion(
+        () => bumpVersion(
           version,
           versionTargets: ['major', 'minor'],
           strategy: ModifyStrategy.relative,
@@ -244,7 +244,7 @@ void main() {
     test('bumps up the major version', () {
       const expectedBumpedVersion = '11.10.10-prerelease+21';
 
-      final bumpedVersion = MagicalSEMVER.bumpVersion(
+      final bumpedVersion = bumpVersion(
         version,
         versionTargets: ['major'],
         strategy: ModifyStrategy.absolute,
@@ -256,7 +256,7 @@ void main() {
     test('bumps up minor version', () {
       const expectedBumpedVersion = '10.11.10-prerelease+21';
 
-      final bumpedVersion = MagicalSEMVER.bumpVersion(
+      final bumpedVersion = bumpVersion(
         version,
         versionTargets: ['minor'],
         strategy: ModifyStrategy.absolute,
@@ -268,7 +268,7 @@ void main() {
     test('bumps up patch version', () {
       const expectedBumpedVersion = '10.10.11-prerelease+21';
 
-      final bumpedVersion = MagicalSEMVER.bumpVersion(
+      final bumpedVersion = bumpVersion(
         version,
         versionTargets: ['patch'],
         strategy: ModifyStrategy.absolute,
@@ -280,7 +280,7 @@ void main() {
     test('bumps up build number', () {
       const expectedBumpedVersion = '10.10.10-prerelease+22';
 
-      final bumpedVersion = MagicalSEMVER.bumpVersion(
+      final bumpedVersion = bumpVersion(
         version,
         versionTargets: ['build-number'],
         strategy: ModifyStrategy.absolute,
@@ -290,7 +290,7 @@ void main() {
     });
 
     test('ignores custom build numbers', () {
-      final bumpedVersion = MagicalSEMVER.bumpVersion(
+      final bumpedVersion = bumpVersion(
         versionWithCustomBuild,
         versionTargets: ['build-number'],
         strategy: ModifyStrategy.absolute,
