@@ -583,7 +583,6 @@ void main() {
         value: value,
       );
 
-
       final expectedMap = {
         'deep key': {
           'deeper key': [
@@ -614,7 +613,7 @@ void main() {
             path: ['key'],
             updateMode: UpdateMode.append,
           ),
-          throwsViolation(
+          throwsCustomException(
             '''Cannot append new values due to an existing value at "key". You need to overwrite this path key.''',
           ),
         );

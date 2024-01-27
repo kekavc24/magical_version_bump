@@ -233,7 +233,7 @@ void main() {
           versionTargets: ['major', 'minor'],
           strategy: ModifyStrategy.relative,
         ),
-        throwsViolation(
+        throwsCustomException(
           'Expected only one target for this versioning strategy',
         ),
       );

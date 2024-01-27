@@ -367,7 +367,7 @@ void main() {
     test('throws error when parsed value is empty', () {
       expect(
         () => nullableChecker.extractDictionary('', append: false),
-        throwsViolation('The root key cannot be empty/null'),
+        throwsCustomException('The root key cannot be empty/null'),
       );
     });
 
@@ -380,7 +380,7 @@ void main() {
           valueWithBlanks,
           append: false,
         ),
-        throwsViolation(
+        throwsCustomException(
           'Invalid keys and value pair at "$valueWithBlanks"',
         ),
       );
@@ -390,7 +390,7 @@ void main() {
           valueWithOnePair,
           append: false,
         ),
-        throwsViolation(
+        throwsCustomException(
           'Invalid keys and value pair at "$valueWithOnePair"',
         ),
       );

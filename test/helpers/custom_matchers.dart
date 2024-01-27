@@ -1,6 +1,6 @@
 part of 'helpers.dart';
 
-Matcher throwsViolation(String message) {
+Matcher throwsCustomException(String message) {
   return throwsA(
     isA<MagicalException>().having((e) => e.message, 'message', message),
   );

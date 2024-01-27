@@ -11,7 +11,7 @@ import 'package:test/test.dart';
 import 'package:yaml/yaml.dart';
 import 'package:yaml_edit/yaml_edit.dart';
 
-part 'magical_exception_message.dart';
+part 'custom_matchers.dart';
 part 'set_reset_yaml.dart';
 part 'set_up_sanitizers.dart';
 part 'read_nested_nodes.dart';
