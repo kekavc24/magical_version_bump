@@ -20,7 +20,7 @@ final class ReplacerTracker extends SingleValueTracker<String, MatchedNodeData>
     }
   }
 
-  /// Adds a single match. 
+  /// Adds a single match.
   void _addMatch(FindManagerOutput output) {
     if (_internalCursor != output.currentFile) {
       reset(cursor: _internalCursor); // Save current history
@@ -42,17 +42,14 @@ final class ReplacerTracker extends SingleValueTracker<String, MatchedNodeData>
     final path =
         _isRename ? matchedNode.getPathToLastKey() : matchedNode.toString();
 
-    if (_isRename && trackerState.containsKey(path)) return;
-
-    trackerState.update(
+    trackerState.putIfAbsent(
       createKey(path, origin: Origin.custom),
-      (match) => matchedNode,
-      ifAbsent: () => matchedNode,
+      () => matchedNode,
     );
   }
 
-  /// Obtains all matches without any duplicate paths. 
-  /// 
+  /// Obtains all matches without any duplicate paths.
+  ///
   /// NOTE: a full path may be nested in another path but the impact is lower.
   List<TrackerOutput> getMatches() {
     // Reset last tracker

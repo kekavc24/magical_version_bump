@@ -17,8 +17,15 @@ base class SingleValueTracker<KeyT, ValueT> {
 
   /// Creates a tracker key tracking a value
   @protected
-  TrackerKey<KeyT> createKey(dynamic value, {required Origin origin}) {
+  TrackerKey<KeyT> createKey(KeyT value, {required Origin origin}) {
     return TrackerKey<KeyT>.fromValue(value, origin);
+  }
+  
+  /// Checks if the map contains the specified [key]
+  bool containsTrackerKey(KeyT key, {required Origin origin}) {
+    return trackerState.containsKey(
+      createKey(key, origin: origin),
+    );
   }
 }
 
@@ -46,7 +53,7 @@ base class DualTracker<KeyT, OtherKeyT, ValueT>
       );
     }
 
-    return super.createKey(value, origin: origin);
+    return super.createKey(value as KeyT, origin: origin);
   }
 }
 
