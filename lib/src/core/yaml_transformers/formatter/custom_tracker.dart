@@ -1,8 +1,11 @@
 part of 'formatter.dart';
 
+// TODO: Add documentation
 final class FormatterTracker<F extends TrackerKey<String>>
     extends SingleValueTracker<String, List<F>>
     with MapHistory<int, String, dynamic, List<F>> {
+  FormatterTracker({int? maxTolerance}) : maxTolerance = maxTolerance ?? 0;
+
   /// Current cursor for current file info being tracked
   int currentCursor = 0;
 
@@ -15,7 +18,7 @@ final class FormatterTracker<F extends TrackerKey<String>>
   int currentTolerance = 0;
 
   /// Currently at 0 as current implementations are sequential/blocking.
-  final maxTolerance = 0;
+  final int maxTolerance;
 
   /// Saves values to this tracker
   void add({
@@ -41,7 +44,7 @@ final class FormatterTracker<F extends TrackerKey<String>>
 
     if (!useLocalCopy) {
       _attempSwap(
-        reachedMaxTolerance: currentTolerance == maxTolerance,
+        reachedMaxTolerance: currentTolerance > maxTolerance,
         fileIndex: fileIndex,
         state: copy,
       );
