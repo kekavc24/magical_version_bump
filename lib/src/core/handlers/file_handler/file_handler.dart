@@ -79,8 +79,14 @@ class FileHandler {
   }
 
   /// Save file.
-  Future<void> saveFile(String modifiedFile, {int index = 0}) async {
-    final saveProgress = fileLogger.progress('Saving changes');
+  Future<void> saveFile(
+    String modifiedFile, {
+    int index = 0,
+    bool showProgress = true,
+  }) async {
+    Progress? saveProgress;
+
+    if (showProgress) saveProgress = fileLogger.progress('Saving changes');
 
     // File path details
     final fileDetails = files.entries.elementAt(index);
@@ -91,7 +97,7 @@ class FileHandler {
 
     await File(fileDetails.key).writeAsString(fileTosave);
 
-    return saveProgress.complete('Saved changes');
+    return saveProgress?.complete('Saved changes');
   }
 
   /// Save multiple files.
