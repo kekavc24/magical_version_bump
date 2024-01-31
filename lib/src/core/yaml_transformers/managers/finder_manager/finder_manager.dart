@@ -1,6 +1,5 @@
 import 'package:collection/collection.dart';
 import 'package:magical_version_bump/src/core/yaml_transformers/managers/finder_manager/finder_formatter.dart';
-import 'package:magical_version_bump/src/core/yaml_transformers/trackers/tracker.dart';
 import 'package:magical_version_bump/src/core/yaml_transformers/yaml_transformer.dart';
 import 'package:magical_version_bump/src/utils/enums/enums.dart';
 import 'package:magical_version_bump/src/utils/typedefs/typedefs.dart';
@@ -15,7 +14,7 @@ typedef FindManagerOutput = ({
 });
 
 class FinderManager
-    extends TransformerManager<TrackerKey<String>, MatchedNodeData> {
+    extends TransformerManager<MatchedNodeData> {
   FinderManager._({
     required super.files,
     required super.aggregator,

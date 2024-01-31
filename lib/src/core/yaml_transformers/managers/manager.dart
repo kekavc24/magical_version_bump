@@ -1,7 +1,6 @@
 import 'package:collection/collection.dart';
 import 'package:magical_version_bump/src/core/yaml_transformers/formatter/formatter.dart';
 import 'package:magical_version_bump/src/core/yaml_transformers/trackers/counter/generic_counter.dart';
-import 'package:magical_version_bump/src/core/yaml_transformers/trackers/tracker.dart';
 import 'package:magical_version_bump/src/utils/enums/enums.dart';
 import 'package:magical_version_bump/src/utils/typedefs/typedefs.dart';
 import 'package:mason_logger/mason_logger.dart';
@@ -13,7 +12,7 @@ export 'replacer_manager/replacer_manager.dart';
 
 enum ManagerProgress { findingMatches, replacingValues }
 
-abstract class TransformerManager<FormatT extends TrackerKey<String>, OutputT> {
+abstract class TransformerManager<OutputT> {
   TransformerManager({
     required List<FileOutput> files,
     required this.aggregator,
@@ -31,7 +30,7 @@ abstract class TransformerManager<FormatT extends TrackerKey<String>, OutputT> {
   final managerCounter = Counter<int, int>();
 
   /// Path formatter for tree like format
-  final NodePathFormatter<FormatT, OutputT> formatter;
+  final NodePathFormatter<OutputT> formatter;
 
   final Logger? logger;
 

@@ -1,13 +1,20 @@
 part of 'formatter.dart';
 
-// TODO: Add documentation
-final class FormatterTracker<F extends TrackerKey<String>>
-    extends SingleValueTracker<String, List<F>>
-    with MapHistory<int, String, dynamic, List<F>> {
+/// A tracker used by [NodePathFormatter] and any of its subclasses to track
+/// paths formatted by linking it to a value wrapped by a [TrackerKey].
+///
+/// History is linked to a file index.
+final class FormatterTracker
+    extends SingleValueTracker<String, List<FormattedPathInfo>>
+    with MapHistory<int, String, dynamic, List<FormattedPathInfo>> {
   FormatterTracker({int? maxTolerance}) : maxTolerance = maxTolerance ?? 0;
 
   /// Current cursor for current file info being tracked
   int currentCursor = 0;
+
+  /// Indicates the current tolerance state of this tracker, in that, how
+  /// many times was the state fetched from history/new state.
+  int currentTolerance = 0;
 
   /// Indicates the max times to tolerate this cursor as the key before
   /// swapping to a new cursor(file index). Think cache miss/hit. Max is [2]
@@ -15,16 +22,13 @@ final class FormatterTracker<F extends TrackerKey<String>>
   ///
   /// Future versions may include some concurrency, thus values may come in
   /// any order
-  int currentTolerance = 0;
-
-  /// Currently at 0 as current implementations are sequential/blocking.
   final int maxTolerance;
 
   /// Saves values to this tracker
   void add({
     required int fileIndex,
     required List<TrackerKey<String>> keys,
-    required F value,
+    required FormattedPathInfo pathInfo,
   }) {
     final useLocalCopy = currentCursor == fileIndex;
 
@@ -37,8 +41,8 @@ final class FormatterTracker<F extends TrackerKey<String>>
     for (final key in keys) {
       copy.update(
         key,
-        (current) => [...current, value],
-        ifAbsent: () => [value],
+        (current) => [...current, pathInfo],
+        ifAbsent: () => [pathInfo],
       );
     }
 
@@ -57,7 +61,7 @@ final class FormatterTracker<F extends TrackerKey<String>>
   void _attempSwap({
     required bool reachedMaxTolerance,
     required int fileIndex,
-    required Map<TrackerKey<String>, List<F>> state,
+    required Map<TrackerKey<String>, List<FormattedPathInfo>> state,
   }) {
     if (reachedMaxTolerance) {
       reset(cursor: currentCursor);

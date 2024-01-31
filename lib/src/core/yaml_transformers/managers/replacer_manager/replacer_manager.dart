@@ -13,8 +13,7 @@ typedef ReplaceManagerOutput = ({
   String oldPath,
 });
 
-class ReplacerManager extends TransformerManager<DualTrackerKey<String, String>,
-    ReplaceManagerOutput> {
+class ReplacerManager extends TransformerManager<ReplaceManagerOutput> {
   ReplacerManager._({
     required super.files,
     required super.aggregator,

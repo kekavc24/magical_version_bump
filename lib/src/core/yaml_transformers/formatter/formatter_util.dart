@@ -4,6 +4,8 @@
 
 part of 'formatter.dart';
 
+typedef FormattedPathInfo = ({String path, String? updatedPath});
+
 enum CharSet { utf8, ascii }
 
 /// Magenta for heading for any file names
@@ -92,17 +94,23 @@ List<TrackerKey<String>> getKeysFromMatch(MatchedNodeData matchedNodeData) {
 }
 
 /// Wraps matches with a lightGreen [AnsiCode] for matches
-String wrapMatches({required String path, required List<String> matches}) {
+FormattedPathInfo wrapMatches({
+  required String path,
+  required List<String> matches,
+}) {
   /// Wrap any match with green.
-  return path
-      .split('/')
-      .map((e) => matches.contains(e) ? matchColor.wrap(e) : e)
-      .join('/');
+  return (
+    path: path
+        .split('/')
+        .map((e) => matches.contains(e) ? matchColor.wrap(e) : e)
+        .join('/'),
+    updatedPath: null,
+  );
 }
 
 /// Wraps updated values with lightGreen [AnsiCode] and values to be
 /// replaced with a lightRed [AnsiCode]
-({String oldPath, String updatedPath}) replaceAndWrap({
+FormattedPathInfo replaceAndWrap({
   required String path,
   required bool replacedKeys,
   required Map<String, String> replacements,
@@ -135,7 +143,7 @@ String wrapMatches({required String path, required List<String> matches}) {
       return replacedColor.wrap(element)!;
     });
     return (
-      oldPath: [...oldKeyPath, lastElement].join('/'),
+      path: [...oldKeyPath, lastElement].join('/'),
       updatedPath: [...replaced, lastElement].join('/'),
     );
   }
@@ -148,7 +156,7 @@ String wrapMatches({required String path, required List<String> matches}) {
     ..addAll(keys)
     ..add(matchColor.wrap(replacements[lastElement])!);
 
-  return (oldPath: oldPath, updatedPath: replaced.join('/'));
+  return (path: oldPath, updatedPath: replaced.join('/'));
 }
 
 /// Used to separate different children. This is mainly used to show clear
@@ -199,10 +207,10 @@ String createHeader({
 
 /// A tree-like view of info for each match/value added. Replace mode stores value in a
 /// [DualTrackerKey] with old path and new path
-String formatInfo<T extends TrackerKey<String>>({
+String formatInfo({
   required bool isReplaceMode,
   required String key,
-  required List<T> formattedPaths,
+  required List<FormattedPathInfo> formattedPaths,
 }) {
   final countOfPaths = formattedPaths.length;
 
@@ -214,23 +222,22 @@ String formatInfo<T extends TrackerKey<String>>({
   );
 
   // Loop all links and create a tree-like structure
-  for (final (index, value) in formattedPaths.indexed) {
+  for (final (index, formattedPath) in formattedPaths.indexed) {
     // Replace mode has 2 sub branches before the next. Create one for old path
     if (isReplaceMode) {
       final oldPathBranch = getBranch(); // Never last
-      formatBuffer.writeln('$oldPathBranch ${value.key}');
+      formatBuffer.writeln('$oldPathBranch ${formattedPath.path}');
     }
 
-    // Check if last child
     final isLastChild = index == (countOfPaths - 1);
 
-    // Access value instead of key in replacemode
-    final twigToUse =
-        isReplaceMode ? (value as DualTrackerKey).otherKey : value.key;
+    // Use updated path in replace mode.
+    final branchInfo =
+        isReplaceMode ? formattedPath.updatedPath! : formattedPath.path;
 
     final defaultBranch = getBranch(isLastChild: isLastChild);
 
-    formatBuffer.writeln('$defaultBranch $twigToUse');
+    formatBuffer.writeln('$defaultBranch $branchInfo');
 
     // Write pipe separator for replace mode
     if (isReplaceMode && !isLastChild) {
