@@ -107,7 +107,7 @@ void main() {
 
         final wrappedPath = wrapMatches(path: path, matches: matches);
 
-        expect(wrappedPath, expectedPath);
+        expect(wrappedPath.path, expectedPath);
       },
     );
 
@@ -127,7 +127,7 @@ void main() {
           replacements: replacements,
         );
 
-        expect(pathInfo.oldPath, equals(oldPathWithTarget));
+        expect(pathInfo.path, equals(oldPathWithTarget));
         expect(pathInfo.updatedPath, equals(updatedPath));
       },
     );
@@ -148,7 +148,7 @@ void main() {
           replacements: replacements,
         );
 
-        expect(pathInfo.oldPath, equals(oldPathWithTarget));
+        expect(pathInfo.path, equals(oldPathWithTarget));
         expect(pathInfo.updatedPath, equals(updatedPath));
       },
     );
@@ -227,7 +227,7 @@ void main() {
           isReplaceMode: false,
           key: match,
           formattedPaths: const [
-            TrackerKey(key: path, origin: Origin.custom),
+            (path: path, updatedPath: null),
           ],
         ),
         equalsIgnoringWhitespace(tree),
@@ -249,7 +249,7 @@ void main() {
           isReplaceMode: true,
           key: match,
           formattedPaths: const [
-            DualTrackerKey(key: path, otherKey: path),
+            (path: path, updatedPath: path),
           ],
         ),
         equalsIgnoringWhitespace(tree),

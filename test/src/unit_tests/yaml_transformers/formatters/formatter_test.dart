@@ -7,8 +7,21 @@ import 'package:magical_version_bump/src/utils/enums/enums.dart';
 import 'package:test/test.dart';
 
 void main() {
+  late FormattedPathInfo pathInfo;
+
   group('finder formatter', () {
     final finderFormatter = FinderFormatter();
+
+    setUpAll(
+      () => pathInfo = (
+        path: [
+          'root',
+          'key',
+          'value',
+        ].map((e) => matchColor.wrap(e)).join('/'),
+        updatedPath: null,
+      ),
+    );
 
     final match = MatchedNodeData.fromFinder(
       nodeData: NodeData.stringSkeleton(
@@ -21,15 +34,6 @@ void main() {
       matchedPairs: const {'root': 'key'},
     );
 
-    final path = TrackerKey(
-      key: [
-        'root',
-        'key',
-        'value',
-      ].map((e) => matchColor.wrap(e)).join('/'),
-      origin: Origin.custom,
-    );
-
     const keys = [
       TrackerKey(key: 'value', origin: Origin.value),
       TrackerKey(key: 'key', origin: Origin.key),
@@ -40,7 +44,7 @@ void main() {
       final extractedInfo = finderFormatter.extractFrom(match);
 
       expect(extractedInfo.keys, equals(keys));
-      expect(extractedInfo.path, equals(path));
+      expect(extractedInfo.pathInfo, equals(pathInfo));
     });
 
     test('extracts and adds all inputs for each file index', () {
@@ -53,8 +57,8 @@ void main() {
       finderFormatter.tracker.reset(cursor: 1); // Last index is the cursor
 
       final defaultTrackerState =
-          <TrackerKey<String>, List<TrackerKey<String>>>{}..addEntries(
-              keys.map((e) => MapEntry(e, [path])),
+          <TrackerKey<String>, List<FormattedPathInfo>>{}..addEntries(
+              keys.map((e) => MapEntry(e, [pathInfo])),
             );
 
       expect(
@@ -70,6 +74,13 @@ void main() {
   group('replacer formatter', () {
     final replacerFormatter = ReplacerFormatter();
 
+    setUpAll(
+      () => pathInfo = (
+        path: "${replacedColor.wrap('key')}/value",
+        updatedPath: "${matchColor.wrap('updatedKey')}/value",
+      ),
+    );
+
     final replacerInput = (
       mapping: {'key': 'updatedKey'},
       oldPath: 'key/value',
@@ -80,16 +91,11 @@ void main() {
       TrackerKey(key: 'key', origin: Origin.key),
     ];
 
-    final pathInfo = DualTrackerKey(
-      key: "${replacedColor.wrap('key')}/value",
-      otherKey: "${matchColor.wrap('updatedKey')}/value",
-    );
-
     test('extracts keys and path from ReplacerManagerOutput', () {
       final extractedInfo = replacerFormatter.extractFrom(replacerInput);
 
       expect(extractedInfo.keys, equals(keys));
-      expect(extractedInfo.path, equals(pathInfo));
+      expect(extractedInfo.pathInfo, equals(pathInfo));
     });
 
     test('extracts and adds all inputs for each file index', () {

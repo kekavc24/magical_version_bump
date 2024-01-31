@@ -4,10 +4,7 @@ import 'package:magical_version_bump/src/utils/enums/enums.dart';
 import 'package:test/test.dart';
 
 /// Mainly tracks paths from a node to be printed to screen.
-///
-/// This generalization helps test [DualTrackerKey] as it is a subtype of said
-/// class.
-typedef _MockFormatterTracker = FormatterTracker<TrackerKey<String>>;
+typedef _MockFormatterTracker = FormatterTracker;
 
 void main() {
   late _MockFormatterTracker tracker;
@@ -15,7 +12,7 @@ void main() {
   const key = TrackerKey<String>.fromValue('key', Origin.custom);
   const otherKey = TrackerKey<String>.fromValue('otherKey', Origin.custom);
 
-  const path = TrackerKey<String>.fromValue('this/path', Origin.custom);
+  const FormattedPathInfo pathInfo = (path: 'this/path', updatedPath: null);
 
   void resetTracker(
     _MockFormatterTracker tracker, {
@@ -34,31 +31,12 @@ void main() {
 
     test('adds single path being tracked', () {
       final expectedState = {
-        key: [path],
-        otherKey: [path],
+        key: [pathInfo],
+        otherKey: [pathInfo],
       };
 
       // Tracks by file index
-      tracker.add(fileIndex: 0, keys: [key, otherKey], value: path);
-
-      expect(tracker.trackerState, equals(expectedState));
-
-      addTearDown(() => resetTracker(tracker));
-    });
-
-    test('adds old path & updated paths being tracked', () {
-      final dualPath = DualTrackerKey<String, String>.fromValue(
-        key: path.key,
-        otherKey: 'updated/path',
-        origin: Origin.custom,
-      );
-
-      final expectedState = {
-        key: [dualPath],
-        otherKey: [dualPath],
-      };
-
-      tracker.add(fileIndex: 0, keys: [key, otherKey], value: dualPath);
+      tracker.add(fileIndex: 0, keys: [key, otherKey], pathInfo: pathInfo);
 
       expect(tracker.trackerState, equals(expectedState));
 
@@ -67,8 +45,8 @@ void main() {
 
     test('swaps current cursor when new file index is added', () {
       tracker
-        ..add(fileIndex: 0, keys: [key], value: path) // initial index
-        ..add(fileIndex: 1, keys: [otherKey], value: path); // new index
+        ..add(fileIndex: 0, keys: [key], pathInfo: pathInfo) // initial index
+        ..add(fileIndex: 1, keys: [otherKey], pathInfo: pathInfo); // new index
 
       expect(tracker.currentCursor, equals(1));
       expect(tracker.currentTolerance, equals(0));
@@ -81,14 +59,14 @@ void main() {
       expect(
         tracker.trackerState,
         equals({
-          otherKey: [path],
+          otherKey: [pathInfo],
         }),
       );
 
       expect(
         tracker.getFromHistory(0), // old state is in history
         equals({
-          key: [path],
+          key: [pathInfo],
         }),
       );
 
@@ -101,8 +79,8 @@ void main() {
 
     test('does not swap until max tolerance is exceeded', () {
       tracker
-        ..add(fileIndex: 0, keys: [key], value: path) // initial index
-        ..add(fileIndex: 1, keys: [otherKey], value: path); // new index
+        ..add(fileIndex: 0, keys: [key], pathInfo: pathInfo) // initial index
+        ..add(fileIndex: 1, keys: [otherKey], pathInfo: pathInfo); // new index
 
       expect(tracker.currentCursor, equals(0));
       expect(tracker.currentTolerance, equals(1));
@@ -112,36 +90,36 @@ void main() {
       expect(
         tracker.trackerState,
         equals({
-          key: [path],
+          key: [pathInfo],
         }),
       );
 
       expect(
         tracker.getFromHistory(1), // updated state is in history
         equals({
-          otherKey: [path],
+          otherKey: [pathInfo],
         }),
       );
     });
 
     test('swaps once max tolerance is exceeded', () {
       // Exceed max tolerance
-      tracker.add(fileIndex: 1, keys: [key], value: path);
-      
+      tracker.add(fileIndex: 1, keys: [key], pathInfo: pathInfo);
+
       expect(tracker.currentCursor, equals(1));
       expect(tracker.currentTolerance, equals(0)); // Resets tolerance
       expect(
         tracker.trackerState,
         equals({
-          otherKey: [path],
-          key: [path],
+          otherKey: [pathInfo],
+          key: [pathInfo],
         }),
       );
 
       expect(
         tracker.getFromHistory(0), // old state is in history
         equals({
-          key: [path],
+          key: [pathInfo],
         }),
       );
     });
