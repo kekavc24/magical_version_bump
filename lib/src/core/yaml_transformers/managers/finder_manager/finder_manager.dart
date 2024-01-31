@@ -4,7 +4,6 @@ import 'package:magical_version_bump/src/core/yaml_transformers/yaml_transformer
 import 'package:magical_version_bump/src/utils/enums/enums.dart';
 import 'package:magical_version_bump/src/utils/typedefs/typedefs.dart';
 import 'package:mason_logger/mason_logger.dart';
-import 'package:yaml/yaml.dart';
 
 enum FinderType { byValue, bySearch, both }
 
@@ -13,79 +12,80 @@ typedef FindManagerOutput = ({
   MatchedNodeData data,
 });
 
-class FinderManager
-    extends TransformerManager<MatchedNodeData> {
+class FinderManager extends TransformerManager<MatchedNodeData> {
   FinderManager._({
-    required super.files,
+    required super.fileQueue,
     required super.aggregator,
-    super.logger,
-  }) : super(formatter: FinderFormatter());
-
-  factory FinderManager.fullSetup({
-    required List<FileOutput> files,
-    required Aggregator aggregator,
-    required Logger? logger,
+    required super.logger,
     required FinderType finderType,
     required KeysToFind? keysToFind,
     required ValuesToFind? valuesToFind,
     required PairsToFind? pairsToFind,
-  }) {
+  }) : super(formatter: FinderFormatter()) {
     /// Save history when, [!applyToEachFile && applyToEachArg] is false
     final saveCounterHistory =
         !(!aggregator.applyToEachFile && aggregator.applyToEachArg);
 
     finder = _setUpFinder(
-      files.first.fileAsMap,
+      fileQueue.first,
       saveCounterToHistory: saveCounterHistory,
       finderType: finderType,
       keysToFind: keysToFind,
       valuesToFind: valuesToFind,
       pairsToFind: pairsToFind,
     );
-
-    return FinderManager._(
-      files: files,
-      aggregator: aggregator,
-      logger: logger,
-    );
   }
 
-  factory FinderManager.findValues({
-    required List<FileOutput> files,
+  FinderManager.fullSetup({
+    required List<Map<dynamic, dynamic>> fileQueue,
+    required Aggregator aggregator,
+    required Logger? logger,
+    required FinderType finderType,
+    required KeysToFind? keysToFind,
+    required ValuesToFind? valuesToFind,
+    required PairsToFind? pairsToFind,
+  }) : this._(
+          fileQueue: fileQueue,
+          aggregator: aggregator,
+          logger: logger,
+          finderType: finderType,
+          keysToFind: keysToFind,
+          valuesToFind: valuesToFind,
+          pairsToFind: pairsToFind,
+        );
+
+  FinderManager.findValues({
+    required List<Map<dynamic, dynamic>> fileQueue,
     required Aggregator aggregator,
     required ValuesToFind valuesToFind,
-  }) {
-    return FinderManager.fullSetup(
-      files: files,
-      aggregator: aggregator,
-      logger: null,
-      keysToFind: null,
-      valuesToFind: valuesToFind,
-      pairsToFind: null,
-      finderType: FinderType.byValue,
-    );
-  }
+  }) : this.fullSetup(
+          fileQueue: fileQueue,
+          aggregator: aggregator,
+          logger: null,
+          keysToFind: null,
+          valuesToFind: valuesToFind,
+          pairsToFind: null,
+          finderType: FinderType.byValue,
+        );
 
-  factory FinderManager.findKeys({
-    required List<FileOutput> files,
+  FinderManager.findKeys({
+    required List<Map<dynamic, dynamic>> fileQueue,
     required Aggregator aggregator,
     required KeysToFind keysToFind,
-  }) {
-    return FinderManager.fullSetup(
-      files: files,
-      aggregator: aggregator,
-      logger: null,
-      finderType: FinderType.byValue,
-      keysToFind: keysToFind,
-      valuesToFind: null,
-      pairsToFind: null,
-    );
-  }
+  }) : this.fullSetup(
+          fileQueue: fileQueue,
+          aggregator: aggregator,
+          logger: null,
+          finderType: FinderType.byValue,
+          keysToFind: keysToFind,
+          valuesToFind: null,
+          pairsToFind: null,
+        );
 
   /// Indicates a finder used by this manager to generate matches.
   ///
   /// This manager just queues file based on some conditions.
-  static late Finder finder;
+  late Finder finder;
 
   ///
   Iterable<FinderOutput> _internalGenerator() {
@@ -160,8 +160,8 @@ class FinderManager
     ///     file gets equal chance to reach the count of each argument when
     ///     not [AggregateType.all]. Even if we have to index the whole file!
 
-    final numOfFiles = yamlQueue.length;
-    final localQueue = QueueList.from(yamlQueue); // Local editable queue
+    final numOfFiles = fileQueue.length;
+    final localQueue = QueueList.from(fileQueue); // Local editable queue
 
     /// Keep track of file index to use as a cursor. We use it to reset the
     /// last counter state to history. For easy access by [ConsolePrinter]
@@ -224,7 +224,7 @@ class FinderManager
 }
 
 Finder _setUpFinder(
-  YamlMap yamlMap, {
+  Map<dynamic, dynamic> yamlMap, {
   required FinderType finderType,
   required bool saveCounterToHistory,
   KeysToFind? keysToFind,
@@ -232,7 +232,7 @@ Finder _setUpFinder(
   PairsToFind? pairsToFind,
 }) {
   return switch (finderType) {
-    _ => ValueFinder.findInYaml(
+    _ => ValueFinder.findInMap(
         yamlMap,
         saveCounterToHistory: saveCounterToHistory,
         keysToFind: keysToFind,

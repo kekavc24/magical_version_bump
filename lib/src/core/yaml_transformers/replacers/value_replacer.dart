@@ -11,10 +11,10 @@ class ValueReplacer extends Replacer {
 
   @override
   ReplacementOutput replace(
-    YamlMap yamlMap, {
+    Map<dynamic, dynamic> map, {
     required MatchedNodeData matchedNodeData,
   }) {
-    final modifiable = {...yamlMap}; // Make modifiable
+    final modifiable = {...map}; // Make modifiable
 
     // Get replacement
     final replacement = super.getReplacement<String>(

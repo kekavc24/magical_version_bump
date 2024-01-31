@@ -13,51 +13,56 @@ typedef ReplaceManagerOutput = ({
   String oldPath,
 });
 
+typedef ModifiedFiles = ({int fileIndex, Map<dynamic, dynamic> modifiedFile});
+
 class ReplacerManager extends TransformerManager<ReplaceManagerOutput> {
   ReplacerManager._({
-    required super.files,
+    required super.fileQueue,
     required super.aggregator,
     required super.logger,
     required this.commandType,
-  })  : assert(!commandType.isFinder, 'Find command not allowed'),
-        super(formatter: ReplacerFormatter());
-
-  factory ReplacerManager.create({
-    required WalkSubCommandType commandType,
-    required List<FileOutput> files,
-    required Aggregator aggregator,
-    required Logger logger,
     required Map<String, List<String>> substituteToMatchers,
-  }) {
-    _replacer = _getReplacer(commandType, substituteToMatchers: substituteToMatchers,);
-
-    _manager = _getManager(
+  })  : assert(!commandType.isFinder, 'Find command not allowed'),
+        super(formatter: ReplacerFormatter()) {
+    _replacer = _getReplacer(
       commandType,
-      files: files,
+      substituteToMatchers: substituteToMatchers,
+    );
+
+    finderManager = _getManager(
+      commandType,
+      fileQueue: fileQueue,
       aggregator: aggregator,
       replacer: _replacer,
     );
-
-    return ReplacerManager._(
-      files: files,
-      aggregator: aggregator,
-      logger: logger,
-      commandType: commandType,
-    );
   }
+
+  ReplacerManager.defaultSetup({
+    required WalkSubCommandType commandType,
+    required List<Map<dynamic, dynamic>> fileQueue,
+    required Aggregator aggregator,
+    required Logger logger,
+    required Map<String, List<String>> substituteToMatchers,
+  }) : this._(
+          fileQueue: fileQueue,
+          aggregator: aggregator,
+          logger: logger,
+          commandType: commandType,
+          substituteToMatchers: substituteToMatchers,
+        );
 
   /// Indicates the command that using this manager. Accepts only
   /// [WalkSubCommandType.rename] or [WalkSubCommandType.replace] for now.
   final WalkSubCommandType commandType;
 
   /// Generates [MatchedNodeData] objects using a [Finder] for replacement
-  static late FinderManager _manager;
+  late FinderManager finderManager;
 
   /// Represents a replacer used by this manager to rename keys or replace
   /// values.
-  static late Replacer _replacer;
+  late Replacer _replacer;
 
-  FinderManager get currentFinderManager => _manager;
+  Iterable<ModifiedFiles>? modifiedFiles;
 
   @override
   Future<void> transform() async {
@@ -67,10 +72,10 @@ class ReplacerManager extends TransformerManager<ReplaceManagerOutput> {
     );
 
     // Modifiable queue we can read and swap modifiable values back and forth
-    final localQueue = [...yamlQueue];
+    final localQueue = [...fileQueue];
 
     /// Accumulate all matches from [FinderManager]
-    final matches = _manager.generate().toList();
+    final matches = finderManager.generate().toList();
 
     if (matches.isEmpty) {
       finderProgress.fail('No matches found');
@@ -139,6 +144,11 @@ class ReplacerManager extends TransformerManager<ReplaceManagerOutput> {
           .toList(),
     );
 
+    // Add modified files
+    modifiedFiles = accumulator.keys.map(
+      (element) => (fileIndex: element, modifiedFile: localQueue[element]),
+    );
+
     replacerProgress.complete(
       'Replaced matches in ${accumulator.length} file(s)',
     );
@@ -157,18 +167,18 @@ Replacer _getReplacer(
 
 FinderManager _getManager(
   WalkSubCommandType commandType, {
-  required List<FileOutput> files,
+  required List<Map<dynamic, dynamic>> fileQueue,
   required Aggregator aggregator,
   required Replacer replacer,
 }) {
   final manager = commandType == WalkSubCommandType.rename
       ? FinderManager.findKeys(
-          files: files,
+          fileQueue: fileQueue,
           aggregator: aggregator,
           keysToFind: replacer.getTargets() as KeysToFind,
         )
       : FinderManager.findValues(
-          files: files,
+          fileQueue: fileQueue,
           aggregator: aggregator,
           valuesToFind: replacer.getTargets() as ValuesToFind,
         );

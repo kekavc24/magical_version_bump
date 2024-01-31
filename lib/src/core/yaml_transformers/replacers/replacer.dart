@@ -95,7 +95,7 @@ abstract class Replacer {
 
   /// Replaces a matched node in a yaml map and returns an updated yaml map
   ReplacementOutput replace(
-    YamlMap yamlMap, {
+    Map<dynamic, dynamic> map, {
     required MatchedNodeData matchedNodeData,
   });
 }

@@ -11,10 +11,10 @@ class KeySwapper extends Replacer {
 
   @override
   ReplacementOutput replace(
-    YamlMap yamlMap, {
+    Map<dynamic, dynamic> map, {
     required MatchedNodeData matchedNodeData,
   }) {
-    final modifiable = {...yamlMap}; // Make modifiable
+    final modifiable = {...map};
 
     // Get replacement pair
     final replacementPair = super.getReplacement<Map<String, String>>(

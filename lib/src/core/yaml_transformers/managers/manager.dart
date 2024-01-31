@@ -1,27 +1,25 @@
-import 'package:collection/collection.dart';
 import 'package:magical_version_bump/src/core/yaml_transformers/formatter/formatter.dart';
 import 'package:magical_version_bump/src/core/yaml_transformers/trackers/counter/generic_counter.dart';
 import 'package:magical_version_bump/src/utils/enums/enums.dart';
 import 'package:magical_version_bump/src/utils/typedefs/typedefs.dart';
 import 'package:mason_logger/mason_logger.dart';
 import 'package:meta/meta.dart';
-import 'package:yaml/yaml.dart';
 
 export 'finder_manager/finder_manager.dart';
 export 'replacer_manager/replacer_manager.dart';
 
 enum ManagerProgress { findingMatches, replacingValues }
 
-abstract class TransformerManager<OutputT> {
+abstract class TransformerManager<FormatterOutputT> {
   TransformerManager({
-    required List<FileOutput> files,
+    required this.fileQueue,
     required this.aggregator,
     required this.formatter,
-    this.logger,
-  }) : yamlQueue = QueueList.from(files.map((e) => e.fileAsMap));
+    required this.logger,
+  });
 
-  /// A queue of all yaml maps to run a transform operation on
-  final QueueList<YamlMap> yamlQueue;
+  /// A queue of all yaml/ordinary maps to run a transform operation on
+  final List<Map<dynamic, dynamic>> fileQueue;
 
   /// A custom Aggregator for this transformer
   final Aggregator aggregator;
@@ -30,7 +28,7 @@ abstract class TransformerManager<OutputT> {
   final managerCounter = Counter<int, int>();
 
   /// Path formatter for tree like format
-  final NodePathFormatter<OutputT> formatter;
+  final NodePathFormatter<FormatterOutputT> formatter;
 
   final Logger? logger;
 
