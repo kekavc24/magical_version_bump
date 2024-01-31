@@ -51,7 +51,7 @@ T extractKey<T>({
       .map(
         (e) => DualTrackerKey<String, String>.fromEntry(
           entry: e,
-          origin: Origin.pair,
+          origin: origin,
         ),
       )
       .toList() as T;
@@ -153,7 +153,7 @@ String wrapMatches({required String path, required List<String> matches}) {
 
 /// Used to separate different children. This is mainly used to show clear
 /// distinction when showing values replaced in various paths.
-String _childSeparator({
+String getChildSeparator({
   CharSet charSet = CharSet.utf8,
 }) {
   final separator = charSet == CharSet.utf8 ? '│' : '|';
@@ -162,7 +162,7 @@ String _childSeparator({
 }
 
 /// Used to separate value found/replaced with its count
-String _countSeparator({CharSet charSet = CharSet.utf8}) {
+String getCountSeparator({CharSet charSet = CharSet.utf8}) {
   return charSet == CharSet.utf8 ? '──' : '--';
 }
 
@@ -209,7 +209,7 @@ String formatInfo<T extends TrackerKey<String>>({
   // Key acts as the "anchor"
   final formatBuffer = StringBuffer(
     anchorColor.wrap(
-      '''$key ${_countSeparator()} ${isReplaceMode ? 'Replaced ' : 'Found '} $countOfPaths\n''',
+      '''$key ${getCountSeparator()} ${isReplaceMode ? 'Replaced ' : 'Found '} $countOfPaths\n''',
     )!,
   );
 
@@ -234,68 +234,10 @@ String formatInfo<T extends TrackerKey<String>>({
 
     // Write pipe separator for replace mode
     if (isReplaceMode && !isLastChild) {
-      formatBuffer.writeln(_childSeparator());
+      formatBuffer.writeln(getChildSeparator());
     }
   }
 
   formatBuffer.writeln(); // Add empty line
   return formatBuffer.toString();
-}
-
-/// Aggregate info from a [NodePathFormatter]
-String aggregateInfo<FormatT extends TrackerKey<String>, InputT>({
-  required bool isReplaceMode,
-  required NodePathFormatter<FormatT, InputT> formatter,
-  required List<String> fileNames,
-  required Counter<int, int> finderFileCounter,
-  Counter<int, int>? replacerFileCounter,
-}) {
-  if (isReplaceMode) {
-    assert(
-      replacerFileCounter != null,
-      'Missing counter from replace manager!',
-    );
-  }
-
-  final aggregateBuffer = StringBuffer();
-  final tracker = formatter.tracker;
-
-  // Reset the last tracker to ease access from history
-  tracker.reset(cursor: tracker.currentCursor);
-
-  // Use index to access each file info, order is always maintained
-  for (final (index, fileName) in fileNames.indexed) {
-    final infoToAggregate = tracker.getFromHistory(index);
-
-    // Add top level header with info about
-    aggregateBuffer.write(
-      createHeader(
-        isReplaceMode: isReplaceMode,
-        fileName: fileName,
-        countOfMatches: finderFileCounter.getCount(
-          index,
-          origin: Origin.custom,
-        ),
-        countOfReplacements: replacerFileCounter?.getCount(
-          index,
-          origin: Origin.custom,
-        ),
-      ),
-    );
-
-    if (infoToAggregate == null) continue;
-
-    // Loop all files and create their tree-like string
-    for (final entry in infoToAggregate.entries) {
-      final formattedInfo = formatInfo<FormatT>(
-        isReplaceMode: isReplaceMode,
-        key: entry.key.key, // weird?
-        formattedPaths: entry.value,
-      );
-
-      aggregateBuffer.write(formattedInfo);
-    }
-  }
-
-  return aggregateBuffer.toString();
 }

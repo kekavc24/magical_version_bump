@@ -6,7 +6,7 @@ import 'package:mason_logger/mason_logger.dart';
 import 'package:meta/meta.dart';
 
 part 'custom_tracker.dart';
-part 'format_util.dart';
+part 'formatter_util.dart';
 
 abstract base class NodePathFormatter<FormatT extends TrackerKey<String>,
     InputT> {
@@ -42,12 +42,53 @@ abstract base class NodePathFormatter<FormatT extends TrackerKey<String>,
     required List<String> fileNames,
     required Counter<int, int> finderFileCounter,
     Counter<int, int>? replacerFileCounter,
-  }) =>
-      aggregateInfo(
-        isReplaceMode: isReplaceMode,
-        formatter: this,
-        fileNames: fileNames,
-        finderFileCounter: finderFileCounter,
-        replacerFileCounter: replacerFileCounter,
+  }) {
+    if (isReplaceMode) {
+      assert(
+        replacerFileCounter != null,
+        'Missing counter from replace manager!',
       );
+    }
+
+    final aggregateBuffer = StringBuffer();
+
+    // Reset the last tracker to ease access from history
+    tracker.reset(cursor: tracker.currentCursor);
+
+    // Use index to access each file info, order is always maintained
+    for (final (index, fileName) in fileNames.indexed) {
+      final infoToAggregate = tracker.getFromHistory(index);
+
+      // Add top level header with info about
+      aggregateBuffer.write(
+        createHeader(
+          isReplaceMode: isReplaceMode,
+          fileName: fileName,
+          countOfMatches: finderFileCounter.getCount(
+            index,
+            origin: Origin.custom,
+          ),
+          countOfReplacements: replacerFileCounter?.getCount(
+            index,
+            origin: Origin.custom,
+          ),
+        ),
+      );
+
+      if (infoToAggregate == null) continue;
+
+      // Loop all files and create their tree-like string
+      for (final entry in infoToAggregate.entries) {
+        final formattedInfo = formatInfo<FormatT>(
+          isReplaceMode: isReplaceMode,
+          key: entry.key.key, // weird?
+          formattedPaths: entry.value,
+        );
+
+        aggregateBuffer.write(formattedInfo);
+      }
+    }
+
+    return aggregateBuffer.toString();
+  }
 }
