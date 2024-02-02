@@ -1,4 +1,5 @@
 import 'package:magical_version_bump/src/core/yaml_transformers/managers/replacer_manager/replacer_formatter.dart';
+import 'package:magical_version_bump/src/core/yaml_transformers/trackers/counter/generic_counter.dart';
 import 'package:magical_version_bump/src/core/yaml_transformers/trackers/tracker.dart';
 import 'package:magical_version_bump/src/core/yaml_transformers/yaml_transformer.dart';
 import 'package:magical_version_bump/src/utils/enums/enums.dart';
@@ -24,17 +25,23 @@ class ReplacerManager extends TransformerManager<ReplaceManagerOutput> {
     required Map<String, List<String>> substituteToMatchers,
   })  : assert(!commandType.isFinder, 'Find command not allowed'),
         super(formatter: ReplacerFormatter()) {
-    _replacer = _getReplacer(
-      commandType,
-      substituteToMatchers: substituteToMatchers,
-    );
+    // Replacer based on replace mode
+    _replacer = switch (commandType) {
+      WalkSubCommandType.rename => KeySwapper(substituteToMatchers),
+      _ => ValueReplacer(substituteToMatchers),
+    };
 
-    finderManager = _getManager(
-      commandType,
-      fileQueue: fileQueue,
-      aggregator: aggregator,
-      replacer: _replacer,
-    );
+    _finderManager = commandType == WalkSubCommandType.rename
+        ? FinderManager.findKeys(
+            fileQueue: fileQueue,
+            aggregator: aggregator,
+            keysToFind: _replacer.getTargets<KeysToFind>(),
+          )
+        : FinderManager.findValues(
+            fileQueue: fileQueue,
+            aggregator: aggregator,
+            valuesToFind: _replacer.getTargets<ValuesToFind>(),
+          );
   }
 
   ReplacerManager.defaultSetup({
@@ -56,13 +63,17 @@ class ReplacerManager extends TransformerManager<ReplaceManagerOutput> {
   final WalkSubCommandType commandType;
 
   /// Generates [MatchedNodeData] objects using a [Finder] for replacement
-  late FinderManager finderManager;
+  late FinderManager _finderManager;
 
   /// Represents a replacer used by this manager to rename keys or replace
   /// values.
   late Replacer _replacer;
 
   Iterable<ModifiedFiles>? modifiedFiles;
+
+  /// Obtains the counter used by the [FinderManager] used to manage the
+  /// finding of matches in different files
+  Counter<int, int> get finderManagerCounter => _finderManager.managerCounter;
 
   @override
   Future<void> transform() async {
@@ -75,7 +86,7 @@ class ReplacerManager extends TransformerManager<ReplaceManagerOutput> {
     final localQueue = [...fileQueue];
 
     /// Accumulate all matches from [FinderManager]
-    final matches = finderManager.generate().toList();
+    final matches = _finderManager.generate().toList();
 
     if (matches.isEmpty) {
       finderProgress.fail('No matches found');
@@ -153,35 +164,4 @@ class ReplacerManager extends TransformerManager<ReplaceManagerOutput> {
       'Replaced matches in ${accumulator.length} file(s)',
     );
   }
-}
-
-Replacer _getReplacer(
-  WalkSubCommandType commandType, {
-  required Map<String, List<String>> substituteToMatchers,
-}) {
-  return switch (commandType) {
-    WalkSubCommandType.rename => KeySwapper(substituteToMatchers),
-    _ => ValueReplacer(substituteToMatchers),
-  };
-}
-
-FinderManager _getManager(
-  WalkSubCommandType commandType, {
-  required List<Map<dynamic, dynamic>> fileQueue,
-  required Aggregator aggregator,
-  required Replacer replacer,
-}) {
-  final manager = commandType == WalkSubCommandType.rename
-      ? FinderManager.findKeys(
-          fileQueue: fileQueue,
-          aggregator: aggregator,
-          keysToFind: replacer.getTargets() as KeysToFind,
-        )
-      : FinderManager.findValues(
-          fileQueue: fileQueue,
-          aggregator: aggregator,
-          valuesToFind: replacer.getTargets() as ValuesToFind,
-        );
-
-  return manager;
 }

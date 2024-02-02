@@ -26,7 +26,7 @@ class FinderManager extends TransformerManager<MatchedNodeData> {
     final saveCounterHistory =
         !(!aggregator.applyToEachFile && aggregator.applyToEachArg);
 
-    finder = _setUpFinder(
+    _finder = _setUpFinder(
       fileQueue.first,
       saveCounterToHistory: saveCounterHistory,
       finderType: finderType,
@@ -85,11 +85,11 @@ class FinderManager extends TransformerManager<MatchedNodeData> {
   /// Indicates a finder used by this manager to generate matches.
   ///
   /// This manager just queues file based on some conditions.
-  late Finder finder;
+  late Finder _finder;
 
   ///
   Iterable<FinderOutput> _internalGenerator() {
-    return finder.find(
+    return _finder.find(
       aggregateType: aggregator.type,
       applyToEach: aggregator.applyToEachArg,
       count: aggregator.count,
@@ -159,7 +159,6 @@ class FinderManager extends TransformerManager<MatchedNodeData> {
     ///   * [applyToEachArg] is [true] - Files get a wildcard. Each
     ///     file gets equal chance to reach the count of each argument when
     ///     not [AggregateType.all]. Even if we have to index the whole file!
-
     final numOfFiles = fileQueue.length;
     final localQueue = QueueList.from(fileQueue); // Local editable queue
 
@@ -176,7 +175,7 @@ class FinderManager extends TransformerManager<MatchedNodeData> {
       // Add yaml if we are not starting. Finder always has the first file
       if (fileIndex != 0) {
         // Swap and use previous file.
-        finder.swapMap(yamlMap, cursor: fileIndex - 1);
+        _finder.swapMap(yamlMap, cursor: fileIndex - 1);
       }
 
       // Loop all matches
@@ -219,7 +218,7 @@ class FinderManager extends TransformerManager<MatchedNodeData> {
     ///
     /// This index denotes the file whose counter is active. No need to
     /// subtract "1" to go back to previous file.
-    finder.counter!.reset(cursor: fileIndex);
+    _finder.counter!.reset(cursor: fileIndex);
   }
 }
 
