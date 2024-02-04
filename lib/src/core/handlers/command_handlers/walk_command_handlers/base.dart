@@ -12,7 +12,7 @@ abstract base class HandleWalkCommand extends CommandHandler {
   /// A manager that handles internal "map-walk" functionalities
   late TransformerManager<dynamic> _manager;
 
-  /// Set up [TransformerManager] to handle recursions 
+  /// Set up [TransformerManager] to handle recursions
   ///
   /// Internally, the [TransformerManager] sets up a `Formatter`.
   ///
