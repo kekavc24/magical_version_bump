@@ -8,12 +8,14 @@ pubspec.lock
 doc/api/
 
 # Files generated during & for tests
+.vscode/
 .test_coverage.dart
 coverage/
 .test_runner.dart
-fake.dart
+fake*.dart
 fake.yaml
 fake.json
+mock_data.json
 .markdownlint.yaml
 
 # Android studio and IntelliJ

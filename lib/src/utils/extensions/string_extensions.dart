@@ -1,9 +1,9 @@
-import 'package:magical_version_bump/src/utils/enums/enums.dart';
+part of 'extensions.dart';
 
 extension StringExtension on String {
   /// Get file type
   FileType get fileType => switch (this) {
-        'yaml' => FileType.yaml,
+        'yaml' || 'yml' => FileType.yaml,
         'json' => FileType.json,
         _ => FileType.unknown
       };

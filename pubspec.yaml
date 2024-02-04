@@ -1,7 +1,7 @@
 name: magical_version_bump
 description: A commandline tool for automatically modifying/changing nodes
- specified in your pubspec.yaml
-version: 1.0.1
+  specified in your pubspec.yaml
+version: 1.1.0-dev.1
 homepage: https://github.com/kekavc24/magical_version_bump
 repository: https://github.com/kekavc24/magical_version_bump
 issue_tracker: https://github.com/kekavc24/magical_version_bump/issues
@@ -20,21 +20,24 @@ platforms:
   macos:
 
 dependencies:
-  args: ^2.3.1
-  cli_completion: ">=0.3.0 <0.5.0"
-  mason_logger: ^0.2.4
+  args: ^2.4.2
+  cli_completion: ^0.4.0
+  collection: ^1.18.0
+  equatable: ^2.0.5
+  mason_logger: ^0.2.11
+  meta: ^1.11.0
   pub_semver: ^2.1.4
-  pub_updater: ">=0.3.0 <0.5.0"
-  yaml: ^3.1.1
-  yaml_edit: ^2.1.0
+  pub_updater: ^0.4.0
+  yaml: ^3.1.2
+  yaml_edit: ^2.1.1
 
 dev_dependencies:
-  build_runner: ^2.0.0
-  build_verify: ^3.0.0
-  build_version: ^2.0.0
-  mocktail: ^1.0.0
-  test: ^1.19.2
-  very_good_analysis: ^5.0.0+1
+  build_runner: ^2.4.8
+  build_verify: ^3.1.0
+  build_version: ^2.1.1
+  mocktail: ^1.0.3
+  test: ^1.25.2
+  very_good_analysis: ^5.1.0
 
 executables:
   mag:

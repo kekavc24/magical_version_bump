@@ -19,3 +19,66 @@ enum PresetType {
   /// Preset version, prerelease & build number
   all;
 }
+
+/// Amount of values that match condition in list of string
+enum MatchCount {
+  /// No match
+  none,
+
+  /// At least 1 or more
+  some,
+
+  /// All values match
+  all
+}
+
+/// Type of update to map
+enum UpdateMode {
+  /// Adds value to terminal end
+  append,
+
+  /// Replaces a single value
+  replace,
+
+  /// Removes and replaces old value with a new one
+  overwrite
+}
+
+/// Type of subcommand that may have been triggered
+enum WalkSubCommandType {
+  find(isFinder: true),
+  search(isFinder: true),
+  rename(isFinder: false),
+  replace(isFinder: false);
+
+  const WalkSubCommandType({required this.isFinder});
+
+  final bool isFinder;
+}
+
+/// Type of ordering based on a list of targets
+enum OrderType {
+  /// At least one of any
+  loose,
+
+  /// All present
+  grouped,
+
+  /// All present and in exact order specified
+  strict
+}
+
+/// Aggregation type based on count
+enum AggregateType {
+  /// Only first matching value
+  first,
+
+  /// Count of values
+  count,
+
+  /// Find all
+  all;
+}
+
+/// Indicates a custom origin of a value
+enum Origin { key, value, pair, custom }

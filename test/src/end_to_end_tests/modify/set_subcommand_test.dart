@@ -2,6 +2,7 @@ import 'package:magical_version_bump/src/command_runner.dart';
 import 'package:mason_logger/mason_logger.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:test/test.dart';
+import 'package:yaml/yaml.dart';
 
 import '../../../helpers/helpers.dart';
 
@@ -56,7 +57,11 @@ void main() {
         final result = await commandRunner.run(args);
 
         expect(result, equals(ExitCode.usage.code));
-        verify(() => logger.err('Cannot append at name')).called(1);
+        verify(
+          () => logger.err(
+            '''Cannot append new values due to an existing value at "name". You need to overwrite this path key.''',
+          ),
+        ).called(1);
       },
     );
   });
@@ -136,15 +141,20 @@ void main() {
 
       final defaultStart = ['nested'];
 
-      final createdValue = await readNestedNodes(
+      final createdValue = await readNestedNodes<String>(
         null,
         [...defaultStart, 'value'],
       );
-      final createdList = await readNestedNodes(
+
+      final createdList = await readNestedNodes<YamlList>(
         null,
         [...defaultStart, 'list'],
       );
-      final createdMap = await readNestedNodes(null, [...defaultStart, 'map']);
+
+      final createdMap = await readNestedNodes<YamlMap>(
+        null,
+        [...defaultStart, 'map'],
+      );
 
       await resetFile(node: 'nested', remove: true);
 

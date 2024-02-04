@@ -26,7 +26,7 @@ void main() {
     when(() => logger.progress(any())).thenReturn(_MockProgress());
     when(
       () => logger.prompt(
-        'Please enter the path to file:',
+        'Please enter the path to file: ',
         defaultValue: any(
           named: 'defaultValue',
         ),
