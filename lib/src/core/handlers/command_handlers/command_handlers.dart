@@ -2,13 +2,18 @@ import 'package:args/args.dart';
 import 'package:magical_version_bump/src/core/argument_normalizers/arg_normalizer.dart';
 import 'package:magical_version_bump/src/core/custom_version_modifiers/semver_version_modifer.dart';
 import 'package:magical_version_bump/src/core/handlers/file_handler/file_handler.dart';
+import 'package:magical_version_bump/src/core/yaml_transformers/trackers/counter/generic_counter.dart';
+import 'package:magical_version_bump/src/core/yaml_transformers/yaml_transformer.dart';
 import 'package:magical_version_bump/src/utils/enums/enums.dart';
-import 'package:magical_version_bump/src/utils/exceptions/command_exceptions.dart';
+import 'package:magical_version_bump/src/utils/exceptions/magical_exception.dart';
 import 'package:magical_version_bump/src/utils/mixins/command_mixins.dart';
 import 'package:mason_logger/mason_logger.dart';
 
-part 'bump_command_handler.dart';
-part 'set_command_handler.dart';
+part 'modify_command_handlers/bump_command_handler.dart';
+part 'modify_command_handlers/set_command_handler.dart';
+part 'walk_command_handlers/base.dart';
+part 'walk_command_handlers/find_command_handler.dart';
+part 'walk_command_handlers/replace_command_handler.dart';
 
 /// Each command has a unique way to handle incoming arguments
 abstract class CommandHandler with ValidateVersion, ModifyYaml {
@@ -24,9 +29,7 @@ abstract class CommandHandler with ValidateVersion, ModifyYaml {
   late ArgumentsNormalizer _argumentsNormalizer;
 
   /// Each subclass must implement this as each command has its own core logic.
-  Future<void> _coreCommandHandler(ArgResults? argResults) async {
-    throw UnimplementedError();
-  }
+  Future<void> _coreCommandHandler(ArgResults? argResults);
 
   /// Set up file handler
   void _setupFileHandler(ArgResults? argResults) {
@@ -38,9 +41,7 @@ abstract class CommandHandler with ValidateVersion, ModifyYaml {
 
   /// Each subclass behaves differently based on args passed in by user. Thus
   /// must be overriden/implemented.
-  void _setUpArgChecker(ArgResults? argResults) {
-    throw UnimplementedError();
-  }
+  void _setUpArgChecker(ArgResults? argResults);
 
   /// Handle command. Commands call this method with args the user passed
   /// in.
@@ -57,7 +58,7 @@ abstract class CommandHandler with ValidateVersion, ModifyYaml {
 
     if (!validatedArgs.isValid) {
       validationProgress.fail(validatedArgs.reason!.key);
-      throw MagicalException(violation: validatedArgs.reason!.value);
+      throw MagicalException(message: validatedArgs.reason!.value);
     }
 
     validationProgress.complete('Checked arguments');

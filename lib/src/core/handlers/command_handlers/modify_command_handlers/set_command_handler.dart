@@ -1,4 +1,4 @@
-part of 'command_handlers.dart';
+part of '../command_handlers.dart';
 
 class HandleSetCommand extends CommandHandler {
   HandleSetCommand({required super.logger});
@@ -48,7 +48,7 @@ class HandleSetCommand extends CommandHandler {
     if (versionModifiers.presetType != PresetType.none) {
       final localVersion = fileOuput.fileAsMap['version'] as String?;
 
-      final version = MagicalSEMVER.addPresets(
+      final version = addPresets(
         localVersion ?? '',
         modifiers: versionModifiers,
       );

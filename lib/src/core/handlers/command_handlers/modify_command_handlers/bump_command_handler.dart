@@ -1,4 +1,4 @@
-part of 'command_handlers.dart';
+part of '../command_handlers.dart';
 
 final class HandleBumpCommand extends CommandHandler {
   HandleBumpCommand({required super.logger});
@@ -27,7 +27,7 @@ final class HandleBumpCommand extends CommandHandler {
 
     /// Preset any values before validating the version. When `--preset` flag
     /// is used or `--set-version` option
-    final currentVersion = MagicalSEMVER.addPresets(
+    final currentVersion = addPresets(
       localVersion ?? '',
       modifiers: versionModifiers,
     );
@@ -41,7 +41,7 @@ final class HandleBumpCommand extends CommandHandler {
     // Bump the version
     final modProgress = logger.progress('Bumping up version');
 
-    final modifiedVersion = MagicalSEMVER.bumpVersion(
+    final modifiedVersion = bumpVersion(
       validatedVersion,
       versionTargets: preppedArgs.targets,
       strategy: versionModifiers.strategy,
@@ -53,7 +53,7 @@ final class HandleBumpCommand extends CommandHandler {
     }
 
     // Add final touches before updating yaml file
-    final versionToSave = MagicalSEMVER.appendPreAndBuild(
+    final versionToSave = appendPreAndBuild(
       modifiedVersion.version,
       modifiers: versionModifiers,
     );
