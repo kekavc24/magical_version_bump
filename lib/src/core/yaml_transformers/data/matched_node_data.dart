@@ -1,6 +1,6 @@
 part of '../yaml_transformer.dart';
 
-/// Data object specifically created when a `Finder` finds it based on some 
+/// Data object specifically created when a `Finder` finds it based on some
 /// predefined condition
 @immutable
 class MatchedNodeData extends NodeData {
@@ -59,7 +59,7 @@ class MatchedNodeData extends NodeData {
   String getPathToLastKey() {
     return getUptoLastRenameable().map((key) => key.toString()).join('/');
   }
-  
+
   @override
   List<Object> get props => [
         ...super.props,

@@ -38,7 +38,7 @@ class MagicalIndexer {
   /// Yaml map to search and index
   Map<dynamic, dynamic> map;
 
-  /// Triggers this indexer to generate any terminal values found in a 
+  /// Triggers this indexer to generate any terminal values found in a
   /// yaml/json map
   Iterable<NodeData> indexYaml() sync* {
     for (final entry in map.entries) {

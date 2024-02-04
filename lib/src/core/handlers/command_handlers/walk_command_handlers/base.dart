@@ -31,7 +31,7 @@ abstract base class HandleWalkCommand extends CommandHandler {
 
     final isReplaceMode = !_subCommandType.isFinder;
     final counters = _getCounters();
-    
+
     // Save changes as replace mode modifies them
     if (isReplaceMode) {
       final saveProgress = logger.progress('Saving changes');

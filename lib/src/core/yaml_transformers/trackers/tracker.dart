@@ -20,7 +20,7 @@ base class SingleValueTracker<KeyT, ValueT> {
   TrackerKey<KeyT> createKey(KeyT value, {required Origin origin}) {
     return TrackerKey<KeyT>.fromValue(value, origin);
   }
-  
+
   /// Checks if the map contains the specified [key]
   bool containsTrackerKey(KeyT key, {required Origin origin}) {
     return trackerState.containsKey(
@@ -35,8 +35,8 @@ base class SingleValueTracker<KeyT, ValueT> {
 /// [KeyT] - denotes the value being tracked. Acts as a key to the map used
 /// internally. It is wrapped with a [TrackerKey] for equality & hashing ease.
 ///
-/// [OtherKeyT] - denotes an optional type incase a [MapEntry] is passed. In 
-/// which case, the value of [KeyT] & [OtherKeyT] are both wrapped in a 
+/// [OtherKeyT] - denotes an optional type incase a [MapEntry] is passed. In
+/// which case, the value of [KeyT] & [OtherKeyT] are both wrapped in a
 /// [DualTrackerKey].
 ///
 /// [ValueT] - denotes the tracking info. Stored as is.
@@ -60,20 +60,20 @@ base class DualTracker<KeyT, OtherKeyT, ValueT>
 /// A mixin to add history functionality to any [SingleValueTracker] class/
 /// its subclasses.
 ///
-/// [CursorT] - denotes the cursor type. Think of it as a key linking any 
+/// [CursorT] - denotes the cursor type. Think of it as a key linking any
 /// tracker state stored. Can be any data type as long as you make it unique
 ///
 /// [KeyT] - denotes the value being tracked. Acts as a key to the map used
 /// internally. It is wrapped with a [TrackerKey] for equality & hashing ease.
 ///
-/// [OtherKeyT] - denotes an optional type incase a [MapEntry] is passed. In 
-/// which case, the value of [KeyT] & [OtherKeyT] are both wrapped in a 
+/// [OtherKeyT] - denotes an optional type incase a [MapEntry] is passed. In
+/// which case, the value of [KeyT] & [OtherKeyT] are both wrapped in a
 /// [DualTrackerKey].
 ///
 /// [ValueT] - denotes the tracking info. Stored as is.
 base mixin MapHistory<CursorT, KeyT, OtherKeyT, ValueT>
     on SingleValueTracker<KeyT, ValueT> {
-  /// Stores the tracker history for a [SingleValueTracker] or 
+  /// Stores the tracker history for a [SingleValueTracker] or
   /// [DualTracker]
   final Map<CursorT, Map<TrackerKey<KeyT>, ValueT>> history = {};
 

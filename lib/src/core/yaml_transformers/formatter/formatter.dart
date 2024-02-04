@@ -16,13 +16,13 @@ abstract base class NodePathFormatter<InputT> {
   /// Stores the info for this formatter for easy access
   final FormatterTracker tracker;
 
-  /// Each `TransformerManager` extracts values differently. See fine grained 
+  /// Each `TransformerManager` extracts values differently. See fine grained
   /// implementations for each.
   ({List<TrackerKey<String>> keys, FormattedPathInfo pathInfo}) extractFrom(
     InputT input,
   );
-  
-  /// Adds inputs from a single file based on its index to this formatter's 
+
+  /// Adds inputs from a single file based on its index to this formatter's
   /// tracker.
   void add(int fileIndex, List<InputT> inputs) {
     for (final input in inputs) {
@@ -35,7 +35,7 @@ abstract base class NodePathFormatter<InputT> {
     }
   }
 
-  /// Adds inputs from multiple files based on their index to this formatter's 
+  /// Adds inputs from multiple files based on their index to this formatter's
   /// tracker.
   void addAll(List<(int fileIndex, List<InputT> inputs)> fileInputs) {
     for (final (fileIndex, outputs) in fileInputs) {
