@@ -12,10 +12,9 @@ abstract base class HandleWalkCommand extends CommandHandler {
   /// A manager that handles internal "map-walk" functionalities
   late TransformerManager<dynamic> _manager;
 
-  /// Set up [TransformerManager] to handle recursions & [ConsolePrinter] to
-  /// format any value found/replaced while "walking".
+  /// Set up [TransformerManager] to handle recursions 
   ///
-  /// Internally, the [TransformerManager] sets up a [ConsolePrinter].
+  /// Internally, the [TransformerManager] sets up a `Formatter`.
   ///
   /// Logic includes any prepped args as each command is set differently
   void _setUpManager(List<Map<dynamic, dynamic>> fileQueue);
