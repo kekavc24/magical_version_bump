@@ -1,3 +1,12 @@
+# 1.1.0-dev.1
+
+* `refactor`: extend existing code with missing functionality. Closes:
+  * [#42](https://github.com/kekavc24/magical_version_bump/issues/42)
+  * [#44](https://github.com/kekavc24/magical_version_bump/issues/44)
+  * [#45](https://github.com/kekavc24/magical_version_bump/issues/45)
+* `feat`: add `walk` command with `find`, `rename` and `replace` subcommands.
+* `test`: update existing & add new tests.
+
 # 1.0.1
 
 * `refactor` : improve code readability and testability.
