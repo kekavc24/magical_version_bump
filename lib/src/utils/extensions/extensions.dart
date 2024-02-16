@@ -1,6 +1,6 @@
 import 'package:args/args.dart';
 import 'package:magical_version_bump/src/utils/enums/enums.dart';
-import 'package:magical_version_bump/src/utils/exceptions/magical_exception.dart';
+import 'package:magical_version_bump/src/utils/exceptions/exceptions.dart';
 import 'package:magical_version_bump/src/utils/typedefs/typedefs.dart';
 import 'package:pub_semver/pub_semver.dart';
 

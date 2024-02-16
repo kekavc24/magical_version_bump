@@ -1,7 +1,7 @@
 import 'package:magical_version_bump/src/core/yaml_transformers/trackers/counter/generic_counter.dart';
 import 'package:magical_version_bump/src/core/yaml_transformers/yaml_transformer.dart';
 import 'package:magical_version_bump/src/utils/enums/enums.dart';
-import 'package:magical_version_bump/src/utils/exceptions/magical_exception.dart';
+import 'package:magical_version_bump/src/utils/exceptions/exceptions.dart';
 import 'package:magical_version_bump/src/utils/extensions/extensions.dart';
 import 'package:magical_version_bump/src/utils/typedefs/typedefs.dart';
 import 'package:meta/meta.dart';

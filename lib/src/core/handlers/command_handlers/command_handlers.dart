@@ -5,7 +5,7 @@ import 'package:magical_version_bump/src/core/handlers/file_handler/file_handler
 import 'package:magical_version_bump/src/core/yaml_transformers/trackers/counter/generic_counter.dart';
 import 'package:magical_version_bump/src/core/yaml_transformers/yaml_transformer.dart';
 import 'package:magical_version_bump/src/utils/enums/enums.dart';
-import 'package:magical_version_bump/src/utils/exceptions/magical_exception.dart';
+import 'package:magical_version_bump/src/utils/exceptions/exceptions.dart';
 import 'package:magical_version_bump/src/utils/mixins/command_mixins.dart';
 import 'package:mason_logger/mason_logger.dart';
 

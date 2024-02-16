@@ -1,4 +1,3 @@
-import 'package:collection/collection.dart';
 import 'package:magical_version_bump/src/utils/exceptions/exceptions.dart';
 import 'package:meta/meta.dart';
 
