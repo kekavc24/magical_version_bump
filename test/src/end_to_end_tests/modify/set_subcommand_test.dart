@@ -25,7 +25,7 @@ void main() {
   const build = '100';
   const version = '8.8.8+8';
 
-  setUp(() async {
+  setUpAll(() async {
     logger = _MockLogger();
     commandRunner = MagicalVersionBumpCommandRunner(
       logger: logger,
@@ -52,7 +52,7 @@ void main() {
     test(
       'when appending a new nested node to node with non-map nodes',
       () async {
-        final args = [...defaultArgs, '--add', 'name|newNode=value'];
+        final args = [...defaultArgs, '--add', 'name,newNode=value'];
 
         final result = await commandRunner.run(args);
 
@@ -126,11 +126,11 @@ void main() {
       final args = [
         ...defaultArgs,
         '--dictionary',
-        'nested|value=string',
+        'nested,value=string',
         '--add',
-        'nested|list=string,list',
+        'nested,list=string,list',
         '--add',
-        'nested|map=string->list',
+        'nested,map=string>list',
       ];
 
       final result = await commandRunner.run(args);
