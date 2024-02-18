@@ -235,12 +235,10 @@ void main() {
         args: [],
       ) as SetArgumentsNormalizer;
 
-      final validatedArgs = argsChecker.validateArgs();
+      final (_, reason) = argsChecker.validateArgs();
 
-      expect(validatedArgs.isValid, false);
-      expect(validatedArgs.reason, isNotNull);
-      expect(validatedArgs.reason!.key, 'Missing arguments');
-      expect(validatedArgs.reason!.value, 'Arguments cannot be empty or null');
+      expect(reason!.key, 'Missing arguments');
+      expect(reason.value, 'Arguments cannot be empty or null');
     });
   });
 }

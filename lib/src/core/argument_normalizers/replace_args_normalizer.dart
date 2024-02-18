@@ -12,13 +12,13 @@ final class ReplacerArgumentsNormalizer extends ArgumentsNormalizer {
   late ListOfParsedValues _targetCandidates;
 
   @override
-  ({bool isValid, InvalidReason? reason}) customValidate() {
+  (bool isValid, InvalidReason? reason) customValidate() {
     _replacementCandidates = argResults!.replacementCandidates;
 
     if (_replacementCandidates.isEmpty) {
       return (
-        isValid: false,
-        reason: const InvalidReason(
+        false,
+        const InvalidReason(
           'Missing replacements',
           'You need to provide at one replacement',
         ),
@@ -31,8 +31,8 @@ final class ReplacerArgumentsNormalizer extends ArgumentsNormalizer {
 
     if (_targetCandidates.isEmpty) {
       return (
-        isValid: false,
-        reason: InvalidReason(
+        false,
+        InvalidReason(
           "Missing ${isRename ? 'keys' : 'values'}",
           "You need to provide at least one ${isRename ? 'key' : 'value'}",
         ),
@@ -42,10 +42,10 @@ final class ReplacerArgumentsNormalizer extends ArgumentsNormalizer {
   }
 
   @override
-  ({
+  (
     Aggregator aggregator,
     Map<String, List<String>> substituteToMatchers,
-  }) prepArgs() {
+  ) prepArgs() {
     // Create modifiable list
     final replacementCandidates = [..._replacementCandidates];
 
@@ -74,9 +74,6 @@ final class ReplacerArgumentsNormalizer extends ArgumentsNormalizer {
       if (replacementCandidates.isNotEmpty) replacementCandidates.removeAt(0);
     }
 
-    return (
-      aggregator: argResults!.getAggregator(),
-      substituteToMatchers: substituteToMatchers,
-    );
+    return (argResults!.getAggregator(), substituteToMatchers);
   }
 }

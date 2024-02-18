@@ -8,15 +8,15 @@ final class FindArgumentsNormalizer extends ArgumentsNormalizer {
   late PairsToFind _pairsToFind;
 
   @override
-  ({bool isValid, InvalidReason? reason}) customValidate() {
+  (bool isValid, InvalidReason? reason) customValidate() {
     _keysToFind = _extractKeyOrValue(argResults!, extractKeys: true);
     _valuesToFind = _extractKeyOrValue(argResults!, extractKeys: false);
-    _pairsToFind = extractPairs(argResults!);
+    _pairsToFind = _extractPairs(argResults!);
 
     if (_keysToFind.isEmpty && _valuesToFind.isEmpty && _pairsToFind.isEmpty) {
       return (
-        isValid: false,
-        reason: const InvalidReason(
+        false,
+        const InvalidReason(
           'Missing arguments',
           'You need to provide at least a key/value/key-value pair to be found',
         ),
@@ -26,17 +26,17 @@ final class FindArgumentsNormalizer extends ArgumentsNormalizer {
   }
 
   @override
-  ({
+  (
     Aggregator aggregator,
     KeysToFind keysToFind,
     ValuesToFind valuesToFind,
     PairsToFind pairsToFind,
-  }) prepArgs() {
+  ) prepArgs() {
     return (
-      aggregator: argResults!.getAggregator(),
-      keysToFind: (keys: _keysToFind, orderType: argResults!.keyOrder),
-      valuesToFind: _valuesToFind,
-      pairsToFind: _pairsToFind,
+      argResults!.getAggregator(),
+      (keys: _keysToFind, orderType: argResults!.keyOrder),
+       _valuesToFind,
+      _pairsToFind,
     );
   }
 
@@ -54,7 +54,7 @@ final class FindArgumentsNormalizer extends ArgumentsNormalizer {
   /// Extracts pairs.
   ///
   /// Throws error when a pair is not complete
-  PairsToFind extractPairs(ArgResults argResults) {
+  PairsToFind _extractPairs(ArgResults argResults) {
     final listOfPairs = argResults.mapPairs.flattened;
 
     if (listOfPairs.isEmpty) return {};

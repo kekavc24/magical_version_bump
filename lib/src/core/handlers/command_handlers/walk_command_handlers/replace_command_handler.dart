@@ -10,14 +10,14 @@ final class HandleReplaceCommand extends HandleWalkCommand {
   void _setUpManager(List<Map<dynamic, dynamic>> fileQueue) {
     // Obtain prepped args from checker
     final checker = _getChecker<ReplacerArgumentsNormalizer>();
-    final preppedArgs = checker.prepArgs();
+    final (aggregator, substituteToMatchers) = checker.prepArgs();
 
     _manager = ReplacerManager.defaultSetup(
       commandType: _subCommandType,
       fileQueue: fileQueue,
-      aggregator: preppedArgs.aggregator,
+      aggregator: aggregator,
       logger: logger,
-      substituteToMatchers: preppedArgs.substituteToMatchers,
+      substituteToMatchers: substituteToMatchers,
     );
   }
 

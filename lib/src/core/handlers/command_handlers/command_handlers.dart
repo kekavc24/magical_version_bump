@@ -54,11 +54,11 @@ abstract class CommandHandler with ValidateVersion, ModifyYaml {
 
     final validationProgress = logger.progress('Checking arguments');
 
-    final validatedArgs = _argumentsNormalizer.validateArgs();
+    final (isValid, reason) = _argumentsNormalizer.validateArgs();
 
-    if (!validatedArgs.isValid) {
-      validationProgress.fail(validatedArgs.reason!.key);
-      throw MagicalException(message: validatedArgs.reason!.value);
+    if (!isValid) {
+      validationProgress.fail(reason!.key);
+      throw MagicalException(message: reason.value);
     }
 
     validationProgress.complete('Checked arguments');

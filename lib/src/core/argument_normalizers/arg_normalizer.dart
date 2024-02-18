@@ -24,7 +24,7 @@ abstract class ArgumentsNormalizer {
   final ArgResults? argResults;
 
   /// Basic implementation to check if args are empty or null
-  ({bool isValid, InvalidReason? reason}) validateArgs({
+  (bool isValid, InvalidReason? reason) validateArgs({
     bool ignoreRestArgs = true,
   }) {
     /// Args must not be empty or null.
@@ -32,8 +32,8 @@ abstract class ArgumentsNormalizer {
         argResults!.arguments.isEmpty ||
         (ignoreRestArgs && argResults!.rest.isNotEmpty)) {
       return (
-        isValid: false,
-        reason: const InvalidReason(
+        false,
+        const InvalidReason(
           'Missing arguments',
           'Arguments cannot be empty or null',
         ),
@@ -43,10 +43,7 @@ abstract class ArgumentsNormalizer {
   }
 
   @protected
-  ({bool isValid, InvalidReason? reason}) customValidate() => (
-        isValid: true,
-        reason: null,
-      );
+  (bool isValid, InvalidReason? reason) customValidate() => (true, null);
 
   /// Prep args to desired format
   void prepArgs();

@@ -17,8 +17,7 @@ final class HandleBumpCommand extends CommandHandler {
     final checker = _getChecker<BumpArgumentsNormalizer>();
 
     // Required information to bump version
-    final preppedArgs = checker.prepArgs();
-    final versionModifiers = preppedArgs.modifiers;
+    final (versionModifiers, targets) = checker.prepArgs();
 
     // Read pubspec.yaml file
     final fileOuput = await _fileHandler.readFile();
@@ -43,7 +42,7 @@ final class HandleBumpCommand extends CommandHandler {
 
     final modifiedVersion = bumpVersion(
       validatedVersion,
-      versionTargets: preppedArgs.targets,
+      versionTargets: targets,
       strategy: versionModifiers.strategy,
     );
 
