@@ -5,17 +5,16 @@ abstract base class Tokenizer<IntermediateTokenT, TokenT> {
   final _charBuffer = StringBuffer();
 
   /// Add a character to buffer
-  @protected
   void addToBuffer(String char) => _charBuffer.write(char);
 
-  /// Obtains the character accumulate so far in the buffer
-  @protected
+  /// Obtains the characters accumulated so far in the buffer
   String getBuffer({bool reset = true}) {
     final buffer = _charBuffer.toString();
     if (reset) resetBuffer();
     return buffer;
   }
 
+  /// Clears the internal buffer used by this tokenizer
   void resetBuffer() => _charBuffer.clear();
 
   /// Returns a custom token indicating no more tokens are available for
@@ -33,7 +32,7 @@ abstract base class Tokenizer<IntermediateTokenT, TokenT> {
 }
 
 /// Generate a synchronous stream of characters from string
-Iterable<(int, String)> generateCharacters(
+Iterable<(int index, String char)> generateCharacters(
   String input, {
   String splitPattern = '',
 }) sync* {

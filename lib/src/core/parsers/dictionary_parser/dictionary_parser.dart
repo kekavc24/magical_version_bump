@@ -28,7 +28,7 @@ final class DictionaryParser extends Parser<DictBuilder> {
     if (input.isEmpty) {
       throw _getParseException(
         'Input cannot be empty!',
-        currentInput: inputIndex + 1,
+        currentInput: inputIndex,
         currentInputPosition: 0,
         input: input,
       );
@@ -81,18 +81,21 @@ final class DictionaryParser extends Parser<DictBuilder> {
   ) {
     // Terminate if tokenizer generates error
     if (tokenType == DictionaryTokenType.error) {
-      const error = r'Expected an escaped character but found "\"';
+      const error = r'Expected an escaped character after "\"';
       return (null, error);
     }
 
     // Terminate once no more tokens are present
     if (tokenType == DictionaryTokenType.end) {
+      final canBuildMap = _tempMapBuilder.isNotEmpty;
+
       // Incase we never parsed any values
-      if (_parseStatus == DictParserStatus.parsingKeys) {
+      if (_parseStatus == DictParserStatus.parsingKeys ||
+          (_values.isEmpty && !canBuildMap)) {
         return (null, 'Expected at least one value but got nothing');
       }
 
-      if (_tempMapBuilder.isNotEmpty) {
+      if (canBuildMap) {
         _buildMap();
       }
       final builder = (
@@ -127,21 +130,18 @@ final class DictionaryParser extends Parser<DictBuilder> {
 
   String? _addKey(String? token, DictionaryTokenType tokenType) {
     // No success key delimiters
-    if (_lastToken.isDelimiter && tokenType.isDelimiter) {
-      var message = 'Expected another key but found the delimiter, "$token". ';
+    if (tokenType.isDelimiter) {
+      var message = 'Expected a key but found the delimiter, "$token". ';
 
-      if (tokenType == DictionaryTokenType.keyDelimiter) {
-        message += 'Consider escaping the duplicate key delimiter.';
-      } else {
-        message += 'Value delimiters not allowed!';
+      if (_lastToken.isDelimiter) {
+        return message += 'Consider escaping any key delimiter(s) used.';
+      } else if (tokenType == DictionaryTokenType.mapDelimiter) {
+        return message += 'Value delimiters not allowed!';
       }
-      return message;
-    }
 
-    if (!tokenType.isDelimiter) {
-      _keys.add(token!);
-    } else {
       _lastDelimiterToken = tokenType;
+    } else {
+      _keys.add(token!);
     }
 
     _lastToken = tokenType;
@@ -149,11 +149,6 @@ final class DictionaryParser extends Parser<DictBuilder> {
   }
 
   String? _addValue(String? token, DictionaryTokenType tokenType) {
-    // No key delimiters allowed
-    if (tokenType == DictionaryTokenType.keyDelimiter) {
-      return 'Expected value/value delimiter but found, "$token"';
-    }
-
     // When current token is a delimiter
     if (tokenType.isDelimiter) {
       // A delimiter cannot be the first value
@@ -161,8 +156,14 @@ final class DictionaryParser extends Parser<DictBuilder> {
         return 'Expected first value but found, "$token". Consider escaping it';
       }
 
-      // Consecutive delimiter tokens not allowed
-      if (_lastToken == tokenType) {
+      /// Consecutive delimiter tokens not allowed. Also a map delimiter cannot
+      /// be after list delimiter unless escaped.
+      ///
+      /// Explicit as list delimiter can occur after a map delimiter when
+      /// setting the value to null.
+      if (_lastToken == tokenType ||
+          (_lastToken == DictionaryTokenType.listDelimiter &&
+              tokenType == DictionaryTokenType.mapDelimiter)) {
         return 'Expected a value but found, "$token". Consider escaping it';
       }
 

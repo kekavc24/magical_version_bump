@@ -35,7 +35,7 @@ final class DictionaryTokenizer
       }
 
       /// We only emit two to reconcile word built in buffer before
-      /// encountering a delimiter that is not an escape.
+      /// encountering a delimiter that is not an escape character.
       ///
       /// It's index precedes the index of a non-escaped delimiter
       yield (index - 1, first);
@@ -46,7 +46,7 @@ final class DictionaryTokenizer
     // If last token as an escape, indicate to parser
     if (_previousTokenType == DictionaryTokenType.escapeDelimiter) {
       yield (
-        -1,
+        -1, // Expected position for unescaped character
         (token: null, tokenType: DictionaryTokenType.error),
       );
     } else {
@@ -70,7 +70,7 @@ final class DictionaryTokenizer
       return ((token: null, tokenType: DictionaryTokenType.none), null);
     }
 
-    final defaultToken = (token: null, tokenType: tokenType);
+    final defaultToken = (token: char, tokenType: tokenType);
     DictionaryToken? preYield;
 
     // Attempt to obtain any buffered tokens
@@ -83,7 +83,6 @@ final class DictionaryTokenizer
 
   DictionaryTokenType _checkTokenType(String char) {
     return switch (char) {
-      _keyDelimiter => DictionaryTokenType.keyDelimiter,
       _mapDelimiter => DictionaryTokenType.mapDelimiter,
       _listDelimiter => DictionaryTokenType.listDelimiter,
       _escaperDelimiter => DictionaryTokenType.escapeDelimiter,
