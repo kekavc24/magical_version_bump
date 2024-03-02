@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:magical_version_bump/src/core/parsers/parser.dart';
 import 'package:magical_version_bump/src/utils/enums/enums.dart';
 import 'package:magical_version_bump/src/utils/extensions/extensions.dart';
@@ -186,7 +188,11 @@ final class DictionaryParser extends Parser<DictBuilder> {
           _tempMapBuilder.addAll([lastEntry, token!]);
         }
       } else {
-        _values.add(token);
+        _values.add(
+          tokenType == DictionaryTokenType.jsonLiteral
+              ? json.decode(token!)
+              : token,
+        );
       }
     }
 

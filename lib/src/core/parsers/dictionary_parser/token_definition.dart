@@ -1,6 +1,5 @@
 part of 'dictionary_parser.dart';
 
-
 /// Used to separate map literals.
 ///
 /// Example: `key>anotherKey>value` results in:
@@ -28,47 +27,150 @@ const _listDelimiter = ',';
 /// ```
 const _kvDelimiter = '=';
 
+/// Used to enclose raw json literals
+const _jsonLiteralDelimiter = '`';
+
+/// Used to denotes starting of json map
+const _jsonLiteralOpenMap = '{';
+
+/// Use to pair a key with value
+const _jsonLiteralKVDelimiter = ':';
+
+/// Used to denotes end of json map
+const _jsonLiteralCloseMap = '}';
+
+/// Used to denote start of json list
+const _jsonLiteralOpenList = '[';
+
+/// Used to denotes end of json list
+const _jsonLiteralCloseList = ']';
+
+/// Used to wrap values constructed in json
+const _jsonLiteralQuote = '"';
+
 /// Used to escape all stated delimiters & itself
 const _escaperDelimiter = r'\';
 
 enum DictionaryTokenType {
-  /// A fancy way to denote nothing. Helps the [DictionaryTokenizer] accumulate 
-  /// characters before emitting a [DictionaryToken] with token type 
+  /// A fancy way to denote nothing. Helps the [DictionaryTokenizer] accumulate
+  /// characters before emitting a [DictionaryToken] with token type
   /// [DictionaryTokenType.normal]
-  none(isDelimiter: false),
+  none,
 
   /// Denotes a full word/token that can act as a key/value
-  normal(isDelimiter: false),
+  normal,
 
-  /// A fancy way of telling the [DictionaryParser] that the last token was an 
+  /// Denotes a raw json literal that needs to be decoded
+  jsonLiteral,
+
+  /// A fancy way of telling the [DictionaryParser] that the last token was an
   /// escape character. Usually emitted just before [DictionaryTokenType.end]
-  error(isDelimiter: false),
+  error,
 
   /// Denotes a map pointer to the next key/value. Default value is `>`
-  mapDelimiter(isDelimiter: true),
+  mapDelimiter,
 
-  /// Denotes a delimiter for specifying more than one key/value. Default 
+  /// Denotes a delimiter for specifying more than one key/value. Default
   /// value is `,`
-  listDelimiter(isDelimiter: true),
+  listDelimiter,
 
   /// Denotes a delimiter separating keys & values. Default value is `=`
-  kvDelimiter(isDelimiter: true),
+  kvDelimiter,
 
-  /// Denotes a delimiter for escaping any delimiter and itself. Default value 
+  /// Denotes a delimiter for escaping any delimiter and itself. Default value
   /// is `\`.
-  escapeDelimiter(isDelimiter: true),
+  escapeDelimiter,
+
+  ///
+  jsonLiteralDelimiter,
+
+  jsonOpenMap,
+
+  jsonKVDelimiter,
+
+  jsonCloseMap,
+
+  jsonOpenList,
+
+  jsonCloseList,
 
   /// Used by [DictionaryTokenizer] indicate no more tokens are available for
   /// parsing to [DictionaryParser]
-  end(isDelimiter: false);
+  end;
 
-  const DictionaryTokenType({required this.isDelimiter});
-
-  /// An easy way to check if the token type is a delimiter 
-  final bool isDelimiter;
+  /// Checks type of token
+  static DictionaryTokenType checkTokenType(String char) {
+    return switch (char) {
+      _mapDelimiter => DictionaryTokenType.mapDelimiter,
+      _listDelimiter => DictionaryTokenType.listDelimiter,
+      _escaperDelimiter => DictionaryTokenType.escapeDelimiter,
+      _kvDelimiter => DictionaryTokenType.kvDelimiter,
+      _jsonLiteralDelimiter => DictionaryTokenType.jsonLiteralDelimiter,
+      _jsonLiteralOpenMap => DictionaryTokenType.jsonOpenMap,
+      _jsonLiteralKVDelimiter => DictionaryTokenType.jsonKVDelimiter,
+      _jsonLiteralCloseMap => DictionaryTokenType.jsonCloseMap,
+      _jsonLiteralOpenList => DictionaryTokenType.jsonOpenList,
+      _jsonLiteralCloseList => DictionaryTokenType.jsonCloseList,
+      _ => DictionaryTokenType.normal,
+    };
+  }
 }
 
 typedef DictionaryToken = ({
   DictionaryTokenType tokenType,
   String? token,
 });
+
+extension _DictTokenTypeExt on DictionaryTokenType {
+  /// An easy way to check if the token type is a delimiter
+  bool get isDelimiter => switch (this) {
+        DictionaryTokenType.none => false,
+        DictionaryTokenType.normal => false,
+        DictionaryTokenType.jsonLiteral => false,
+        DictionaryTokenType.error => false,
+        DictionaryTokenType.mapDelimiter => true,
+        DictionaryTokenType.listDelimiter => true,
+        DictionaryTokenType.kvDelimiter => true,
+        DictionaryTokenType.escapeDelimiter => true,
+        DictionaryTokenType.jsonLiteralDelimiter => true,
+        DictionaryTokenType.jsonOpenMap => true,
+        DictionaryTokenType.jsonKVDelimiter => true,
+        DictionaryTokenType.jsonCloseMap => true,
+        DictionaryTokenType.jsonOpenList => true,
+        DictionaryTokenType.jsonCloseList => true,
+        DictionaryTokenType.end => true,
+      };
+
+  /// Helps [DictionaryTokenizer] to know which tokens to pass on to
+  /// [DictionaryParser]
+  bool get isYieldable => switch (this) {
+        DictionaryTokenType.none => false,
+        DictionaryTokenType.normal => true,
+        DictionaryTokenType.jsonLiteral => true,
+        DictionaryTokenType.error => true,
+        DictionaryTokenType.mapDelimiter => true,
+        DictionaryTokenType.listDelimiter => true,
+        DictionaryTokenType.kvDelimiter => true,
+        DictionaryTokenType.escapeDelimiter => false,
+        DictionaryTokenType.jsonLiteralDelimiter => false,
+        DictionaryTokenType.jsonOpenMap => false,
+        DictionaryTokenType.jsonKVDelimiter => false,
+        DictionaryTokenType.jsonCloseMap => false,
+        DictionaryTokenType.jsonOpenList => false,
+        DictionaryTokenType.jsonCloseList => false,
+        DictionaryTokenType.end => true
+      };
+
+  /// Checks whether [DictionaryTokenizer] should add quotation marks to the
+  /// before buffering a character
+  bool get shouldTriggerQuoting => switch (this) {
+        DictionaryTokenType.jsonOpenList ||
+        DictionaryTokenType.jsonCloseList ||
+        DictionaryTokenType.jsonOpenMap ||
+        DictionaryTokenType.jsonCloseMap ||
+        DictionaryTokenType.jsonKVDelimiter ||
+        DictionaryTokenType.listDelimiter =>
+          true,
+        _ => false
+      };
+}
