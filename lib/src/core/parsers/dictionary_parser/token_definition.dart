@@ -81,24 +81,30 @@ enum DictionaryTokenType {
   /// is `\`.
   escapeDelimiter,
 
-  ///
+  /// Denotes a delimiter for a stringified json literal. Default value is the
+  /// backtick itself
   jsonLiteralDelimiter,
 
+  /// Denotes the start of a json map. Default value is `{`.
   jsonOpenMap,
 
+  /// Denotes the end of a key and start of a value. Dedault value is `:`.
   jsonKVDelimiter,
 
+  /// Denotes the close/end of a json map. Default is `}`.
   jsonCloseMap,
 
+  /// Denotes the start of a json list. Default is `[`.
   jsonOpenList,
 
+  /// Denotes the end of a json list. Default is `]`.
   jsonCloseList,
 
   /// Used by [DictionaryTokenizer] indicate no more tokens are available for
   /// parsing to [DictionaryParser]
   end;
 
-  /// Checks type of token
+  /// Checks type of token using a single character
   static DictionaryTokenType checkTokenType(String char) {
     return switch (char) {
       _mapDelimiter => DictionaryTokenType.mapDelimiter,

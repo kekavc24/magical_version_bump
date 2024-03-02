@@ -12,11 +12,18 @@ final class DictionaryTokenizer
 
   String input;
 
+  /// Last token tokenized and (not) emitted
   DictionaryTokenType _previousTokenType = DictionaryTokenType.none;
 
+  /// Indicates whether a json string is being tokenized/cleaned
   bool _isTokenizingJsonLiteral = false;
+
+  /// Indicates last character tokenized in a json string
   String? _lastJsonLiteralChar;
-  bool _lastJsonLiteralWasEscaped = false;
+
+  /// Keeps track of all indices of a json string's quotation marks. Ensures
+  /// we correctly clean the json keys/values for Dart's json decoder.
+  final _quoteIndices = <int>[];
 
   @override
   DictionaryToken getEOCharsToken() =>
@@ -44,15 +51,21 @@ final class DictionaryTokenizer
       ///
       /// It's index precedes the index of a non-escaped delimiter
       yield (index - 1, first);
-      yield (index, second); // TODO: Yield only if second is not tokenType.none
+      yield (index, second);
       _previousTokenType = second.tokenType;
     }
 
-    // If last token as an escape, indicate to parser
-    if (_previousTokenType == DictionaryTokenType.escapeDelimiter) {
+    /// If last token as an escape, indicate to parser. We won't need to
+    /// flust buffer for json literals as that is done after the closing
+    /// json literal
+    if (_previousTokenType == DictionaryTokenType.escapeDelimiter ||
+        _isTokenizingJsonLiteral) {
       yield (
         -1, // Expected position for unescaped character
-        (token: null, tokenType: DictionaryTokenType.error),
+        (
+          token: _isTokenizingJsonLiteral ? 'json-literal' : null,
+          tokenType: DictionaryTokenType.error,
+        ),
       );
     } else {
       final lastEntry = _flushBuffer();
@@ -80,7 +93,7 @@ final class DictionaryTokenizer
     /// Then return a token that prevents the generator from yielding a new
     /// token
     if (tokenType == DictionaryTokenType.normal || isEscaped) {
-      addToBuffer(char);
+      charBuffer.pushToMainBuffer(char);
       return ((token: null, tokenType: DictionaryTokenType.none), null);
     }
 
@@ -95,23 +108,21 @@ final class DictionaryTokenizer
     return preYield != null ? (preYield, defaultToken) : (defaultToken, null);
   }
 
+  /// Tokenizes json literal strings
   IntermediateDictToken _tokenizeJsonLiteral(
     bool isEscaped,
     DictionaryTokenType tokenType,
     String char,
   ) {
-    // // TODO flush buffer only if last token was a list delimiter
-    // DictionaryToken? bufferedToken;
-
-    // if (!_isTokenizingJsonLiteral &&
-    //     _previousTokenType == DictionaryTokenType.listDelimiter) {
-    //   bufferedToken = _flushBuffer();
-    // }
-
     if (tokenType == DictionaryTokenType.jsonLiteralDelimiter && !isEscaped) {
       if (_isTokenizingJsonLiteral) {
         _isTokenizingJsonLiteral = false;
-        return (_flushBuffer(DictionaryTokenType.jsonLiteral)!, null);
+        _lastJsonLiteralChar = null;
+        return (
+          _flushBuffer(DictionaryTokenType.jsonLiteral) ??
+              (token: '', tokenType: DictionaryTokenType.jsonLiteral),
+          null,
+        );
       }
 
       _isTokenizingJsonLiteral = true;
@@ -124,54 +135,60 @@ final class DictionaryTokenizer
       return ((token: null, tokenType: _previousTokenType), null);
     }
 
-    // TODO: Checklist for implementation
-    /// 1. Add json quotes before first letter which is after :
-    ///     * a jsonOpenList, jsonOpenMap
-    ///     * jsonLiteralDelimiter
-    ///     * listDelimiter if next is not any of stated above
-    /// 2. Add json quotes after last letter/char which is before:
-    ///     * a jsonCloseList, jsonCloseMap
-    ///     * a json literal
-    ///
-    /// Heads up,
-    /// * All json literals can be escaped
-    /// * Space before and after any json delimiter added smoothly
-    /// * Return tokenType.none if nothing was buffered previously or
-    ///   if json literal is being buffered
-    if (isEscaped) {
-      _lastJsonLiteralWasEscaped = true;
+    /// Add directly to temp buffer if character is escaped or the
+    /// last character was escaped while escaping a character
+    if (isEscaped || _lastJsonLiteralChar == r'\') {
       _lastJsonLiteralChar = char;
-      addToBuffer(char);
+      charBuffer.pushToTempBuffer(char);
       return ((token: null, tokenType: DictionaryTokenType.none), null);
     }
 
-    final isQuotable = _lastJsonLiteralChar != null &&
-        _lastJsonLiteralChar != _jsonLiteralQuote &&
-        char != _jsonLiteralQuote &&
-        !_lastJsonLiteralWasEscaped;
-
-    // Add closing quote before or after
-    if (isQuotable &&
-        (tokenType.shouldTriggerQuoting ||
-            _previousTokenType.shouldTriggerQuoting)) {
-      addToBuffer(_jsonLiteralQuote);
+    if (tokenType.shouldTriggerQuoting) {
+      // Flush temporary before next json delimiter token
+      charBuffer
+        ..flushTempBuffer(
+          mode: _optimumQuoteFixMode(),
+          wrapper: _jsonLiteralQuote,
+        )
+        ..pushToMainBuffer(char);
+    } else {
+      if (char == _jsonLiteralQuote) {
+        _quoteIndices.add(charBuffer.lastTempBufferIndex + 1);
+      }
+      charBuffer.pushToTempBuffer(char);
     }
-    addToBuffer(char);
 
-    if (_lastJsonLiteralWasEscaped) _lastJsonLiteralWasEscaped = false;
     _lastJsonLiteralChar = char;
     return ((token: null, tokenType: tokenType), null);
   }
 
+  /// Flushes buffer and emits a dictionary token if not empty
   DictionaryToken? _flushBuffer([DictionaryTokenType? tokenType]) {
-    var buffer = '';
-    if ((buffer = getBuffer(reset: false)).isNotEmpty) {
-      resetBuffer();
+    final buffer = charBuffer.flushMainBuffer();
+    if (buffer != null) {
       return (
         token: buffer,
         tokenType: tokenType ?? DictionaryTokenType.normal,
       );
     }
     return null;
+  }
+
+  /// Obtains the best way to prepend or append
+  QuoteFixMode _optimumQuoteFixMode() {
+    if (_quoteIndices.isEmpty) return QuoteFixMode.bothEnds;
+
+    // Indices of all quotation marks
+    final (min, max) = _quoteIndices.getMinAndMax();
+    final maxIndex = charBuffer.lastTempBufferIndex;
+    _quoteIndices.clear(); // Remove indices
+
+    // When not:
+    return switch (min!) {
+      > 0 when max! < maxIndex => QuoteFixMode.bothEnds, // At either start/end
+      == 0 when max! < maxIndex => QuoteFixMode.append, // At end
+      > 0 when max! == maxIndex => QuoteFixMode.preppend, // At start
+      _ => QuoteFixMode.none, // At start and end or if equal
+    };
   }
 }

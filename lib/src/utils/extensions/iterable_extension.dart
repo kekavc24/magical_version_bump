@@ -41,3 +41,21 @@ extension IterableOperations on Iterable<String> {
     return every(other.contains) && (length == other.length);
   }
 }
+
+extension EfficientOperation on Iterable<int> {
+  (int? min, int? max) getMinAndMax() {
+    int? min;
+    var max = min = firstOrNull;
+
+    for (final value in this) {
+      if (min == null || value < min) {
+        min = value;
+      } 
+      
+      if (max == null || value > max) {
+        max = value;
+      }
+    }
+    return (min, max);
+  }
+}
