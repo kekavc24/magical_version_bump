@@ -117,7 +117,7 @@ void main() {
 
     test(
       'extracts & generates map for multi-key map when value is null',
-      () async {
+      () {
         final dictionary = dictionaryParser.parse(
           '''testKey=testMapKey>otherMapKey>''',
           0,
@@ -131,6 +131,61 @@ void main() {
         expect(dictionary.data, equals(expectedMappedValues));
       },
     );
+
+    test('when json list literal is present', () {
+      final dictionary = dictionaryParser.parse(
+        'key=`[jsonLiteral]`',
+        0,
+      );
+
+      expect(dictionary.rootKeys, equals(['key']));
+      expect(dictionary.data, equals(['jsonLiteral']));
+    });
+
+    test('when json map literal is present', () {
+      final dictionary = dictionaryParser.parse(
+        'key=`[jsonLiteral]`',
+        0,
+      );
+
+      expect(dictionary.rootKeys, equals(['key']));
+      expect(dictionary.data, equals(['jsonLiteral']));
+    });
+
+    test('when json literal is part of a list', () {
+      final dictionary = dictionaryParser.parse(
+        'key=value,`{json:literal}`',
+        0,
+      );
+
+      expect(dictionary.rootKeys, equals(['key']));
+      expect(
+        dictionary.data,
+        equals(
+          [
+            'value',
+            {'json': 'literal'},
+          ],
+        ),
+      );
+    });
+
+    test('when json literal is part of a map', () {
+      final dictionary = dictionaryParser.parse(
+        'key=valueWith>`{json:literal}`',
+        0,
+      );
+
+      expect(dictionary.rootKeys, equals(['key']));
+      expect(
+        dictionary.data,
+        equals(
+          {
+            'valueWith': {'json': 'literal'},
+          },
+        ),
+      );
+    });
 
     test('extracts escaped delimiters used for either key/value', () async {
       final dictionary = dictionaryParser.parse(

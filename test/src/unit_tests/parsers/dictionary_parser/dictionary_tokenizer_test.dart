@@ -77,6 +77,107 @@ void main() {
       expect(tokens, equals(expectedTokens));
     });
 
+    group('from json literal input', () {
+      test('when a raw json map is passed in', () {
+        addTokenizerInput('`{key:value}`');
+
+        final expectedTokens = [
+          (
+            12,
+            (
+              token: '{"key":"value"}',
+              tokenType: DictionaryTokenType.jsonLiteral
+            )
+          ),
+          (-1, tokenizer.getEOCharsToken()),
+        ];
+
+        expect(
+          tokenizer.tokenize().toList(),
+          equals(expectedTokens),
+        );
+      });
+
+      test('when a raw json list is passed in', () {
+        addTokenizerInput('`[value,anotherValue]`');
+
+        final expectedTokens = [
+          (
+            21,
+            (
+              token: '["value","anotherValue"]',
+              tokenType: DictionaryTokenType.jsonLiteral
+            )
+          ),
+          (-1, tokenizer.getEOCharsToken()),
+        ];
+
+        expect(
+          tokenizer.tokenize().toList(),
+          equals(expectedTokens),
+        );
+      });
+
+      test('when an empty json map/list is passed in', () {
+        addTokenizerInput('`{[]}`');
+
+        final expectedTokens = [
+          (5, (token: '{[]}', tokenType: DictionaryTokenType.jsonLiteral)),
+          (-1, tokenizer.getEOCharsToken()),
+        ];
+
+        expect(
+          tokenizer.tokenize().toList(),
+          equals(expectedTokens),
+        );
+      });
+
+      test('when escaped json map or list delimiters are escaped', () {
+        addTokenizerInput(r'`{\{key:\[value}`');
+
+        final expectedTokens = [
+          (
+            16,
+            (
+              token: '{"{key":"[value"}',
+              tokenType: DictionaryTokenType.jsonLiteral
+            )
+          ),
+          (-1, tokenizer.getEOCharsToken()),
+        ];
+
+        expect(
+          tokenizer.tokenize().toList(),
+          equals(expectedTokens),
+        );
+      });
+
+      test('when a clean json map/list is passed in', () {
+        addTokenizerInput('`{"key":"value"}`,`["value"]`');
+
+        final expectedTokens = [
+          (
+            16,
+            (
+              token: '{"key":"value"}',
+              tokenType: DictionaryTokenType.jsonLiteral
+            )
+          ),
+          (17, (token: ',', tokenType: DictionaryTokenType.listDelimiter)),
+          (
+            28,
+            (token: '["value"]', tokenType: DictionaryTokenType.jsonLiteral)
+          ),
+          (-1, tokenizer.getEOCharsToken()),
+        ];
+
+        expect(
+          tokenizer.tokenize().toList(),
+          equals(expectedTokens),
+        );
+      });
+    });
+
     test(
       'adds error token when no unescaped characters are added in input',
       () {
