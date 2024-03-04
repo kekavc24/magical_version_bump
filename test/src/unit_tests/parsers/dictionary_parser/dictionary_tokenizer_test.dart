@@ -43,7 +43,7 @@ void main() {
         equals((token: null, tokenType: DictionaryTokenType.none)),
       );
 
-      expect(tokenizer.getBuffer(), equals('n'));
+      expect(tokenizer.charBuffer.flushMainBuffer(), equals('n'));
     });
 
     test('emits any buffered input when delimiter is passed in after', () {

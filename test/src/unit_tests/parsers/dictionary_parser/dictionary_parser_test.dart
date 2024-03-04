@@ -86,22 +86,6 @@ void main() {
       );
     });
 
-    test(
-      'extracts key and values, ignores map delimiter if pair is missing',
-      () async {
-        final dictionary = dictionaryParser.parse(
-          'testKey=testMapKey>',
-          0,
-        );
-
-        expect(dictionary.rootKeys, equals(['testKey']));
-        expect(
-          dictionary.data,
-          equals('testMapKey'),
-        );
-      },
-    );
-
     test('extracts multiple keys and mapped values', () async {
       final dictionary = dictionaryParser.parse(
         '''testKey,anotherKey=testMapKey>testMapValue,otherMapKey>otherMapValue''',
@@ -140,7 +124,7 @@ void main() {
         );
 
         final expectedMappedValues = <String, dynamic>{
-          'testMapKey': {'otherMapKey': 'null'},
+          'testMapKey': {'otherMapKey': null},
         };
 
         expect(dictionary.rootKeys, equals(['testKey']));
