@@ -22,7 +22,7 @@ void main() {
           orderType: OrderType.loose,
         );
 
-        final finder = ValueFinder.findInMap(
+        final finder = ValueFinder.findInDynamicValue(
           defaultMap,
           saveCounterToHistory: false,
           keysToFind: keysToFind,
@@ -51,7 +51,7 @@ void main() {
           orderType: OrderType.grouped,
         );
 
-        final finder = ValueFinder.findInMap(
+        final finder = ValueFinder.findInDynamicValue(
           defaultMap,
           saveCounterToHistory: false,
           keysToFind: keysToFind,
@@ -78,7 +78,7 @@ void main() {
           orderType: OrderType.strict,
         );
 
-        final finder = ValueFinder.findInMap(
+        final finder = ValueFinder.findInDynamicValue(
           defaultMap,
           saveCounterToHistory: false,
           keysToFind: keysToFind,
@@ -104,7 +104,7 @@ void main() {
       test(
         'when at root, nested in key with list or a value to a key in map',
         () {
-          final finder = ValueFinder.findInMap(
+          final finder = ValueFinder.findInDynamicValue(
             defaultMap,
             saveCounterToHistory: false,
             keysToFind: null,
@@ -134,7 +134,7 @@ void main() {
           'anotherKey': 'key',
         };
 
-        final finder = ValueFinder.findInMap(
+        final finder = ValueFinder.findInDynamicValue(
           defaultMap,
           saveCounterToHistory: false,
           keysToFind: null,
@@ -176,7 +176,7 @@ void main() {
           'key': 'value',
         };
 
-        final finder = ValueFinder.findInMap(
+        final finder = ValueFinder.findInDynamicValue(
           defaultMap,
           saveCounterToHistory: false,
           keysToFind: null,
@@ -232,7 +232,7 @@ void main() {
         'keyWithList': 'key',
       };
 
-      final finder = ValueFinder.findInMap(
+      final finder = ValueFinder.findInDynamicValue(
         defaultMap,
         saveCounterToHistory: false,
         keysToFind: keysToFind,
@@ -278,7 +278,7 @@ void main() {
           'keyWithList': 'key',
         };
 
-        final finder = ValueFinder.findInMap(
+        final finder = ValueFinder.findInDynamicValue(
           defaultMap,
           saveCounterToHistory: false,
           keysToFind: keysToFind,
