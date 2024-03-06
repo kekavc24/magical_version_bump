@@ -5,7 +5,6 @@ import 'package:magical_version_bump/src/utils/exceptions/exceptions.dart';
 import 'package:magical_version_bump/src/utils/extensions/extensions.dart';
 import 'package:magical_version_bump/src/utils/typedefs/typedefs.dart';
 import 'package:meta/meta.dart';
-import 'package:yaml/yaml.dart';
 
 part 'custom_tracker.dart';
 part 'value_finder.dart';
@@ -60,7 +59,7 @@ abstract base class Finder {
   /// Try swapping manually or calling the methods specified above if you want
   /// to avoid the error.
   MatchCounter? swapMap(Map<dynamic, dynamic> map, {int? cursor}) {
-    indexer.map = map;
+    indexer.indexable = map;
 
     /// If [_saveCounterToHistory] is true, a cursor must be provided
     if (_saveCounterToHistory) {
@@ -76,7 +75,7 @@ abstract base class Finder {
   }
 
   /// An on-demand generator that is indexing a map.
-  Iterable<NodeData> get _generator => indexer.indexYaml();
+  Iterable<NodeData> get _generator => indexer.index();
 
   /// Default entry point for finding values. Finds values based on
   /// [AggregateType] specified.

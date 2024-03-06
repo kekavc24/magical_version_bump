@@ -27,27 +27,33 @@ part of '../yaml_transformer.dart';
 /// marked as nested. See [ NodeData ]
 ///
 class MagicalIndexer {
-  MagicalIndexer._(this.map);
+  MagicalIndexer._(this.indexable);
 
-  /// Instantiate with yaml map
-  MagicalIndexer.forYaml(YamlMap yamlMap) : this._(yamlMap);
+  /// Instantiate with dynamic value
+  MagicalIndexer.forDynamicValue(dynamic value) : this._(value);
 
   /// Instantiate with dart map
   MagicalIndexer.forDartMap(Map<dynamic, dynamic> map) : this._(map);
 
-  /// Yaml map to search and index
-  Map<dynamic, dynamic> map;
+  /// A dynamic value to be indexed
+  dynamic indexable;
 
   /// Triggers this indexer to generate any terminal values found in a
   /// yaml/json map
-  Iterable<NodeData> indexYaml() sync* {
-    for (final entry in map.entries) {
-      final setUpData = NodeData.fromRoot(
-        key: entry.key as String,
-        value: entry.value,
-      );
-
-      yield* _recursiveIndex(setUpData);
+  Iterable<NodeData> index() sync* {
+    if (isTerminal(indexable)) {
+      yield NodeData.fromRoot(key: '', value: indexable);
+    } else if (indexable is List) {
+      yield* _recursiveIndex(NodeData.fromRoot(key: null, value: indexable));
+    } else {
+      for (final entry in (indexable as Map).entries) {
+        yield* _recursiveIndex(
+          NodeData.fromRoot(
+            key: entry.key,
+            value: entry.value,
+          ),
+        );
+      }
     }
   }
 
