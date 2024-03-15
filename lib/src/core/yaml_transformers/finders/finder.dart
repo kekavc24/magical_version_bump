@@ -131,8 +131,8 @@ abstract base class Finder {
 
       yield* findAllSync(prefilledCounter: true).takeWhile(
         (value) {
-          /// Last value may be ignored. Last value itself causes the limit
-          /// to be reached. The limit is never reaches before.
+          /// Last value may be ignored. The last value itself causes the limit
+          /// to be reached.
           if (value.reachedLimit) lastValue = value;
           return !value.reachedLimit;
         },
@@ -150,19 +150,28 @@ abstract base class Finder {
   Iterable<FinderOutput> findAllSync({bool prefilledCounter = false}) sync* {
     /// Incase this method is called indirectly via [Finder.find]
     ///
-    /// [Finder.findByCount] always prefills the counter thus always
-    /// sets up the [MatchCounter]
+    /// [Finder.findByCount] always prefills the counter and sets up the 
+    /// [MatchCounter]
     if (!prefilledCounter) _setUpCounter(null);
 
     for (final nodeData in _generator) {
       // Generate matched node data
       final matchedNodeData = generateMatch(nodeData);
 
-      // We only yield it if it is valid
+      /// Try increment with the counter first.
+      /// 
+      /// The counter checks to make sure this [MatchedNodeData] has valid
+      /// matches. Matches below the limit. The [MatchedNodeData] will be
+      /// modified any redudant matches dropped.
+      /// 
+      /// Nothing happens if below the limit
+      final reachedLimit = counter!.incrementUsingMatch(matchedNodeData);
+
+      // If still valid after any modification, yield!
       if (matchedNodeData.isValidMatch()) {
         yield (
           data: matchedNodeData,
-          reachedLimit: counter!.incrementUsingMatch(matchedNodeData),
+          reachedLimit: reachedLimit,
         );
       }
     }
