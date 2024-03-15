@@ -24,14 +24,14 @@ class ValueReplacer extends Replacer {
 
     final updatedMap = modifiable.updateIndexedMap(
       replacement,
-      target: matchedNodeData.key,
-      path: matchedNodeData.precedingKeys,
+      target: matchedNodeData.node.key,
+      path: matchedNodeData.node.precedingKeys,
       keyAndReplacement: {},
-      value: matchedNodeData.value,
+      value: matchedNodeData.node.value,
     );
 
     return (
-      mapping: {matchedNodeData.data: replacement},
+      mapping: {matchedNodeData.node.data: replacement},
       updatedMap: YamlMap.wrap(updatedMap),
     );
   }
