@@ -16,10 +16,10 @@ final class DictionaryTokenizer
   DictionaryTokenType _previousTokenType = DictionaryTokenType.none;
 
   /// Indicates whether a json string is being tokenized/cleaned
-  bool _isTokenizingJsonLiteral = false;
+  bool _isJson = false;
 
   /// Indicates last character tokenized in a json string
-  String? _lastJsonLiteralChar;
+  String? _lastJsonChar;
 
   /// Keeps track of all indices of a json string's quotation marks. Ensures
   /// we correctly clean the json keys/values for Dart's json decoder.
@@ -39,7 +39,7 @@ final class DictionaryTokenizer
 
       if (second == null) {
         // Emit token if any are available
-        if (first.tokenType.isYieldable && !_isTokenizingJsonLiteral) {
+        if (first.tokenType.isYieldable && !_isJson) {
           yield (index, first);
         }
         _previousTokenType = first.tokenType;
@@ -55,15 +55,14 @@ final class DictionaryTokenizer
       _previousTokenType = second.tokenType;
     }
 
-    /// If last token as an escape, indicate to parser. We won't need to
+    /// If last token was an escape, indicate to parser. We won't need to
     /// flust buffer for json literals as that is done after the closing
     /// json literal
-    if (_previousTokenType == DictionaryTokenType.escapeDelimiter ||
-        _isTokenizingJsonLiteral) {
+    if (_previousTokenType == DictionaryTokenType.escapeDelimiter || _isJson) {
       yield (
         -1, // Expected position for unescaped character
         (
-          token: _isTokenizingJsonLiteral ? 'json-literal' : null,
+          token: _isJson ? 'json-literal' : null,
           tokenType: DictionaryTokenType.error,
         ),
       );
@@ -83,29 +82,26 @@ final class DictionaryTokenizer
     final isEscaping =
         !isEscaped && tokenType == DictionaryTokenType.escapeDelimiter;
 
-    if ((_isTokenizingJsonLiteral ||
-            tokenType == DictionaryTokenType.jsonLiteralDelimiter) &&
+    if ((_isJson || tokenType == DictionaryTokenType.jsonLiteralDelimiter) &&
         !isEscaping) {
       return _tokenizeJsonLiteral(isEscaped, tokenType, char);
     }
 
-    /// If last token type was being escaped or a normal one, write to buffer.
-    /// Then return a token that prevents the generator from yielding a new
-    /// token
-    if (tokenType == DictionaryTokenType.normal || isEscaped) {
-      charBuffer.pushToMainBuffer(char);
-      return ((token: null, tokenType: DictionaryTokenType.none), null);
+    // Delimiters clear the buffered characters by default
+    if (tokenType.isDelimiter(isBufferingJson: _isJson, isEscaped: isEscaped)) {
+      final defaultToken = (token: char, tokenType: tokenType);
+
+      DictionaryToken? preYield;
+
+      // Attempt to obtain any buffered tokens
+      if (_previousTokenType == DictionaryTokenType.none && !isEscaping) {
+        preYield = _flushBuffer();
+      }
+      return preYield != null ? (preYield, defaultToken) : (defaultToken, null);
     }
 
-    final defaultToken = (token: char, tokenType: tokenType);
-
-    DictionaryToken? preYield;
-
-    // Attempt to obtain any buffered tokens
-    if (_previousTokenType == DictionaryTokenType.none && !isEscaping) {
-      preYield = _flushBuffer();
-    }
-    return preYield != null ? (preYield, defaultToken) : (defaultToken, null);
+    charBuffer.pushToMainBuffer(char);
+    return ((token: null, tokenType: DictionaryTokenType.none), null);
   }
 
   /// Tokenizes json literal strings
@@ -115,9 +111,9 @@ final class DictionaryTokenizer
     String char,
   ) {
     if (tokenType == DictionaryTokenType.jsonLiteralDelimiter && !isEscaped) {
-      if (_isTokenizingJsonLiteral) {
-        _isTokenizingJsonLiteral = false;
-        _lastJsonLiteralChar = null;
+      if (_isJson) {
+        _isJson = false;
+        _lastJsonChar = null;
         return (
           _flushBuffer(DictionaryTokenType.jsonLiteral) ??
               (token: '', tokenType: DictionaryTokenType.jsonLiteral),
@@ -125,20 +121,20 @@ final class DictionaryTokenizer
         );
       }
 
-      _isTokenizingJsonLiteral = true;
+      _isJson = true;
       return ((token: null, tokenType: tokenType), null);
     }
 
     // Ignore all spaces that aren't escaped
     if (char == ' ' && !isEscaped) {
-      _lastJsonLiteralChar = char;
+      _lastJsonChar = char;
       return ((token: null, tokenType: _previousTokenType), null);
     }
 
     /// Add directly to temp buffer if character is escaped or the
     /// last character was escaped while escaping a character
-    if (isEscaped || _lastJsonLiteralChar == r'\') {
-      _lastJsonLiteralChar = char;
+    if (isEscaped || _lastJsonChar == r'\') {
+      _lastJsonChar = char;
       charBuffer.pushToTempBuffer(char);
       return ((token: null, tokenType: DictionaryTokenType.none), null);
     }
@@ -147,7 +143,7 @@ final class DictionaryTokenizer
       // Flush temporary before next json delimiter token
       charBuffer
         ..flushTempBuffer(
-          mode: _optimumQuoteFixMode(),
+          fixMode: _optimumQuoteFixMode(),
           wrapper: _jsonLiteralQuote,
         )
         ..pushToMainBuffer(char);
@@ -158,7 +154,7 @@ final class DictionaryTokenizer
       charBuffer.pushToTempBuffer(char);
     }
 
-    _lastJsonLiteralChar = char;
+    _lastJsonChar = char;
     return ((token: null, tokenType: tokenType), null);
   }
 
@@ -181,14 +177,14 @@ final class DictionaryTokenizer
     // Indices of all quotation marks
     final (min, max) = _quoteIndices.getMinAndMax();
     final maxIndex = charBuffer.lastTempBufferIndex;
-    _quoteIndices.clear(); // Remove indices
+    _quoteIndices.clear();
 
     // When not:
     return switch (min!) {
-      > 0 when max! < maxIndex => QuoteFixMode.bothEnds, // At either start/end
-      == 0 when max! < maxIndex => QuoteFixMode.append, // At end
-      > 0 when max! == maxIndex => QuoteFixMode.preppend, // At start
-      _ => QuoteFixMode.none, // At start and end or if equal
+      > 0 when max! < maxIndex => QuoteFixMode.bothEnds,
+      == 0 when max! < maxIndex => QuoteFixMode.append,
+      > 0 when max! == maxIndex => QuoteFixMode.preppend,
+      _ => QuoteFixMode.none,
     };
   }
 }

@@ -112,7 +112,7 @@ final class DictionaryParser extends Parser<DictBuilder> {
     }
 
     // No delimiter should be the first token unless escaped
-    if (tokenType.isDelimiter && _parseStatus == DictParserStatus.none) {
+    if (tokenType.isDelimiter() && _parseStatus == DictParserStatus.none) {
       return (null, 'Expected a key but found the delimiter, "$token"');
     }
 
@@ -135,10 +135,10 @@ final class DictionaryParser extends Parser<DictBuilder> {
 
   String? _addKey(String? token, DictionaryTokenType tokenType) {
     // No success key delimiters
-    if (tokenType.isDelimiter) {
+    if (tokenType.isDelimiter()) {
       var message = 'Expected a key but found the delimiter, "$token". ';
 
-      if (_lastToken.isDelimiter) {
+      if (_lastToken.isDelimiter()) {
         return message += 'Consider escaping any key delimiter(s) used.';
       } else if (tokenType
           case DictionaryTokenType.mapDelimiter ||
@@ -157,7 +157,7 @@ final class DictionaryParser extends Parser<DictBuilder> {
 
   String? _addValue(String? token, DictionaryTokenType tokenType) {
     // When current token is a delimiter
-    if (tokenType.isDelimiter) {
+    if (tokenType.isDelimiter()) {
       // A delimiter cannot be the first value
       if (_lastToken == DictionaryTokenType.kvDelimiter) {
         return 'Expected first value but found, "$token". Consider escaping it';
@@ -246,7 +246,7 @@ final class DictionaryParser extends Parser<DictBuilder> {
       _values.add(map);
     }
 
-    _tempMapBuilder.clear(); // Reset map builder
+    _tempMapBuilder.clear();
   }
 
   /// Generates a parse exception

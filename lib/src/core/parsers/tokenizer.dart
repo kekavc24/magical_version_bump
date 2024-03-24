@@ -74,13 +74,13 @@ base class StackedBuffer {
 
   /// Adds any input present in the temporary buffer and wraps it with any
   /// character provided.
-  void flushTempBuffer({required QuoteFixMode mode, String wrapper = ''}) {
+  void flushTempBuffer({required QuoteFixMode fixMode, String wrapper = ''}) {
     if (_temporaryBuffer.isEmpty) return;
     
     pushToMainBuffer(
-      mode == QuoteFixMode.none
+      fixMode == QuoteFixMode.none
           ? peekTempBuffer
-          : '''${mode.addAtHead ? wrapper : ''}$peekTempBuffer${mode.addAtTail ? wrapper : ''}''',
+          : '''${fixMode.addAtHead ? wrapper : ''}$peekTempBuffer${fixMode.addAtTail ? wrapper : ''}''',
     );
     _temporaryBuffer.clear();
   }
@@ -88,7 +88,9 @@ base class StackedBuffer {
   /// Flushes the temporary buffer with [QuoteFixMode.none] and empties the
   /// input currently buffered in the main buffer. Returns null if empty.
   String? flushMainBuffer() {
-    if (_temporaryBuffer.isNotEmpty) flushTempBuffer(mode: QuoteFixMode.none);
+    if (_temporaryBuffer.isNotEmpty){
+      flushTempBuffer(fixMode: QuoteFixMode.none);
+    }
     if (_mainCharBuffer.isEmpty) return null;
     final buffer = _mainCharBuffer.toString();
     _mainCharBuffer.clear();

@@ -33,7 +33,7 @@ const _jsonLiteralDelimiter = '`';
 /// Used to denotes starting of json map
 const _jsonLiteralOpenMap = '{';
 
-/// Use to pair a key with value
+/// Used to pair a key with value
 const _jsonLiteralKVDelimiter = ':';
 
 /// Used to denotes end of json map
@@ -129,23 +129,25 @@ typedef DictionaryToken = ({
 
 extension _DictTokenTypeExt on DictionaryTokenType {
   /// An easy way to check if the token type is a delimiter
-  bool get isDelimiter => switch (this) {
-        DictionaryTokenType.none => false,
-        DictionaryTokenType.normal => false,
-        DictionaryTokenType.jsonLiteral => false,
-        DictionaryTokenType.error => false,
-        DictionaryTokenType.mapDelimiter => true,
-        DictionaryTokenType.listDelimiter => true,
-        DictionaryTokenType.kvDelimiter => true,
-        DictionaryTokenType.escapeDelimiter => true,
-        DictionaryTokenType.jsonLiteralDelimiter => true,
-        DictionaryTokenType.jsonOpenMap => true,
-        DictionaryTokenType.jsonKVDelimiter => true,
-        DictionaryTokenType.jsonCloseMap => true,
-        DictionaryTokenType.jsonOpenList => true,
-        DictionaryTokenType.jsonCloseList => true,
-        DictionaryTokenType.end => true,
-      };
+  bool isDelimiter({bool isBufferingJson = false, bool isEscaped = false}) {
+    return switch (this) {
+      DictionaryTokenType.none => false,
+      DictionaryTokenType.normal => false,
+      DictionaryTokenType.jsonLiteral => false,
+      DictionaryTokenType.error => false,
+      DictionaryTokenType.mapDelimiter => !isEscaped,
+      DictionaryTokenType.listDelimiter => !isEscaped,
+      DictionaryTokenType.kvDelimiter => !isEscaped,
+      DictionaryTokenType.escapeDelimiter => !isEscaped,
+      DictionaryTokenType.jsonLiteralDelimiter  => isBufferingJson,
+      DictionaryTokenType.jsonOpenMap => isBufferingJson,
+      DictionaryTokenType.jsonKVDelimiter => isBufferingJson,
+      DictionaryTokenType.jsonCloseMap => isBufferingJson,
+      DictionaryTokenType.jsonOpenList => isBufferingJson,
+      DictionaryTokenType.jsonCloseList => isBufferingJson,
+      DictionaryTokenType.end => true,
+    };
+  }
 
   /// Helps [DictionaryTokenizer] to know which tokens to pass on to
   /// [DictionaryParser]
