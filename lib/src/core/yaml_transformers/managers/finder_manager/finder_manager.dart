@@ -231,7 +231,7 @@ Finder _setUpFinder(
   PairsToFind? pairsToFind,
 }) {
   return switch (finderType) {
-    _ => ValueFinder.findInMap(
+    _ => ValueFinder.findInDynamicValue(
         yamlMap,
         saveCounterToHistory: saveCounterToHistory,
         keysToFind: keysToFind,

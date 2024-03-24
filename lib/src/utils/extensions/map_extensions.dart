@@ -1,6 +1,6 @@
 import 'package:magical_version_bump/src/core/yaml_transformers/data/pair_definition/custom_pair_type.dart';
 import 'package:magical_version_bump/src/utils/enums/enums.dart';
-import 'package:magical_version_bump/src/utils/exceptions/magical_exception.dart';
+import 'package:magical_version_bump/src/utils/exceptions/exceptions.dart';
 import 'package:magical_version_bump/src/utils/typedefs/typedefs.dart';
 
 part 'helpers/map_extension/recursive_helper.dart';

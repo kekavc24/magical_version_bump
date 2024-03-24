@@ -71,7 +71,7 @@ abstract class Replacer {
 
     // Just return the value instead as a string
     return _getReplacementCandidate(
-      matchedNodeData.data,
+      matchedNodeData.node.data,
       useFirst: useFirst,
     ) as T;
   }

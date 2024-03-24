@@ -36,7 +36,7 @@ void main() {
 
   setUp(() {
     yamlMap = YamlMap.wrap(map);
-    nodes = MagicalIndexer.forDartMap(map).indexYaml().toList();
+    nodes = MagicalIndexer.forDartMap(map).index().toList();
     keySwapper = KeySwapper(
       {
         'replacedKeyAtRoot': ['normalKey'],

@@ -1,9 +1,10 @@
 import 'package:args/args.dart';
 import 'package:collection/collection.dart';
+import 'package:magical_version_bump/src/core/parsers/dictionary_parser/dictionary_parser.dart';
 
 import 'package:magical_version_bump/src/utils/data/version_modifiers.dart';
 import 'package:magical_version_bump/src/utils/enums/enums.dart';
-import 'package:magical_version_bump/src/utils/exceptions/magical_exception.dart';
+import 'package:magical_version_bump/src/utils/exceptions/exceptions.dart';
 import 'package:magical_version_bump/src/utils/extensions/extensions.dart';
 import 'package:magical_version_bump/src/utils/typedefs/typedefs.dart';
 import 'package:meta/meta.dart';
@@ -23,7 +24,7 @@ abstract class ArgumentsNormalizer {
   final ArgResults? argResults;
 
   /// Basic implementation to check if args are empty or null
-  ({bool isValid, InvalidReason? reason}) validateArgs({
+  (bool isValid, InvalidReason? reason) validateArgs({
     bool ignoreRestArgs = true,
   }) {
     /// Args must not be empty or null.
@@ -31,8 +32,8 @@ abstract class ArgumentsNormalizer {
         argResults!.arguments.isEmpty ||
         (ignoreRestArgs && argResults!.rest.isNotEmpty)) {
       return (
-        isValid: false,
-        reason: const InvalidReason(
+        false,
+        const InvalidReason(
           'Missing arguments',
           'Arguments cannot be empty or null',
         ),
@@ -42,10 +43,7 @@ abstract class ArgumentsNormalizer {
   }
 
   @protected
-  ({bool isValid, InvalidReason? reason}) customValidate() => (
-        isValid: true,
-        reason: null,
-      );
+  (bool isValid, InvalidReason? reason) customValidate() => (true, null);
 
   /// Prep args to desired format
   void prepArgs();

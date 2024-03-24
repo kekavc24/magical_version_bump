@@ -28,9 +28,7 @@ abstract base class PairType extends Equatable {
 
   /// Returns the value stored at this node as a string
   @override
-  String toString() {
-    return _value.toString();
-  }
+  String toString() => _value.toString();
 
   /// Checks if nested in a list
   bool isNested() => _indices.isNotEmpty;

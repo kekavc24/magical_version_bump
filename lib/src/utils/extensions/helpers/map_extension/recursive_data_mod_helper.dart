@@ -79,9 +79,9 @@ dynamic _updateTerminalValue({
         ? update
         : update is String && updateMode == UpdateMode.append
             ? <String>[update]
-            : update is List<String>
-                ? <String>[...update]
-                : update as Map<String, String>;
+            : update is List
+                ? <dynamic>[...update]
+                : update;
   }
 
   // Convert to list by default since only a single value exists

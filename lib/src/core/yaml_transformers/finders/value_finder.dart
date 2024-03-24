@@ -27,29 +27,14 @@ base class ValueFinder extends Finder {
           pairsToFind: pairsToFind,
         );
 
-  ValueFinder.findInMap(
-    Map<dynamic, dynamic> map, {
+  ValueFinder.findInDynamicValue(
+    dynamic value, {
     required bool saveCounterToHistory,
     required KeysToFind? keysToFind,
     required ValuesToFind? valuesToFind,
     required PairsToFind? pairsToFind,
   }) : this.findWithIndexer(
-          MagicalIndexer.forDartMap(map),
-          saveCounterToHistory: saveCounterToHistory,
-          keysToFind: keysToFind,
-          valuesToFind: valuesToFind,
-          pairsToFind: pairsToFind,
-        );
-
-  /// Setup everything that may need to found
-  ValueFinder.findInYaml(
-    YamlMap yamlMap, {
-    required bool saveCounterToHistory,
-    required KeysToFind? keysToFind,
-    required ValuesToFind? valuesToFind,
-    required PairsToFind? pairsToFind,
-  }) : this.findInMap(
-          yamlMap,
+          MagicalIndexer.forDynamicValue(value),
           saveCounterToHistory: saveCounterToHistory,
           keysToFind: keysToFind,
           valuesToFind: valuesToFind,

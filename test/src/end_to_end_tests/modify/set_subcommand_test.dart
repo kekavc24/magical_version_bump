@@ -20,12 +20,12 @@ void main() {
 
   const name = 'Test File';
   const description = 'This is a test';
-  const homepage = 'https://url.to.homepage';
+  const homepage = r'https\://url.to.homepage';
   const prerelease = 'test';
   const build = '100';
   const version = '8.8.8+8';
 
-  setUp(() async {
+  setUpAll(() async {
     logger = _MockLogger();
     commandRunner = MagicalVersionBumpCommandRunner(
       logger: logger,
@@ -52,7 +52,7 @@ void main() {
     test(
       'when appending a new nested node to node with non-map nodes',
       () async {
-        final args = [...defaultArgs, '--add', 'name|newNode=value'];
+        final args = [...defaultArgs, '--add', 'name,newNode=value'];
 
         final result = await commandRunner.run(args);
 
@@ -119,18 +119,18 @@ void main() {
       await resetFile(node: 'homepage', remove: true);
 
       expect(result, equals(ExitCode.success.code));
-      expect(currentValue, homepage);
+      expect(currentValue, homepage.replaceFirst(r'\', ''));
     });
 
     test('creates new node with values and appends new ones', () async {
       final args = [
         ...defaultArgs,
         '--dictionary',
-        'nested|value=string',
+        'nested,value=string',
         '--add',
-        'nested|list=string,list',
+        'nested,list=string,list',
         '--add',
-        'nested|map=string->list',
+        'nested,map=string>list',
       ];
 
       final result = await commandRunner.run(args);
