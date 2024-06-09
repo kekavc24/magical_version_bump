@@ -36,12 +36,13 @@ final class MatchCounter extends CounterWithHistory<int, dynamic, dynamic> {
       final ignoredPairs = increment(
         data.matchedPairs.entries,
         origin: Origin.pair,
-      ) as List<MapEntry<String, String>>;
+      );
 
       data.matchedPairs.removeWhere(
-        (key, value) => ignoredPairs.any(
-          (element) => element.key == key && element.value == value,
-        ),
+        (matchedKey, matchedValue) => ignoredPairs.any((element) {
+          final MapEntry(:key, :value) = element as MapEntry;
+          return key == matchedKey && value == matchedValue;
+        }),
       );
     }
 
