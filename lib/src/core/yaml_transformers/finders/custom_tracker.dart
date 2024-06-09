@@ -5,9 +5,11 @@ part of 'finder.dart';
 ///
 /// See [Counter].
 final class MatchCounter extends CounterWithHistory<int, dynamic, dynamic> {
-  MatchCounter({required int? limit}) : _limit = limit;
+  MatchCounter({this.limit}) : isStrict = limit != null;
 
-  final int? _limit;
+  final bool isStrict;
+
+  final int? limit;
 
   /// Increments from [ MatchedNodeData ].
   ///
@@ -17,26 +19,59 @@ final class MatchCounter extends CounterWithHistory<int, dynamic, dynamic> {
   bool incrementUsingMatch(MatchedNodeData data) {
     // Add any matched keys
     if (data.matchedKeys.isNotEmpty) {
-      increment(data.matchedKeys, origin: Origin.key);
+      final ignoredKeys = increment(data.matchedKeys, origin: Origin.key);
+
+      data.matchedKeys.removeWhere(ignoredKeys.contains); // Remove ignored keys
     }
 
     // Add matched value if not empty
     if (data.matchedValue.isNotEmpty) {
-      increment([data.matchedValue], origin: Origin.value);
+      if (increment([data.matchedValue], origin: Origin.value).isNotEmpty) {
+        data.matchedValue = ''; // Remove value
+      }
     }
 
     // Add all pairs
     if (data.matchedPairs.isNotEmpty) {
-      increment(data.matchedPairs.entries, origin: Origin.pair);
+      final ignoredPairs = increment(
+        data.matchedPairs.entries,
+        origin: Origin.pair,
+      );
+
+      data.matchedPairs.removeWhere(
+        (matchedKey, matchedValue) => ignoredPairs.any((element) {
+          final MapEntry(:key, :value) = element as MapEntry;
+          return key == matchedKey && value == matchedValue;
+        }),
+      );
     }
 
     /// All must be equal or greater than limit. Other keys may have
     /// been found before more than once.
     ///
     /// Get set of all counts and check if any is below limit
-    final anyBelowLimit = _limit == null ||
-        super.trackerState.values.toSet().any((element) => element < _limit!);
+    final anyBelowLimit = limit == null ||
+        super.trackerState.values.toSet().any((element) => element < limit!);
 
     return !anyBelowLimit;
+  }
+
+  @override
+  List<dynamic> increment(Iterable<dynamic> values, {required Origin origin}) {
+    final ignored = <dynamic>[];
+    final valuesToAdd = <dynamic>[...values];
+
+    // In strict mode, ensure we only add those below limit
+    if (isStrict) {
+      for (final value in values) {
+        if (getCount(value, origin: origin) == limit) {
+          ignored.add(value);
+          valuesToAdd.remove(value);
+        }
+      }
+    }
+
+    super.increment(valuesToAdd, origin: origin);
+    return ignored;
   }
 }

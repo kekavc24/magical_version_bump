@@ -1,11 +1,10 @@
 import 'package:magical_version_bump/src/core/yaml_transformers/trackers/counter/generic_counter.dart';
 import 'package:magical_version_bump/src/core/yaml_transformers/yaml_transformer.dart';
 import 'package:magical_version_bump/src/utils/enums/enums.dart';
-import 'package:magical_version_bump/src/utils/exceptions/magical_exception.dart';
+import 'package:magical_version_bump/src/utils/exceptions/exceptions.dart';
 import 'package:magical_version_bump/src/utils/extensions/extensions.dart';
 import 'package:magical_version_bump/src/utils/typedefs/typedefs.dart';
 import 'package:meta/meta.dart';
-import 'package:yaml/yaml.dart';
 
 part 'custom_tracker.dart';
 part 'value_finder.dart';
@@ -60,7 +59,7 @@ abstract base class Finder {
   /// Try swapping manually or calling the methods specified above if you want
   /// to avoid the error.
   MatchCounter? swapMap(Map<dynamic, dynamic> map, {int? cursor}) {
-    indexer.map = map;
+    indexer.indexable = map;
 
     /// If [_saveCounterToHistory] is true, a cursor must be provided
     if (_saveCounterToHistory) {
@@ -76,7 +75,7 @@ abstract base class Finder {
   }
 
   /// An on-demand generator that is indexing a map.
-  Iterable<NodeData> get _generator => indexer.indexYaml();
+  Iterable<NodeData> get _generator => indexer.index();
 
   /// Default entry point for finding values. Finds values based on
   /// [AggregateType] specified.
@@ -132,8 +131,8 @@ abstract base class Finder {
 
       yield* findAllSync(prefilledCounter: true).takeWhile(
         (value) {
-          /// Last value may be ignored. Last value itself causes the limit
-          /// to be reached. The limit is never reaches before.
+          /// Last value may be ignored. The last value itself causes the limit
+          /// to be reached.
           if (value.reachedLimit) lastValue = value;
           return !value.reachedLimit;
         },
@@ -151,19 +150,28 @@ abstract base class Finder {
   Iterable<FinderOutput> findAllSync({bool prefilledCounter = false}) sync* {
     /// Incase this method is called indirectly via [Finder.find]
     ///
-    /// [Finder.findByCount] always prefills the counter thus always
-    /// sets up the [MatchCounter]
+    /// [Finder.findByCount] always prefills the counter and sets up the
+    /// [MatchCounter]
     if (!prefilledCounter) _setUpCounter(null);
 
     for (final nodeData in _generator) {
       // Generate matched node data
       final matchedNodeData = generateMatch(nodeData);
 
-      // We only yield it if it is valid
+      /// Try increment with the counter first.
+      ///
+      /// The counter checks to make sure this [MatchedNodeData] has valid
+      /// matches. Matches below the limit. The [MatchedNodeData] will be
+      /// modified any redudant matches dropped.
+      ///
+      /// Nothing happens if below the limit
+      final reachedLimit = counter!.incrementUsingMatch(matchedNodeData);
+
+      // If still valid after any modification, yield!
       if (matchedNodeData.isValidMatch()) {
         yield (
           data: matchedNodeData,
-          reachedLimit: counter!.incrementUsingMatch(matchedNodeData),
+          reachedLimit: reachedLimit,
         );
       }
     }

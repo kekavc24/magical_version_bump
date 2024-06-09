@@ -9,7 +9,7 @@ void main() {
       final map = {'key': 'value'};
 
       // Index it
-      final node = MagicalIndexer.forDartMap(map).indexYaml().first;
+      final node = MagicalIndexer.forDartMap(map).index().first;
 
       expect(node.toString(), 'key/value');
     });
@@ -19,7 +19,7 @@ void main() {
 
       // Index & get paths
       final nodes = MagicalIndexer.forDartMap(map)
-          .indexYaml()
+          .index()
           .toList()
           .map((node) => node.toString());
 
@@ -32,7 +32,7 @@ void main() {
       };
 
       // Index it
-      final node = MagicalIndexer.forDartMap(map).indexYaml().first;
+      final node = MagicalIndexer.forDartMap(map).index().first;
 
       expect(node.toString(), 'key/nestedKey/value');
     });
@@ -45,7 +45,7 @@ void main() {
 
       // Index it
       final nodes = MagicalIndexer.forDartMap(map)
-          .indexYaml()
+          .index()
           .toList()
           .map((node) => node.toString());
 
@@ -62,7 +62,7 @@ void main() {
         'key': ['value', 'anotherValue'],
       };
 
-      final nodes = MagicalIndexer.forDartMap(map).indexYaml().toList();
+      final nodes = MagicalIndexer.forDartMap(map).index().toList();
 
       // Expected nodes
       final expectedNodes = [
@@ -88,7 +88,7 @@ void main() {
         ],
       };
 
-      final node = MagicalIndexer.forDartMap(map).indexYaml().first;
+      final node = MagicalIndexer.forDartMap(map).index().first;
 
       // Key will be at index 0. Index goes to key rather than value
       final expectedNode = NodeData.skeleton(
@@ -107,7 +107,7 @@ void main() {
         ],
       };
 
-      final node = MagicalIndexer.forDartMap(map).indexYaml().first;
+      final node = MagicalIndexer.forDartMap(map).index().first;
 
       // Index goes to value rather than key
       final expectedNode = NodeData.skeleton(
@@ -135,7 +135,7 @@ void main() {
 
       final rootKey = createPair<Key>(value: 'key');
 
-      final nodes = MagicalIndexer.forDartMap(map).indexYaml().toList();
+      final nodes = MagicalIndexer.forDartMap(map).index().toList();
 
       // Expected nodes
       final expectedNodes = [
@@ -177,14 +177,12 @@ void main() {
   });
 
   group('indexer for yaml', () {
-    YamlMap createMap(String yaml) => loadYaml(yaml) as YamlMap;
-
     test('indexes simple yaml string', () {
       const yaml = 'key: value';
 
-      final node = MagicalIndexer.forYaml(
-        createMap(yaml),
-      ).indexYaml().toList().first;
+      final node = MagicalIndexer.forDynamicValue(
+        loadYaml(yaml),
+      ).index().toList().first;
 
       expect(node.toString(), 'key/value');
     });
@@ -200,9 +198,9 @@ void main() {
           - third
       ''';
 
-      final nodePaths = MagicalIndexer.forYaml(
-        createMap(yaml),
-      ).indexYaml().toList().map((e) => e.toString());
+      final nodePaths = MagicalIndexer.forDynamicValue(
+        loadYaml(yaml),
+      ).index().toList().map((e) => e.toString());
 
       final expectedPaths = [
         'root/value',

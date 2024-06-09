@@ -15,8 +15,7 @@ class HandleSetCommand extends CommandHandler {
   Future<void> _coreCommandHandler(ArgResults? argResults) async {
     final checker = _getChecker<SetArgumentsNormalizer>();
 
-    final preppedArgs = checker.prepArgs();
-    final versionModifiers = preppedArgs.modifiers;
+    final (dictionaries, versionModifiers) = checker.prepArgs();
 
     // Read pubspec.yaml file
     final fileOuput = await _fileHandler.readFile();
@@ -26,11 +25,11 @@ class HandleSetCommand extends CommandHandler {
 
     final changeProgress = logger.progress('Updating nodes');
 
-    if (preppedArgs.dictionaries.isNotEmpty) {
+    if (dictionaries.isNotEmpty) {
       ///
       /// Loop all entries. The first entry will use file read fresh from disk
       /// while successive entries will use the previously modified file
-      for (final (index, dictionary) in preppedArgs.dictionaries.indexed) {
+      for (final (index, dictionary) in dictionaries.indexed) {
         editedFile = index == 0
             ? await updateYamlFile(fileOuput, dictionary: dictionary)
             : await updateYamlFile(

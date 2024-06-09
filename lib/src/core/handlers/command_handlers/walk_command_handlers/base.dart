@@ -29,7 +29,7 @@ abstract base class HandleWalkCommand extends CommandHandler {
     await _manager.transform();
 
     final isReplaceMode = !_subCommandType.isFinder;
-    final counters = _getCounters();
+    final (finderCounter, replacerCounter) = _getCounters();
 
     // Save changes as replace mode modifies them
     if (isReplaceMode) {
@@ -55,8 +55,8 @@ abstract base class HandleWalkCommand extends CommandHandler {
     final output = _manager.formatter.format(
       isReplaceMode: isReplaceMode,
       fileNames: _fileHandler.filePaths,
-      finderFileCounter: counters.$1,
-      replacerFileCounter: counters.$2,
+      finderFileCounter: finderCounter,
+      replacerFileCounter: replacerCounter,
     );
 
     logger.info(output);

@@ -36,54 +36,26 @@ extension IterableOperations on Iterable<String> {
     return MatchCount.none;
   }
 
-  /// Output list of values for dictionary based on match count
-  dynamic splitBasedOnMatch() {
-    const pattern = '->';
-
-    final matchCount = checkMatchCount(pattern);
-
-    // If all are maps, return an enclosed map of values
-    if (matchCount == MatchCount.all) {
-      return fold(
-        <String, String>{},
-        (previousValue, element) {
-          final map = element.splitAndTrim(pattern);
-          previousValue.update(
-            map.first,
-            (value) => map.last.isEmpty ? 'null' : map.last,
-            ifAbsent: () => map.last.isEmpty ? 'null' : map.last,
-          );
-          return previousValue;
-        },
-      );
-    }
-
-    // If mixed with some strings, split individually
-    if (matchCount == MatchCount.some) {
-      return fold(
-        <dynamic>[],
-        (previousValue, element) {
-          // Extract map and add it
-          if (element.contains(pattern)) {
-            final map = element.splitAndTrim(pattern);
-            previousValue.add(
-              {map.first: map.last.isEmpty ? 'null' : map.last},
-            );
-          } else {
-            previousValue.add(element);
-          }
-
-          return previousValue;
-        },
-      );
-    }
-
-    // Just return "as-is" if none
-    return this;
-  }
-
   /// Has all values found in another list
   bool hasAll(Iterable<String> other) {
     return every(other.contains) && (length == other.length);
+  }
+}
+
+extension EfficientOperation on Iterable<int> {
+  (int? min, int? max) getMinAndMax() {
+    int? min;
+    var max = min = firstOrNull;
+
+    for (final value in this) {
+      if (min == null || value < min) {
+        min = value;
+      }
+
+      if (max == null || value > max) {
+        max = value;
+      }
+    }
+    return (min, max);
   }
 }

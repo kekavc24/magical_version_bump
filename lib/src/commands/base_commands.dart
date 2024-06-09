@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:args/command_runner.dart';
 import 'package:magical_version_bump/src/core/handlers/command_handlers/command_handlers.dart';
-import 'package:magical_version_bump/src/utils/exceptions/magical_exception.dart';
+import 'package:magical_version_bump/src/utils/exceptions/exceptions.dart';
 import 'package:mason_logger/mason_logger.dart';
 
 /// Abstract command used by all commands. Every command or subcommand will

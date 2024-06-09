@@ -5,7 +5,7 @@ import 'package:magical_version_bump/src/core/handlers/file_handler/file_handler
 import 'package:magical_version_bump/src/core/yaml_transformers/trackers/counter/generic_counter.dart';
 import 'package:magical_version_bump/src/core/yaml_transformers/yaml_transformer.dart';
 import 'package:magical_version_bump/src/utils/enums/enums.dart';
-import 'package:magical_version_bump/src/utils/exceptions/magical_exception.dart';
+import 'package:magical_version_bump/src/utils/exceptions/exceptions.dart';
 import 'package:magical_version_bump/src/utils/mixins/command_mixins.dart';
 import 'package:mason_logger/mason_logger.dart';
 
@@ -54,11 +54,11 @@ abstract class CommandHandler with ValidateVersion, ModifyYaml {
 
     final validationProgress = logger.progress('Checking arguments');
 
-    final validatedArgs = _argumentsNormalizer.validateArgs();
+    final (isValid, reason) = _argumentsNormalizer.validateArgs();
 
-    if (!validatedArgs.isValid) {
-      validationProgress.fail(validatedArgs.reason!.key);
-      throw MagicalException(message: validatedArgs.reason!.value);
+    if (!isValid) {
+      validationProgress.fail(reason!.key);
+      throw MagicalException(message: reason.value);
     }
 
     validationProgress.complete('Checked arguments');

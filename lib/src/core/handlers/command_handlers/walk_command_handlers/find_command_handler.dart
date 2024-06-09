@@ -9,16 +9,16 @@ final class HandleFindCommand extends HandleWalkCommand {
   void _setUpManager(List<Map<dynamic, dynamic>> fileQueue) {
     // Obtain prepped args from checker
     final checker = _getChecker<FindArgumentsNormalizer>();
-    final preppedArgs = checker.prepArgs();
+    final (aggregator, keys, values, pairs) = checker.prepArgs();
 
     _manager = FinderManager.fullSetup(
       fileQueue: fileQueue,
-      aggregator: preppedArgs.aggregator,
+      aggregator: aggregator,
       logger: logger,
       finderType: FinderType.byValue,
-      keysToFind: preppedArgs.keysToFind,
-      valuesToFind: preppedArgs.valuesToFind,
-      pairsToFind: preppedArgs.pairsToFind,
+      keysToFind: keys,
+      valuesToFind: values,
+      pairsToFind: pairs,
     );
   }
 

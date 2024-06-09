@@ -31,10 +31,10 @@ void main() {
         args: args,
       ) as BumpArgumentsNormalizer;
 
-      final preppedArgs = argsChecker.prepArgs();
+      final (modifiers, targets) = argsChecker.prepArgs();
 
-      expect(preppedArgs.modifiers.strategy, ModifyStrategy.relative);
-      expect(preppedArgs.targets, equals(['major', 'build-number']));
+      expect(modifiers.strategy, ModifyStrategy.relative);
+      expect(targets, equals(['major', 'build-number']));
     });
 
     test('with absolute modify strategy', () {
@@ -51,13 +51,10 @@ void main() {
         args: args,
       ) as BumpArgumentsNormalizer;
 
-      final preppedArgs = argsChecker.prepArgs();
+      final (modifiers, targets) = argsChecker.prepArgs();
 
-      expect(preppedArgs.modifiers.strategy, ModifyStrategy.absolute);
-      expect(
-        preppedArgs.targets,
-        equals(['major', 'minor', 'patch', 'build-number']),
-      );
+      expect(modifiers.strategy, ModifyStrategy.absolute);
+      expect(targets, equals(['major', 'minor', 'patch', 'build-number']));
     });
   });
 
@@ -69,12 +66,11 @@ void main() {
         args: [],
       ) as BumpArgumentsNormalizer;
 
-      final validatedArgs = argsChecker.validateArgs();
+      final (_, reason) = argsChecker.validateArgs();
 
-      expect(validatedArgs.isValid, false);
-      expect(validatedArgs.reason, isNotNull);
-      expect(validatedArgs.reason!.key, 'Missing arguments');
-      expect(validatedArgs.reason!.value, 'Arguments cannot be empty or null');
+      expect(reason, isNotNull);
+      expect(reason!.key, 'Missing arguments');
+      expect(reason.value, 'Arguments cannot be empty or null');
     });
 
     test('returns error when targets are empty', () {
@@ -86,12 +82,11 @@ void main() {
         args: args,
       ) as BumpArgumentsNormalizer;
 
-      final validatedArgs = argsChecker.validateArgs();
+      final (_, reason) = argsChecker.validateArgs();
 
-      expect(validatedArgs.isValid, false);
-      expect(validatedArgs.reason, isNotNull);
-      expect(validatedArgs.reason!.key, 'Invalid targets');
-      expect(validatedArgs.reason!.value, error);
+      expect(reason, isNotNull);
+      expect(reason!.key, 'Invalid targets');
+      expect(reason.value, error);
     });
   });
 }
