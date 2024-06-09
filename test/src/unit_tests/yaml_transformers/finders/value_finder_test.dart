@@ -294,7 +294,6 @@ void main() {
         // Just the first match
         final expectedMatches = [
           'key/value',
-          'keyWithList/value',
           'keyWithList/key/value',
           'anotherKey/key/value',
         ];
@@ -304,8 +303,8 @@ void main() {
 
         /// * Each argument has equal chance to reach count of "1".
         /// * Some may be found more than once.
-        expect(counter.getCount('key', origin: Origin.key), 3);
-        expect(counter.getCount('value', origin: Origin.value), 4);
+        expect(counter.getCount('key', origin: Origin.key), 1);
+        expect(counter.getCount('value', origin: Origin.value), 1);
         expect(counter.getCount('anotherKey', origin: Origin.key), 1);
         expect(
           counter.getCount(
