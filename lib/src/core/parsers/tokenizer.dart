@@ -76,7 +76,7 @@ base class StackedBuffer {
   /// character provided.
   void flushTempBuffer({required QuoteFixMode fixMode, String wrapper = ''}) {
     if (_temporaryBuffer.isEmpty) return;
-    
+
     pushToMainBuffer(
       fixMode == QuoteFixMode.none
           ? peekTempBuffer
@@ -88,7 +88,7 @@ base class StackedBuffer {
   /// Flushes the temporary buffer with [QuoteFixMode.none] and empties the
   /// input currently buffered in the main buffer. Returns null if empty.
   String? flushMainBuffer() {
-    if (_temporaryBuffer.isNotEmpty){
+    if (_temporaryBuffer.isNotEmpty) {
       flushTempBuffer(fixMode: QuoteFixMode.none);
     }
     if (_mainCharBuffer.isEmpty) return null;

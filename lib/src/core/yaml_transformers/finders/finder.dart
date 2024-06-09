@@ -150,7 +150,7 @@ abstract base class Finder {
   Iterable<FinderOutput> findAllSync({bool prefilledCounter = false}) sync* {
     /// Incase this method is called indirectly via [Finder.find]
     ///
-    /// [Finder.findByCount] always prefills the counter and sets up the 
+    /// [Finder.findByCount] always prefills the counter and sets up the
     /// [MatchCounter]
     if (!prefilledCounter) _setUpCounter(null);
 
@@ -159,11 +159,11 @@ abstract base class Finder {
       final matchedNodeData = generateMatch(nodeData);
 
       /// Try increment with the counter first.
-      /// 
+      ///
       /// The counter checks to make sure this [MatchedNodeData] has valid
       /// matches. Matches below the limit. The [MatchedNodeData] will be
       /// modified any redudant matches dropped.
-      /// 
+      ///
       /// Nothing happens if below the limit
       final reachedLimit = counter!.incrementUsingMatch(matchedNodeData);
 

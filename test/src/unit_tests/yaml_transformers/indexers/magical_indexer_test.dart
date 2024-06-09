@@ -177,7 +177,6 @@ void main() {
   });
 
   group('indexer for yaml', () {
-
     test('indexes simple yaml string', () {
       const yaml = 'key: value';
 

@@ -35,7 +35,7 @@ final class FindArgumentsNormalizer extends ArgumentsNormalizer {
     return (
       argResults!.getAggregator(),
       (keys: _keysToFind, orderType: argResults!.keyOrder),
-       _valuesToFind,
+      _valuesToFind,
       _pairsToFind,
     );
   }

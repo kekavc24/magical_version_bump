@@ -50,8 +50,8 @@ extension EfficientOperation on Iterable<int> {
     for (final value in this) {
       if (min == null || value < min) {
         min = value;
-      } 
-      
+      }
+
       if (max == null || value > max) {
         max = value;
       }
