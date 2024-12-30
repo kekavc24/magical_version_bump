@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:magical_version_bump/src/command_runner.dart';
-import 'package:magical_version_bump/src/commands/base_commands.dart';
+import 'package:magical_version_bump/src/commands/runnable_command.dart';
 import 'package:magical_version_bump/src/version.dart';
 import 'package:mason_logger/mason_logger.dart';
 import 'package:pub_updater/pub_updater.dart';
@@ -9,10 +9,10 @@ import 'package:pub_updater/pub_updater.dart';
 /// {@template update_command}
 /// A command which updates the CLI.
 /// {@endtemplate}
-class UpdateCommand extends MagicalCommand {
+final class UpdateCommand extends RunnableCommand {
   /// {@macro update_command}
   UpdateCommand({
-    required super.logger,
+    required Logger logger,
     PubUpdater? pubUpdater,
   })  : _logger = logger,
         _pubUpdater = pubUpdater ?? PubUpdater();
@@ -29,7 +29,7 @@ class UpdateCommand extends MagicalCommand {
   String get name => commandName;
 
   @override
-  Future<int> run() async {
+  Future<int> runnable() async {
     final updateCheckProgress = _logger.progress('Checking for updates');
     late final String latestVersion;
     try {
