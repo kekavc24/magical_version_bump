@@ -27,7 +27,7 @@ dependencies:
   mason_logger: ^0.2.11
   meta: ^1.11.0
   pub_semver: ^2.1.4
-  pub_updater: ^0.4.0
+  pub_updater: ">=0.4.0 <0.6.0"
   yaml: ^3.1.2
   yaml_edit: ^2.1.1
 
