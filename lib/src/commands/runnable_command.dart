@@ -15,19 +15,12 @@ abstract base class RunnableCommand extends Command<int> {
     try {
       await runnable();
     } catch (e) {
-      switch (e) {
-        case PathNotFoundException(message: final message):
-          print(wrapError(message));
-          return ExitCode.osFile.code;
-
-        case FormatException(message: final message):
-          print(wrapError(message));
-          return ExitCode.software.code;
-
-        default:
-          print(wrapError(e.toString()));
-          return ExitCode.software.code;
+      if (e case PathNotFoundException(message: final message)) {
+        print(wrapError(message));
+        return ExitCode.ioError.code;
       }
+
+      rethrow;
     }
 
     return ExitCode.success.code;
