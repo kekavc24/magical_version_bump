@@ -4,7 +4,7 @@ import 'package:magical_version_bump/src/commands/runnable_command.dart';
 import 'package:magical_version_bump/src/sem_ver/semver.dart';
 import 'package:magical_version_bump/src/utils/extensions.dart';
 import 'package:magical_version_bump/src/utils/input_iterator.dart';
-import 'package:yaml/yaml.dart';
+import 'package:yaml_edit/yaml_edit.dart';
 
 /// Core version targets
 final _versionSetTargets = {'major', 'minor', 'patch'};
@@ -353,8 +353,7 @@ String runBumpVersion(
   final bumpedPre = switch (prereleaseTarget) {
     null when keepPre => versionToUpdate.prerelease,
     null => <dynamic>[],
-    _ => bumpSemVerWithString(versionToUpdate, prereleaseTarget)
-        .prerelease
+    _ => bumpSemVerWithString(versionToUpdate, prereleaseTarget).prerelease
   };
 
   if (bumpedPre.isNotEmpty) bumpedVersion += '-${bumpedPre.join('.')}';
@@ -393,20 +392,23 @@ Future<List<String>> runBumpForFiles(
   required bool keepPre,
   required bool keepBuild,
 }) async {
-  final queue = FileQueue<YamlMap>(
+  final queue = FileQueue<YamlEditor>(
     files: paths,
-    transform: (file) async => loadYaml(await file.readAsString()) as YamlMap,
+    transform: (file) async => YamlEditor(await file.readAsString()),
   );
 
   final versionsBumped = <String>[];
 
   while (queue.hasNext) {
-    final (:path, :transformed) = await queue.next;
+    final (:path, transformed: yamlEditor) = await queue.next;
 
-    var version = transformed[versionParam] as String?;
+    var version = yamlEditor.parseAt(
+      [versionParam],
+      orElse: () => wrapAsYamlNode(null),
+    ).value as String?;
 
     if (version == null) {
-      throw Exception('No version found for $path');
+      throw Exception('No version found for version param "$path" in file');
     }
 
     version = runBumpVersion(
@@ -420,8 +422,9 @@ Future<List<String>> runBumpForFiles(
     );
 
     versionsBumped.add(version);
-    transformed[versionParam] = version;
-    await queue.saveFile(path, transformed, prettifyJson: true);
+
+    yamlEditor.update([versionParam], version);
+    await queue.saveFile(path, yamlEditor.toString(), prettifyJson: true);
   }
 
   return versionsBumped;
