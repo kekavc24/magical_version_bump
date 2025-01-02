@@ -42,7 +42,7 @@ typedef BumpTargets = ({
 /// {@endtemplate}
 final class SemverSubcommand extends RunnableCommand {
   /// {@macro semver_sub_command}
-  SemverSubcommand() {
+  SemverSubcommand(super.logger) {
     argParser
       ..addFlag(
         'breaking',
@@ -192,7 +192,7 @@ final class SemverSubcommand extends RunnableCommand {
       parsedResults.booleanValue('prefer-inline-output') ? ' ' : '\n',
     );
 
-    print(output);
+    logger.info(output);
   }
 }
 

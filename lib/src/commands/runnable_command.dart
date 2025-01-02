@@ -5,22 +5,32 @@ import 'package:args/command_runner.dart';
 import 'package:mason_logger/mason_logger.dart';
 
 abstract base class RunnableCommand extends Command<int> {
+  RunnableCommand(this.logger);
+
+  final Logger logger;
+
   /// Function to run
   Future<void> runnable();
 
   @override
   FutureOr<int>? run() async {
-    String wrapError(String message) => red.wrap(message)!;
-
     try {
       await runnable();
     } catch (e) {
-      if (e case PathNotFoundException(message: final message)) {
-        print(wrapError(message));
-        return ExitCode.ioError.code;
-      }
+      switch (e) {
+        case PathNotFoundException(message: final message):
+          logger.err(message);
+          return ExitCode.ioError.code;
 
-      rethrow;
+        // Catch format exceptions for a runnable command
+        case FormatException(message: final message):
+          logger.err(message);
+          return ExitCode.usage.code;
+
+        // Rethrow other exceptions to be caught top-level
+        default:
+          rethrow;
+      }
     }
 
     return ExitCode.success.code;

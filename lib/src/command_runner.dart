@@ -36,10 +36,16 @@ class MagicalVersionBumpCommandRunner extends CommandRunner<int> {
       ..addFlag(
         'verbose',
         help: 'Noisy logging, including all shell commands executed.',
+      )
+      ..addFlag(
+        'check-for-update',
+        abbr: 'c',
+        help: 'Checks for update after running any non-update command',
+        defaultsTo: true,
       );
 
-    addCommand(BumpCommand());
-    addCommand(UpdateCommand(logger: _logger, pubUpdater: _pubUpdater));
+    addCommand(BumpCommand(_logger));
+    addCommand(UpdateCommand(_logger, pubUpdater: _pubUpdater));
   }
 
   @override
@@ -112,7 +118,8 @@ class MagicalVersionBumpCommandRunner extends CommandRunner<int> {
     }
 
     // Check for updates
-    if (topLevelResults.command?.name != UpdateCommand.commandName) {
+    if (topLevelResults.command?.name != UpdateCommand.commandName &&
+        topLevelResults['check-for-update'] as bool) {
       await _checkForUpdates();
     }
 
