@@ -108,7 +108,7 @@ final class SemverSubcommand extends RunnableCommand {
         help: 'Strategy to bump the build metadata',
       )
       ..addOption(
-        'versionParam',
+        'version-param',
         aliases: ['vp'],
         defaultsTo: 'version',
         help: 'Indicates key in json/yaml that points to version',
@@ -168,7 +168,7 @@ final class SemverSubcommand extends RunnableCommand {
     final versions = parsedResults.value('input') == 'file'
         ? await runBumpForFiles(
             restArgs,
-            versionParam: parsedResults.value('versionParam'),
+            versionParam: parsedResults.value('version-param'),
             presetTargets: presetTargets,
             setValues: setValues,
             isBreaking: isBreaking,
@@ -349,19 +349,36 @@ String runBumpVersion(
     _ => bumpedVersion
   };
 
+  final coreWasBumped = versionToUpdate.versionCore != bumpedVersion;
+
   // Bump prerelease. Prefer to always bump it.
   final bumpedPre = switch (prereleaseTarget) {
-    null when keepPre => versionToUpdate.prerelease,
+    // In case, we never bumped the version
+    null when keepPre || !coreWasBumped => versionToUpdate.prerelease,
+
+    // Version was bumped. We ignore the metadata
     null => <dynamic>[],
+
+    // Always bump
     _ => bumpSemVerWithString(versionToUpdate, prereleaseTarget).prerelease
   };
 
   if (bumpedPre.isNotEmpty) bumpedVersion += '-${bumpedPre.join('.')}';
 
+  final preWasBumped =
+      compareMetadata(bumpedPre, versionToUpdate.prerelease) != 0;
+
   // Bump build. Prefer to always bump it.
   final bumpedBuild = switch (buildTarget) {
-    null when keepBuild => versionToUpdate.buildMetadata,
+    /// Explicitly preserve if user wants it
+    /// Implicitly preserve if version and prerelease was untouched
+    null when keepBuild || !coreWasBumped && !preWasBumped =>
+      versionToUpdate.buildMetadata,
+
+    // Ignore otherwise.
     null => <dynamic>[],
+
+    // Bump.
     _ => bumpSemVerWithString(versionToUpdate, buildTarget).buildMetadata
   };
 
