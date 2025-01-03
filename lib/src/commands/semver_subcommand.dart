@@ -335,21 +335,24 @@ String runBumpVersion(
   var bumpedVersion = versionToUpdate.versionCore;
 
   // Bump version core
-  bumpedVersion = switch (isBreaking) {
+  final (cVersion, coreWasBumped) = switch (isBreaking) {
     // Prefer breaking release always
-    true => versionToUpdate.nextBreaking.versionCore,
+    true => (versionToUpdate.nextBreaking.versionCore, true),
 
     // Fallback to version target
-    false when versionTarget != null => bumpSemVer(
-        versionToUpdate,
-        (target: versionTarget, indexOrPrefix: null, trailingModifier: null),
-      ).versionCore,
+    false when versionTarget != null => (
+        bumpSemVer(
+          versionToUpdate,
+          (target: versionTarget, indexOrPrefix: null, trailingModifier: null),
+        ).versionCore,
+        true,
+      ),
 
     // Leave untouched
-    _ => bumpedVersion
+    _ => (bumpedVersion, false)
   };
 
-  final coreWasBumped = versionToUpdate.versionCore != bumpedVersion;
+  bumpedVersion = cVersion;
 
   // Bump prerelease. Prefer to always bump it.
   final bumpedPre = switch (prereleaseTarget) {
