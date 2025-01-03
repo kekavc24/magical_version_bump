@@ -94,7 +94,7 @@ final _indexAsPosition = _enclosedParser(digit().plus());
 
 /// Parses any valid metadata that qualifies as valid `SemVer` prerelease and
 /// build metadata
-final _metadataParser = pattern(_metadataRegex.pattern).star();
+final _metadataParser = pattern('0-9A-Za-z-').star();
 
 /// Parses an accessor that qualifies as valid `SemVer` prerelease and build
 /// metadata
