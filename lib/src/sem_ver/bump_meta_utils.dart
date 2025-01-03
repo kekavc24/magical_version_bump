@@ -79,6 +79,19 @@ List<dynamic> _pruneTrailing(List<dynamic> list) {
   return list;
 }
 
+/// Custom compare for swapping metadata
+bool _compareLoose(dynamic existing, dynamic replacement) {
+  if (existing is int && replacement is int) {
+    return existing == replacement;
+  }
+
+  if (existing is String && replacement is String) {
+    return existing.startsWith(replacement);
+  }
+
+  return false;
+}
+
 /// Modifies metadata if the trailing modifier had leading period `.`
 void _leadingPeriodMod(
   List<dynamic> metadata, {
@@ -108,7 +121,8 @@ void _leadingPeriodMod(
       /// build{A}{.value(.value)*}
       ///
       /// - If A is present, add all after A
-      /// - If A is absent, add at the end of current metadata
+      /// - If A is absent, add at the end of current metadata. Moreso when
+      ///   the index provided exceed metadata length
       default:
         if (hasAccessor) metadata.add(accessor);
         metadata.addAll(metadataToAdd);
@@ -155,7 +169,7 @@ void _replaceOrUpdateInPlace(
     /// remaining metadata
     metadata
       ..add(
-        accessor.toString().startsWith(metaAtHead.toString())
+        _compareLoose(accessor, metadata)
             ? _updateInPlace(accessor)
             : metaAtHead,
       )
