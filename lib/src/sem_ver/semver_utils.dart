@@ -230,138 +230,38 @@ List<dynamic> _bumpMetadata(
   ///     * `A` is the accessor
   ///     * `B` is the trailing modifier may/may not have metadata info
   ///
+  /// Wr give preference to the `period (.)` modifier.
+  switch (accessorHasIndex) {
+    /// If the `B` starts with a period, the rule suggests we try updating
+    /// without getting rid of the `A`
+    case _ when firstIsPeriod:
+      _leadingPeriodMod(
+        baseMetadata,
+        accessorHasIndex: accessorHasIndex,
+        hasAccessor: hasAccessor,
+        accessor: valueAtIndex,
+        trailingModifier: trailingModifier,
+        oldMetadata: metadata,
+        metadataToAdd: metaToAdd,
+      );
 
-  /// If the `B` starts with a period, the rule suggests update without getting
-  /// rid of the `A`
-  if (firstIsPeriod && accessorHasIndex) {
-    switch (trailingModifier) {
-      /// build{A}{.}
-      ///
-      /// - If A is present, update inlined. Bump `int` by 1 while strings are
-      ///   rewritten as "A-<int>"
-      case '.' when hasAccessor:
-        baseMetadata.add(_updateInPlace(valueAtIndex));
+    /// `A` was present. As an valid index or within the existing metadata
+    /// itself. Also, the index must be within the metadata range
+    case true when hasAccessor && index < metadata.length:
+      _replaceOrUpdateInPlace(
+        baseMetadata,
+        accessor: valueAtIndex,
+        metadataToAdd: metaToAdd,
+      );
 
-      /// build{A}{.}
-      ///
-      /// - If A is absent, add 1 at the end.
-      case '.' when !hasAccessor:
-        baseMetadata.add(1);
-
-      /// build{A}{.value(.value)*}
-      ///
-      /// - If A is present, add all after A
-      /// - If A is absent, add at the end of current metadata
-      default:
-        if (hasAccessor) baseMetadata.add(valueAtIndex);
-        baseMetadata.addAll(metaToAdd);
-    }
-    //
-  } else if (accessorHasIndex && hasAccessor && index < metadata.length) {
-    /// build{A}{value(.value)*}
-    ///
-    /// - A is present within the metadata.
-    final metaAtHead = metaToAdd.firstOrNull;
-
-    if (metaAtHead != null) {
-      /// If equal to A, update in-place. Otherwise swap them. And add any
-      /// remaining metadata
-      baseMetadata
-        ..add(
-          valueAtIndex.toString().startsWith(metaAtHead)
-              ? _updateInPlace(valueAtIndex)
-              : metaAtHead,
-        )
-        ..addAll(metaToAdd.skip(1));
-    }
-  } else {
-    /// build{A}{value(.value)*}
-    ///
-    /// - If A is absent, add it.
-    if (hasAccessor) baseMetadata.add(valueAtIndex);
-
-    // Add at the end by default.
-    baseMetadata.addAll(metaToAdd);
+    default:
+      _addAtEnd(
+        baseMetadata,
+        hasAccessor: hasAccessor,
+        accessor: valueAtIndex,
+        metadataToAdd: metaToAdd,
+      );
   }
 
   return _pruneTrailing(baseMetadata);
-}
-
-/// Searches and returns the valid index and the specific metadata at the
-/// index.
-///
-/// If [indexOrPrefix] is a [String], then the first instance and its index
-/// is returned. If not found, -1 is returned as the index. Returns `null` if
-/// empty.
-///
-/// If [indexOrPrefix] is [int], the value returned may be `null` if the index
-/// is not within the list.
-(int index, dynamic valueAtIndex) _getPositionInMetadata(
-  List<dynamic> metadata,
-  dynamic indexOrPrefix,
-) {
-  if (indexOrPrefix is String) {
-    return indexOrPrefix.isEmpty
-        ? (-1, null)
-        : metadata.indexed.firstWhere(
-            (value) => value.$2.toString().startsWith(indexOrPrefix),
-            orElse: () => (-1, indexOrPrefix),
-          );
-  }
-
-  final length = metadata.length;
-  final index = min(length, indexOrPrefix as int);
-  return (index, index == length ? null : metadata[index]);
-}
-
-/// Extracts the trailing modifier that indicates how the metadata should be
-/// bumped and/or modified
-_TrailingInfo _extractTrailingModInfo(String trailingModifier) {
-  const pattern = '.';
-  final firstIsPeriod = trailingModifier.startsWith(pattern);
-
-  // Split after first period if present
-  final modifierToSplit =
-      firstIsPeriod ? trailingModifier.safeSubstring(1) : trailingModifier;
-
-  return (firstIsPeriod, modifierToSplit.split(pattern));
-}
-
-/// Increments a [value] based on its type.
-///
-/// Updates on a [String] are rewritten to `myString-<integer>`
-dynamic _updateInPlace(dynamic value) {
-  if (value is int) return value + 1;
-
-  final lastIndex = (value as String).length;
-  var lastIndexOfInt = lastIndex;
-
-  // Walk string backwards till we find the full integer
-  while (lastIndexOfInt != 0) {
-    final possibleIndex = lastIndexOfInt - 1;
-
-    if (int.tryParse(value[possibleIndex]) != null) {
-      lastIndexOfInt = possibleIndex;
-      continue;
-    }
-
-    break;
-  }
-
-  if (lastIndexOfInt == lastIndex) return '$value-1';
-  return '${value.safeSubstring(0, lastIndexOfInt)}'
-      '-${int.parse(value.safeSubstring(lastIndexOfInt)) + 1}';
-}
-
-/// Removes and appends a trailing `1` if the last element is an empty string.
-List<dynamic> _pruneTrailing(List<dynamic> list) {
-  final last = list.lastOrNull;
-
-  if (last != null && last is String && last.trim().isEmpty) {
-    list
-      ..removeLast()
-      ..add(1);
-  }
-
-  return list;
 }

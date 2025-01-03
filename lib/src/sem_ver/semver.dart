@@ -7,6 +7,7 @@ import 'package:meta/meta.dart';
 import 'package:petitparser/petitparser.dart';
 
 part 'semver_utils.dart';
+part 'bump_meta_utils.dart';
 
 /// Represents a class that implements
 /// [Semantic Versioning](https://semver.org/). Its implementation is similar
