@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:args/command_runner.dart';
-import 'package:cli_completion/cli_completion.dart';
 import 'package:magical_version_bump/src/command_runner.dart';
 import 'package:magical_version_bump/src/version.dart';
 import 'package:mason_logger/mason_logger.dart';
@@ -106,7 +105,7 @@ void main() {
     test('can be instantiated without an explicit logger instance', () {
       final commandRunner = MagicalVersionBumpCommandRunner();
       expect(commandRunner, isNotNull);
-      expect(commandRunner, isA<CompletionCommandRunner<int>>());
+      expect(commandRunner, isA<CommandRunner<int>>());
     });
 
     test('handles FormatException', () async {
