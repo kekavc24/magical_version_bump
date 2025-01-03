@@ -98,18 +98,21 @@ final class SemverSubcommand extends RunnableCommand {
         },
       )
       ..addOption(
-        'prereleaseTarget',
+        'prerelease-target',
         aliases: ['preTarget', 'pT'],
+        abbr: 'r',
         help: 'Strategy to bump the prerelease metadata',
       )
       ..addOption(
-        'buildTarget',
+        'build-target',
         aliases: ['bT'],
+        abbr: 'b',
         help: 'Strategy to bump the build metadata',
       )
       ..addOption(
         'version-param',
         aliases: ['vp'],
+        abbr: 'k',
         defaultsTo: 'version',
         help: 'Indicates key in json/yaml that points to version',
       )
@@ -153,11 +156,11 @@ final class SemverSubcommand extends RunnableCommand {
       versionTarget: parsedResults.nullableValue('target'),
       prereleaseTarget: addMetaPrefix(
         'prerelease',
-        parsedResults.nullableValue('prereleaseTarget'),
+        parsedResults.nullableValue('prerelease-target'),
       ),
       buildTarget: addMetaPrefix(
         'build',
-        parsedResults.nullableValue('buildTarget'),
+        parsedResults.nullableValue('build-target'),
       ),
     );
 
