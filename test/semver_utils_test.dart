@@ -198,12 +198,21 @@ void main() {
       test(
         'appends to existing metadata, when accessing modifier is absent',
         () {
+          const currentMeta = 'existing';
           const pre = 'dev';
-          const preInfo = [pre];
+          const preInfo = [currentMeta, pre];
+          const version = '$zeroVersion-$currentMeta';
 
           // Directly via non-existent index
           check(
-            bumpVersion(zeroVersion, target: 'prerelease{0}{.$pre}'),
+            bumpVersion(version, target: 'prerelease{1}{.$pre}'),
+          ).equals(
+            SemVer.rawUnchecked(0, 0, 0, prerelease: preInfo),
+          );
+
+          // When accessor is absent
+          check(
+            bumpVersion(version, target: 'prerelease{}{.$pre}'),
           ).equals(
             SemVer.rawUnchecked(0, 0, 0, prerelease: preInfo),
           );
@@ -211,7 +220,7 @@ void main() {
       );
     });
 
-    group('using leading trailing modifier', () {
+    group('using non-period-leading trailing modifier', () {
       test('updates existing accessor in place', () {
         const accessor = 'dev';
         const extraMeta = 'release-candidate';
