@@ -141,7 +141,7 @@ final class SemverSubcommand extends RunnableCommand {
   String get name => 'semver';
 
   @override
-  Future<void> runnable() async {
+  Future<int?> runnable() async {
     final parsedResults = argResults!;
 
     final restArgs = parsedResults.rest;
@@ -196,6 +196,7 @@ final class SemverSubcommand extends RunnableCommand {
     );
 
     logger.info(output);
+    return null;
   }
 }
 

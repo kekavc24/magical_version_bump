@@ -10,12 +10,14 @@ abstract base class RunnableCommand extends Command<int> {
   final Logger logger;
 
   /// Function to run
-  Future<void> runnable();
+  Future<int?> runnable();
 
   @override
-  FutureOr<int>? run() async {
+  Future<int> run() async {
+    int? code;
+
     try {
-      await runnable();
+      code = await runnable();
     } catch (e) {
       switch (e) {
         case PathNotFoundException(message: final message):
@@ -33,6 +35,6 @@ abstract base class RunnableCommand extends Command<int> {
       }
     }
 
-    return ExitCode.success.code;
+    return code ?? ExitCode.success.code;
   }
 }
