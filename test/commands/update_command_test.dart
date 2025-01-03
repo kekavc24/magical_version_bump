@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:magical_version_bump/src/command_runner.dart';
-import 'package:magical_version_bump/src/commands/commands.dart';
+import 'package:magical_version_bump/src/commands/update_command.dart';
 import 'package:magical_version_bump/src/version.dart';
 import 'package:mason_logger/mason_logger.dart';
 import 'package:mocktail/mocktail.dart';
@@ -62,7 +62,7 @@ void main() {
     });
 
     test('can be instantiated without a pub updater', () {
-      final command = UpdateCommand(logger: logger);
+      final command = UpdateCommand(logger);
       expect(command, isNotNull);
     });
 
