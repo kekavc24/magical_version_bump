@@ -169,7 +169,7 @@ void _replaceOrUpdateInPlace(
     /// remaining metadata
     metadata
       ..add(
-        _compareLoose(accessor, metadata)
+        _compareLoose(accessor, metaAtHead)
             ? _updateInPlace(accessor)
             : metaAtHead,
       )
