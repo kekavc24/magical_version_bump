@@ -209,7 +209,7 @@ Iterable<String> degenarilizeTargets(Iterable<String> targets) {
   final degeneralized = targets.toSet();
 
   if (degeneralized.contains('all')) {
-    return [..._versionSetTargets, ..._metadataSetTargets];
+    return _versionSetTargets.followedBy(_metadataSetTargets);
   }
 
   return {

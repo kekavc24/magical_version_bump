@@ -52,9 +52,7 @@ final class FileQueue<T> implements _CommandInputQueue<TransformedFile<T>> {
   /// Checks if the path points to a json file
   bool _isJson(String path) {
     final split = path.split('.');
-
-    if (split.isEmpty) return false;
-    return split.last.toLowerCase() == 'json';
+    return split.isNotEmpty && split.last.toLowerCase() == 'json';
   }
 
   /// Saves [object] back to a previously read file by calling its
