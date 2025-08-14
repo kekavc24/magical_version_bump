@@ -148,17 +148,17 @@ final class SemverSubcommand extends RunnableCommand {
 
     //if (restArgs.isEmpty) return;
 
-    final presetTargets = degenarilizeTargets(parsedResults.values('preset'));
+    final presetTargets = _degenarilizeTargets(parsedResults.values('preset'));
 
-    final setValues = extractSetValues(parsedResults.values('set'));
+    final setValues = _extractSetValues(parsedResults.values('set'));
 
     final bumpTargets = (
       versionTarget: parsedResults.nullableValue('target'),
-      prereleaseTarget: addMetaPrefix(
+      prereleaseTarget: _addMetaPrefix(
         'prerelease',
         parsedResults.nullableValue('prerelease-target'),
       ),
-      buildTarget: addMetaPrefix(
+      buildTarget: _addMetaPrefix(
         'build',
         parsedResults.nullableValue('build-target'),
       ),
@@ -169,7 +169,7 @@ final class SemverSubcommand extends RunnableCommand {
     final isBreaking = parsedResults.booleanValue('breaking');
 
     final versions = parsedResults.value('input') == 'file'
-        ? await runBumpForFiles(
+        ? await _runBumpForFiles(
             restArgs,
             versionParam: parsedResults.value('version-param'),
             presetTargets: presetTargets,
@@ -180,7 +180,7 @@ final class SemverSubcommand extends RunnableCommand {
             keepBuild: keepBuild,
           )
         : restArgs.map(
-            (version) => runBumpVersion(
+            (version) => _runBumpVersion(
               version,
               presetTargets: presetTargets,
               setValues: setValues,
@@ -203,7 +203,7 @@ final class SemverSubcommand extends RunnableCommand {
 /// Removes abigous references to targets to be preset.
 ///
 /// See [_presetTargets].
-Iterable<String> degenarilizeTargets(Iterable<String> targets) {
+Iterable<String> _degenarilizeTargets(Iterable<String> targets) {
   if (targets.isEmpty) return [];
 
   final degeneralized = targets.toSet();
@@ -219,7 +219,7 @@ Iterable<String> degenarilizeTargets(Iterable<String> targets) {
   };
 }
 
-String? addMetaPrefix(String prefix, String? modifier) {
+String? _addMetaPrefix(String prefix, String? modifier) {
   if (modifier != null) {
     return '$prefix${modifier.trim()}';
   }
@@ -229,7 +229,7 @@ String? addMetaPrefix(String prefix, String? modifier) {
 
 /// Extracts values that are to preset/set before/after bumping a version
 /// respectively.
-Map<String, dynamic> extractSetValues(Iterable<String> values) {
+Map<String, dynamic> _extractSetValues(Iterable<String> values) {
   if (values.isEmpty) return {};
 
   FormatException exception(String message, String value) {
@@ -297,7 +297,7 @@ Map<String, dynamic> extractSetValues(Iterable<String> values) {
 }
 
 /// Bumps a semantic version
-String runBumpVersion(
+String _runBumpVersion(
   String version, {
   required Iterable<String> presetTargets,
   required Map<String, dynamic> setValues,
@@ -406,7 +406,7 @@ String runBumpVersion(
 }
 
 /// Bumps the version specified in a json/yaml file
-Future<List<String>> runBumpForFiles(
+Future<List<String>> _runBumpForFiles(
   List<String> paths, {
   required String versionParam,
   required Iterable<String> presetTargets,
@@ -435,7 +435,7 @@ Future<List<String>> runBumpForFiles(
       throw Exception('No version found for version param "$path" in file');
     }
 
-    version = runBumpVersion(
+    version = _runBumpVersion(
       version,
       presetTargets: presetTargets,
       setValues: setValues,
