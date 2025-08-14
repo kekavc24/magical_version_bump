@@ -1,8 +1,7 @@
 import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
-import 'package:cli_completion/cli_completion.dart';
-import 'package:magical_version_bump/src/commands/commands.dart';
-import 'package:magical_version_bump/src/commands/walk/walk_command.dart';
+import 'package:magical_version_bump/src/commands/bump_command.dart';
+import 'package:magical_version_bump/src/commands/update_command.dart';
 import 'package:magical_version_bump/src/version.dart';
 import 'package:mason_logger/mason_logger.dart';
 import 'package:pub_updater/pub_updater.dart';
@@ -19,7 +18,7 @@ const description =
 /// $ mag --version
 /// ```
 /// {@endtemplate}
-class MagicalVersionBumpCommandRunner extends CompletionCommandRunner<int> {
+class MagicalVersionBumpCommandRunner extends CommandRunner<int> {
   /// {@macro magical_version_bump_command_runner}
   MagicalVersionBumpCommandRunner({
     Logger? logger,
@@ -37,12 +36,16 @@ class MagicalVersionBumpCommandRunner extends CompletionCommandRunner<int> {
       ..addFlag(
         'verbose',
         help: 'Noisy logging, including all shell commands executed.',
+      )
+      ..addFlag(
+        'check-for-update',
+        abbr: 'c',
+        help: 'Checks for update after running any non-update command',
+        defaultsTo: true,
       );
 
-    // Add sub commands
-    addCommand(UpdateCommand(logger: _logger, pubUpdater: _pubUpdater));
-    addCommand(ModifyCommand(logger: _logger));
-    addCommand(WalkCommand(logger: _logger));
+    addCommand(BumpCommand(_logger));
+    addCommand(UpdateCommand(_logger, pubUpdater: _pubUpdater));
   }
 
   @override
@@ -54,11 +57,7 @@ class MagicalVersionBumpCommandRunner extends CompletionCommandRunner<int> {
   @override
   Future<int> run(Iterable<String> args) async {
     try {
-      final topLevelResults = parse(args);
-      if (topLevelResults['verbose'] == true) {
-        _logger.level = Level.verbose;
-      }
-      return await runCommand(topLevelResults) ?? ExitCode.success.code;
+      return await runCommand(parse(args)) ?? ExitCode.success.code;
     } on FormatException catch (e, stackTrace) {
       // On format errors, show the commands error message, root usage and
       // exit with an error code
@@ -81,36 +80,37 @@ class MagicalVersionBumpCommandRunner extends CompletionCommandRunner<int> {
 
   @override
   Future<int?> runCommand(ArgResults topLevelResults) async {
-    // Fast track completion command
-    if (topLevelResults.command?.name == 'completion') {
-      await super.runCommand(topLevelResults);
-      return ExitCode.success.code;
-    }
-
     // Verbose logs
-    _logger
-      ..detail('Argument information:')
-      ..detail('  Top level options:');
-    for (final option in topLevelResults.options) {
-      if (topLevelResults.wasParsed(option)) {
-        _logger.detail('  - $option: ${topLevelResults[option]}');
-      }
-    }
-    if (topLevelResults.command != null) {
-      final commandResult = topLevelResults.command!;
+    if (topLevelResults['verbose'] as bool) {
       _logger
-        ..detail('  Command: ${commandResult.name}')
-        ..detail('    Command options:');
-      for (final option in commandResult.options) {
-        if (commandResult.wasParsed(option)) {
-          _logger.detail('    - $option: ${commandResult[option]}');
+        ..level = Level.verbose
+        ..detail('Argument information:')
+        ..detail('  Top level options:');
+
+      for (final option in topLevelResults.options) {
+        if (topLevelResults.wasParsed(option)) {
+          _logger.detail('  - $option: ${topLevelResults[option]}');
+        }
+      }
+
+      if (topLevelResults.command != null) {
+        final commandResult = topLevelResults.command!;
+        _logger
+          ..detail('  Command: ${commandResult.name}')
+          ..detail('    Command options:');
+
+        for (final option in commandResult.options) {
+          if (commandResult.wasParsed(option)) {
+            _logger.detail('    - $option: ${commandResult[option]}');
+          }
         }
       }
     }
 
     // Run the command or show version
     final int? exitCode;
-    if (topLevelResults['version'] == true) {
+
+    if (topLevelResults['version'] as bool) {
       _logger.info(packageVersion);
       exitCode = ExitCode.success.code;
     } else {
@@ -118,7 +118,8 @@ class MagicalVersionBumpCommandRunner extends CompletionCommandRunner<int> {
     }
 
     // Check for updates
-    if (topLevelResults.command?.name != UpdateCommand.commandName) {
+    if (topLevelResults.command?.name != UpdateCommand.commandName &&
+        topLevelResults['check-for-update'] as bool) {
       await _checkForUpdates();
     }
 
@@ -136,9 +137,10 @@ class MagicalVersionBumpCommandRunner extends CompletionCommandRunner<int> {
         _logger
           ..info('')
           ..info(
-            '''
-${lightYellow.wrap('Update available!')} ${lightCyan.wrap(packageVersion)} \u2192 ${lightCyan.wrap(latestVersion)}
-Run ${lightCyan.wrap('$executableName update')} to update''',
+            '${lightYellow.wrap('Update available!')} '
+            '${lightCyan.wrap(packageVersion)} '
+            '\u2192 ${lightCyan.wrap(latestVersion)}\n'
+            'Run ${lightCyan.wrap('$executableName update')} to update',
           );
       }
     } catch (_) {}
